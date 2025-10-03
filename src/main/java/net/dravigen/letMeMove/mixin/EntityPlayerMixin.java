@@ -44,8 +44,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         ICustomMovementEntity playerMove = (ICustomMovementEntity) this;
         int currentPose = playerMove.letMeMove_$getCustomMovementState();
 
-        if (Keyboard.isKeyDown(Keyboard.KEY_C) || ((isInsideWater() && this.getLookVec().yCoord < 0.45 || isHeadInsideWater()) && this.isUsingSpecialKey() && this.moveForward > 0 && !this.capabilities.isFlying)) {
+        if (Keyboard.isKeyDown(Keyboard.KEY_C)) {
             newPoseState = EnumPose.CRAWLING;
+        } else if (isSprinting() && (isInsideWater() || (!onGround && fallDistance > 2))) {
+            newPoseState = EnumPose.DIVING;
         } else if (this.isSneaking()) {
             newPoseState = EnumPose.SNEAKING;
         } else {
@@ -95,43 +97,30 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Inject(method = "onLivingUpdate",at = @At("HEAD"))
     private void handleFastSwim(CallbackInfo ci) {
-        if (!this.canSwim()) {
-            ((ICustomMovementEntity) this).letMeMove_$setCustomMovementState(EnumPose.STANDING);
-        }
+        if (isInsideWater() && ((ICustomMovementEntity)this).isPose(EnumPose.DIVING)) {
+            if (this.canSwim()) {
+                if (this.moveForward > 0) {
+                    Vec3 direction = this.getLookVec();
+                    float speed = 0.2f * this.getMovementSpeedModifierFromEffects();
 
-        if (isInsideWater() && ((ICustomMovementEntity)this).isPose(EnumPose.CRAWLING)) {
-            if (this.moveForward > 0) {
-                Vec3 look = this.getLookVec();
+                    super.moveEntity(direction.xCoord * speed, direction.yCoord * speed + this.motionY, direction.zCoord * speed);
+                    this.addMovementStat(direction.xCoord * speed, direction.yCoord * speed + this.motionY, direction.zCoord * speed);
 
-                Vec3 direction = look;
-                if ((isInsideWater() && look.yCoord < 0 && look.yCoord > -0.2 ) || (!isHeadInsideWater() && isInsideWater() && look.yCoord > 0 && look.yCoord < 0.45)) {
-                    direction = Vec3.createVectorHelper(look.xCoord, 0, look.zCoord);
+                    this.motionY *= 0.5;
+                    this.motionY = this.motionY < 0 ? 0 : this.motionY - 0.02;
+
+                    this.prevLimbSwingAmount = this.limbSwingAmount;
+                    double var9 = this.posX - this.prevPosX;
+                    double var10 = this.posZ - this.prevPosZ;
+                    float var12 = MathHelper.sqrt_double(var9 * var9 + var10 * var10) * 4.0f;
+                    if (var12 > 1.0f) {
+                        var12 = 1.0f;
+                    }
+                    this.limbSwingAmount += (var12 - this.limbSwingAmount) * 0.4f;
+                    this.limbSwing += this.limbSwingAmount;
                 }
-
-                float speed = 0.2f * this.getMovementSpeedModifierFromEffects();
-
-                this.motionX = direction.xCoord * speed;
-                this.motionZ = direction.zCoord * speed;
-
-                super.moveEntity(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
-                this.addMovementStat(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
-
-                this.motionY *= 0.5f;
-
-                this.prevLimbSwingAmount = this.limbSwingAmount;
-                double var9 = this.posX - this.prevPosX;
-                double var10 = this.posZ - this.prevPosZ;
-                float var12 = MathHelper.sqrt_double(var9 * var9 + var10 * var10) * 4.0f;
-                if (var12 > 1.0f) {
-                    var12 = 1.0f;
-                }
-                this.limbSwingAmount += (var12 - this.limbSwingAmount) * 0.4f;
-                this.limbSwing += this.limbSwingAmount;
-            }  else {
-                super.moveEntity(this.motionX, this.motionY, this.motionX);
-
-                this.motionY = this.motionY < 0 ? 0 : this.motionY - 0.02;
-                this.motionY *= 0.5;
+            } else {
+                ((ICustomMovementEntity) this).letMeMove_$setCustomMovementState(EnumPose.STANDING);
             }
         }
     }
@@ -139,24 +128,13 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     @Unique
     private boolean isInsideWater() {
         World world = this.worldObj;
-        AxisAlignedBB bb = this.boundingBox.copy();
-        bb.offset(0,0.2,0);
-        int minY = MathHelper.floor_double(bb.minY + 0.2);
-        return world.getBlockMaterial(MathHelper.floor_double(this.posX), minY, MathHelper.floor_double(this.posZ)) == Material.water;
-    }
-
-    @Unique
-    private boolean isHeadInsideWater() {
-        World world = this.worldObj;
-        AxisAlignedBB bb = this.boundingBox.copy();
-        int eye = MathHelper.floor_double(bb.maxY - 0.2);
-        return world.getBlockMaterial(MathHelper.floor_double(this.posX), eye, MathHelper.floor_double(this.posZ)) == Material.water;
+        return ((ICustomMovementEntity)this).isPose(EnumPose.DIVING) ? world.isMaterialInBB(this.boundingBox.expand(0,-0.4,0),Material.water) : this.isInsideOfMaterial(Material.water);
     }
 
     @Redirect(method = "addMovementStat",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayer;isInsideOfMaterial(Lnet/minecraft/src/Material;)Z"))
     private boolean addNewSwimExhaustion(EntityPlayer player, Material material, double par1, double par3, double par5) {
         if (player.isInsideOfMaterial(material)) {
-            if (((ICustomMovementEntity)player).isPose(EnumPose.CRAWLING)) {
+            if (((ICustomMovementEntity)player).isPose(EnumPose.DIVING)) {
                 int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
                 if (var7 > 0) {
                     this.addStat(StatList.distanceDoveStat, var7);
@@ -171,7 +149,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Inject(method = "moveEntityWithHeading",at = @At("HEAD"),cancellable = true)
     private void disableMoveIfFastSwimming(float par1, float par2, CallbackInfo ci) {
-        if (isInsideWater() && ((ICustomMovementEntity)this).isPose(EnumPose.CRAWLING) && this.moveForward > 0 && this.canSwim()){
+        if (isInsideWater() && ((ICustomMovementEntity)this).isPose(EnumPose.DIVING) && this.moveForward > 0 && this.canSwim()){
             ci.cancel();
         }
     }
