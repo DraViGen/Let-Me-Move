@@ -106,14 +106,14 @@ loom {
 	sourceCompatibility = JavaVersion.VERSION_17
 	targetCompatibility = JavaVersion.VERSION_17
 }
-
+/*
 runClient {
 	dependsOn(jar)
 }
 
 runServer {
 	dependsOn(jar)
-}
+}*/
 
 class BTWJarReplacer implements MinecraftJarProcessor<Spec> {
 	String name
