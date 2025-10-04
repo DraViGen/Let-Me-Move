@@ -2,7 +2,7 @@ package net.dravigen.letMeMove.mixin.render;
 
 import net.dravigen.letMeMove.EnumPose;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
-import net.dravigen.letMeMove.utils.ModernUtils;
+import net.dravigen.letMeMove.utils.LMMUtils;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +39,7 @@ public abstract class ModelBipedMixin extends ModelBase {
     private void a(Entity entity, float par2, float par3, float par4, float par5, float par6, float par7, CallbackInfo ci) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
         float leaningPitch = customMoveEntity.letMeMove_$getLeaningPitch();
-        if (((ICustomMovementEntity) entity).isPose(EnumPose.CRAWLING) || ((ICustomMovementEntity) entity).isPose(EnumPose.DIVING)) {
+        if (((ICustomMovementEntity) entity).isPose(EnumPose.SWIMMING) || ((ICustomMovementEntity) entity).isPose(EnumPose.DIVING)) {
             float var1 = 1.62f - (1.62f - 1.25f) * leaningPitch;
             GL11.glTranslatef(0, var1, 0);
             GL11.glRotatef(90 * leaningPitch, 1, 0, 0);
@@ -52,10 +52,8 @@ public abstract class ModelBipedMixin extends ModelBase {
 
         ci.cancel();
 
-        boolean bl2 = customMoveEntity.isPose(EnumPose.DIVING);
-        if (!bl2){
-            bl2 = customMoveEntity.isPose(EnumPose.CRAWLING);
-        }
+        boolean bl2 = customMoveEntity.isPose(EnumPose.DIVING) || customMoveEntity.isPose(EnumPose.SWIMMING);
+
         float leaningPitch =  Math.min(1.0F,customMoveEntity.letMeMove_$getLeaningPitch());
 
         leaningPitch = livingEntity.inWater && bl2 ? 1 : leaningPitch;
@@ -89,7 +87,7 @@ public abstract class ModelBipedMixin extends ModelBase {
         this.bipedRightArm.rotateAngleZ = 0.0F;
         this.bipedLeftArm.rotateAngleZ = 0.0F;
 
-        if (!customMoveEntity.isPose(EnumPose.CRAWLING) || customMoveEntity.isPose(EnumPose.DIVING) && livingEntity.inWater) {
+        if (!customMoveEntity.isPose(EnumPose.SWIMMING) || customMoveEntity.isPose(EnumPose.SWIMMING) && livingEntity.inWater) {
             this.bipedRightLeg.rotateAngleX = MathHelper.cos(f * 0.6662F) * 1.4F * g / k;
             this.bipedLeftLeg.rotateAngleX = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k;
         } else {
@@ -178,37 +176,37 @@ public abstract class ModelBipedMixin extends ModelBase {
             float n = leaningPitch;
             if (l < 14.0F) {
                 this.bipedLeftArm.rotateAngleX = this.lerpAngle(n, this.bipedLeftArm.rotateAngleX, 0.0F);
-                this.bipedRightArm.rotateAngleX = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleX, 0.0F);
+                this.bipedRightArm.rotateAngleX = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleX, 0.0F);
 
                 this.bipedLeftArm.rotateAngleY = this.lerpAngle(n, this.bipedLeftArm.rotateAngleY, (float) Math.PI);
-                this.bipedRightArm.rotateAngleY = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleY, (float) Math.PI);
+                this.bipedRightArm.rotateAngleY = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleY, (float) Math.PI);
 
                 this.bipedLeftArm.rotateAngleZ = this.lerpAngle(n, this.bipedLeftArm.rotateAngleZ, (float) Math.PI + 1.8707964F * this.method_2807(l) / this.method_2807(14.0F));
-                this.bipedRightArm.rotateAngleZ = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleZ, (float) Math.PI - 1.8707964F * this.method_2807(l) / this.method_2807(14.0F));
+                this.bipedRightArm.rotateAngleZ = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleZ, (float) Math.PI - 1.8707964F * this.method_2807(l) / this.method_2807(14.0F));
             } else if (l >= 14.0F && l < 22.0F) {
                 float o = (l - 14.0F) / 8.0F;
                 this.bipedLeftArm.rotateAngleX = this.lerpAngle(n, this.bipedLeftArm.rotateAngleX, (float) (Math.PI / 2) * o);
-                this.bipedRightArm.rotateAngleX = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleX, (float) (Math.PI / 2) * o);
+                this.bipedRightArm.rotateAngleX = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleX, (float) (Math.PI / 2) * o);
 
                 this.bipedLeftArm.rotateAngleY = this.lerpAngle(n, this.bipedLeftArm.rotateAngleY, (float) Math.PI);
-                this.bipedRightArm.rotateAngleY = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleY, (float) Math.PI);
+                this.bipedRightArm.rotateAngleY = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleY, (float) Math.PI);
 
                 this.bipedLeftArm.rotateAngleZ = this.lerpAngle(n, this.bipedLeftArm.rotateAngleZ, 5.012389F - 1.8707964F * o);
-                this.bipedRightArm.rotateAngleZ = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleZ, 1.2707963F + 1.8707964F * o);
+                this.bipedRightArm.rotateAngleZ = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleZ, 1.2707963F + 1.8707964F * o);
             } else if (l >= 22.0F && l < 26.0F) {
                 float o = (l - 22.0F) / 4.0F;
                 this.bipedLeftArm.rotateAngleX = this.lerpAngle(n, this.bipedLeftArm.rotateAngleX, (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
-                this.bipedRightArm.rotateAngleX = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleX, (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
+                this.bipedRightArm.rotateAngleX = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleX, (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
 
                 this.bipedLeftArm.rotateAngleY = this.lerpAngle(n, this.bipedLeftArm.rotateAngleY, (float) Math.PI);
-                this.bipedRightArm.rotateAngleY = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleY, (float) Math.PI);
+                this.bipedRightArm.rotateAngleY = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleY, (float) Math.PI);
 
                 this.bipedLeftArm.rotateAngleZ = this.lerpAngle(n, this.bipedLeftArm.rotateAngleZ, (float) Math.PI);
-                this.bipedRightArm.rotateAngleZ = ModernUtils.lerp(m, this.bipedRightArm.rotateAngleZ, (float) Math.PI);
+                this.bipedRightArm.rotateAngleZ = LMMUtils.lerp(m, this.bipedRightArm.rotateAngleZ, (float) Math.PI);
             }
 
-            this.bipedLeftLeg.rotateAngleX = ModernUtils.lerp(leaningPitch, this.bipedLeftLeg.rotateAngleX, 0.3F * MathHelper.cos(f * 0.33333334F + (float) Math.PI));
-            this.bipedRightLeg.rotateAngleX = ModernUtils.lerp(leaningPitch, this.bipedRightLeg.rotateAngleX, 0.3F * MathHelper.cos(f * 0.33333334F));
+            this.bipedLeftLeg.rotateAngleX = LMMUtils.lerp(leaningPitch, this.bipedLeftLeg.rotateAngleX, 0.3F * MathHelper.cos(f * 0.33333334F + (float) Math.PI));
+            this.bipedRightLeg.rotateAngleX = LMMUtils.lerp(leaningPitch, this.bipedRightLeg.rotateAngleX, 0.3F * MathHelper.cos(f * 0.33333334F));
 
         }
 
