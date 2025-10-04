@@ -19,6 +19,8 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Shadow public float limbSwingAmount;
 
+    @Shadow public float limbSwing;
+
     public EntityLivingBaseMixin(World par1World) {
         super(par1World);
     }
@@ -55,44 +57,50 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
     @Inject(method = "onLivingUpdate",at = @At("HEAD"))
     private void updateLeaningPitch(CallbackInfo ci) {
         this.lastLeaningPitch = this.leaningPitch;
+
+        if (this.customMovementState == EnumPose.STANDING.ordinal()) {
+            leaningPitch = 0.0f;
+        }
+
+        if (this.fallDistance > 4) {
+            float pitch = fallDistance;
+            if (pitch > 10) {
+                pitch = 1f;
+            } else {
+                pitch = pitch/10;
+            }
+            leaningPitch = pitch;
+        }
+
         if (this.customMovementState == EnumPose.DIVING.ordinal()) {
             if (this.inWater) {
-                float pitch = (this.rotationPitch + 90) / 90f;
-
-                float difference = pitch - this.leaningPitch;
-
-                if (Math.abs(difference) <= 0.09) {
-                    this.leaningPitch = pitch;
-                } else {
-                    if (difference > 0) {
-                        this.leaningPitch = this.leaningPitch + 0.09f;
-                    } else {
-                        this.leaningPitch = this.leaningPitch - 0.09f;
-                    }
+                float pitch = (this.rotationPitch +90)/90;
+                this.leaningPitch = pitch;
                 }
+            else {
+                this.limbSwingAmount = 0;
+                this.limbSwing = 0;
+
+                float pitch = (this.fallDistance - 2) / 10;
+                pitch = pitch > 1 ? 1 : pitch;
+
+                this.leaningPitch = pitch + 1;
             }
         }
-        if (this.customMovementState == EnumPose.DIVING.ordinal() || this.customMovementState == EnumPose.CRAWLING.ordinal()){
-        if (!this.onGround && this.fallDistance > 2) {
-                float pitch = (this.fallDistance-2) / 10;
+
+        if (this.customMovementState == EnumPose.CRAWLING.ordinal()) {
+            if (!this.onGround && this.fallDistance > 2) {
+                float pitch = (this.fallDistance - 2) / 10;
                 pitch = pitch > 1 ? 1 : pitch;
 
                 this.limbSwingAmount = (float) Math.abs(this.motionY);
 
                 this.leaningPitch = pitch + 1;
-            } else if (!this.onGround && this.fallDistance > 2) {
-                float pitch = (this.fallDistance-2) / 10;
-                pitch = pitch > 1 ? 1 : pitch;
-
-                this.limbSwingAmount = (float) Math.abs(this.motionY);
-
-                this.leaningPitch = pitch + 1;
-            }
-            else this.leaningPitch = Math.min(1.0F, this.leaningPitch + 0.09F);
-        }
-        else {
+            } else this.leaningPitch = Math.min(1.0F, this.leaningPitch + 0.09F);
+        } else {
             this.leaningPitch = Math.max(0.0F, this.leaningPitch - 0.09F);
         }
+
     }
 
     @Inject(method = "getSpeedModifier",at = @At("RETURN"), cancellable = true)

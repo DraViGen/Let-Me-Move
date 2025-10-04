@@ -44,9 +44,9 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         ICustomMovementEntity playerMove = (ICustomMovementEntity) this;
         int currentPose = playerMove.letMeMove_$getCustomMovementState();
 
-        if (Keyboard.isKeyDown(Keyboard.KEY_C)) {
+        if (Keyboard.isKeyDown(Keyboard.KEY_C) && onGround && !isInsideWater()) {
             newPoseState = EnumPose.CRAWLING;
-        } else if (isSprinting() && (isInsideWater() || (!onGround && fallDistance > 2))) {
+        } else if ((isSprinting()||Keyboard.isKeyDown(Keyboard.KEY_C)) && (isInsideWater() || (!onGround && Keyboard.isKeyDown(Keyboard.KEY_C)))) {
             newPoseState = EnumPose.DIVING;
         } else if (this.isSneaking()) {
             newPoseState = EnumPose.SNEAKING;
