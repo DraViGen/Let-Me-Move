@@ -111,7 +111,6 @@ public class AnimationRegistry {
     }
 
     private static void exampleAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
-        GL11.glPushMatrix();
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
@@ -202,12 +201,10 @@ public class AnimationRegistry {
                 model.bipedCloak.rotationPointY = -0.85F;
             }
         }
-        GL11.glPopMatrix();
     }
 
     private static void commonAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
-        GL11.glPushMatrix();
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
@@ -331,16 +328,12 @@ public class AnimationRegistry {
                 model.bipedCloak.rotationPointY = -0.85F;
             }
         }
-        GL11.glPopMatrix();
     }
 
     private static void swimmingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
-        GL11.glPushMatrix();
 
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
-
-        rotateEntity(leaningPitch);
 
         leaningPitch = entity.inWater ? 1 : leaningPitch;
 
@@ -471,17 +464,12 @@ public class AnimationRegistry {
                 model.bipedCloak.rotationPointY = -0.85F;
             }
         }
-        GL11.glPopMatrix();
     }
 
     private static void divingAnimation(ModelBiped model, EntityLivingBase entity, float h, float i, float j) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
 
-        GL11.glPushMatrix();
-
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
-
-        rotateEntity(leaningPitch);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         if (leaningPitch > 0.0F) {
@@ -570,12 +558,5 @@ public class AnimationRegistry {
                 model.bipedCloak.rotationPointY = -0.85F;
             }
         }
-        GL11.glPopMatrix();
-    }
-
-    private static void rotateEntity(float leaningPitch) {
-        float var1 = 1.62f - (1.62f - 1.25f) * leaningPitch;
-        GL11.glTranslatef(0, var1, 0);
-        GL11.glRotatef(90 * leaningPitch, 1, 0, 0);
     }
 }
