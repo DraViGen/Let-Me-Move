@@ -1,26 +1,22 @@
 package net.dravigen.letMeMove.interfaces;
 
-import net.dravigen.letMeMove.EnumPose;
+import net.dravigen.letMeMove.render.AnimationCustom;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.spongepowered.asm.mixin.Unique;
+import net.minecraft.src.ResourceLocation;
 
 public interface ICustomMovementEntity {
 
-    @Unique
     @Environment(EnvType.CLIENT)
-    float letMeMove_$getLeaningPitch();
-    void letMeMove_$setLeaningPitch(float pitch);
+    float llm_$getLeaningPitch();
 
-    int letMeMove_$getCustomMovementState();
-    void letMeMove_$setCustomMovementState(EnumPose state);
+    void llm_$setLeaningPitch(float pitch);
 
-    default EnumPose getPose() {
-        return EnumPose.getPose(this.letMeMove_$getCustomMovementState());
-    }
+    ResourceLocation llm_$getAnimationID();
 
-    default boolean isPose(EnumPose pose) {
-        return getPose() == pose;
-    }
+    AnimationCustom llm_$getAnimation();
 
+    void llm_$setAnimation(ResourceLocation animation);
+
+    boolean llm_$isAnimation(ResourceLocation animationID);
 }

@@ -1,12 +1,12 @@
 package net.dravigen.letMeMove.mixin;
 
-import net.dravigen.letMeMove.EnumPose;
+import net.dravigen.letMeMove.render.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
+import net.dravigen.letMeMove.utils.AnimationUtils;
+import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
-import org.lwjgl.input.Keyboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -14,70 +14,57 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-import static net.dravigen.letMeMove.utils.LMMUtils.isHeadInsideWater;
-import static net.dravigen.letMeMove.utils.LMMUtils.isInsideWater;
+import static net.dravigen.letMeMove.render.AnimationRegistry.*;
+import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 @Mixin(EntityPlayer.class)
 public abstract class EntityPlayerMixin extends EntityLivingBase {
     @Shadow protected boolean sleeping;
-
     @Shadow public abstract float getEyeHeight();
-
     @Shadow public abstract void addStat(StatBase par1StatBase, int par2);
-
     @Shadow public abstract void addExhaustion(float par1);
-
     @Shadow public abstract void addMovementStat(double par1, double par3, double par5);
-
     @Shadow public abstract float getMovementSpeedModifierFromEffects();
-
     @Shadow public abstract boolean canSwim();
-
-    @Shadow public PlayerCapabilities capabilities;
-
-    @Shadow public abstract boolean isUsingSpecialKey();
 
     public EntityPlayerMixin(World par1World) {
         super(par1World);
     }
 
     @Inject(method = "onUpdate", at = @At("HEAD"))
-    private void updatePose(CallbackInfo ci) {
+    private void updateAnimation(CallbackInfo ci) {
         if (this.sleeping) return;
 
-        EnumPose newPoseState;
-        ICustomMovementEntity playerMove = (ICustomMovementEntity) this;
-        int currentPose = playerMove.letMeMove_$getCustomMovementState();
+        ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
 
-        if (((Keyboard.isKeyDown(Keyboard.KEY_C) && (this.onGround || this.fallDistance < 2)) || ((isInsideWater(this) && this.getLookVec().yCoord < 0.45 || isHeadInsideWater(this)) && this.isUsingSpecialKey() && this.moveForward > 0 && !this.capabilities.isFlying))) {
-            newPoseState = EnumPose.SWIMMING;
+        ResourceLocation newID = new ResourceLocation("");
+
+        for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
+            if (animation.isConditonsMet((EntityPlayer) (Object) this, this.boundingBox)) {
+                newID = animation.getID();
+                break;
+            }
         }
-        else if (Keyboard.isKeyDown(Keyboard.KEY_C) && !this.onGround && this.fallDistance > 2) {
-            newPoseState = EnumPose.DIVING;
-        }
-        else if (this.isSneaking()) {
-            newPoseState = EnumPose.SNEAKING;
-        }
-        else {
-            newPoseState = EnumPose.STANDING;
-        }
+
+        newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
 
         List moveRangeCollisionList = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox);
 
-        if (currentPose != newPoseState.ordinal()) {
-            float dHeight = newPoseState.height - EnumPose.getPose(currentPose).height;
+        if (!newID.equals(customPlayer.llm_$getAnimationID())) {
+            AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
+            float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
 
             if (dHeight > 0) {
                 moveRangeCollisionList = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(0, dHeight, 0));
             }
 
             if (moveRangeCollisionList.isEmpty()) {
-                playerMove.letMeMove_$setCustomMovementState(newPoseState);
+                customPlayer.llm_$setAnimation(newID);
             }
             else {
-                for (EnumPose pose : EnumPose.values()) {
+                for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
                     AxisAlignedBB bounds = this.boundingBox.copy();
-                    float dNewHeight = pose.height - EnumPose.getPose(currentPose).height;
+                    float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
                     if (dNewHeight < dHeight) {
                         dHeight = dNewHeight;
 
@@ -85,32 +72,34 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
                         moveRangeCollisionList = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0));
 
                         if (moveRangeCollisionList.isEmpty()) {
-                            playerMove.letMeMove_$setCustomMovementState(pose);
+                            customPlayer.llm_$setAnimation(testAnimation.getID());
                             break;
                         }
                     }
                 }
             }
-        } else if (this.isEntityInsideOpaqueBlock() && !this.isEntityFeetInsideOpaqueBlock()) {
-            playerMove.letMeMove_$setCustomMovementState(EnumPose.SWIMMING);
+        }
+        else if ((this.isEntityInsideOpaqueBlock() || !worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty()) && !GeneralUtils.isEntityFeetInsideOpaqueBlock(this)) {
+            customPlayer.llm_$setAnimation(SWIMMING_ID);
         }
 
-        EnumPose actualPose =  playerMove.getPose();
+        AnimationCustom currentAnimation = customPlayer.llm_$getAnimation();
 
-        this.setSize(0.6f,actualPose.height);
+        this.setSize(0.6f, currentAnimation.height);
         if (this.worldObj.isRemote) {
-            this.yOffset =  actualPose.height - 0.18f;
+            this.yOffset = currentAnimation.height - 0.18f;
         }
     }
 
     @Inject(method = "onLivingUpdate",at = @At("HEAD"))
     private void handleFastSwim(CallbackInfo ci) {
+        ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
         if (!this.canSwim()) {
-            ((ICustomMovementEntity) this).letMeMove_$setCustomMovementState(EnumPose.STANDING);
+            customPlayer.llm_$setAnimation(STANDING_ID);
         }
 
-        if (isInsideWater(this) && ((ICustomMovementEntity)this).isPose(EnumPose.SWIMMING)) {
-            boolean b1 = !isHeadInsideWater(this) && isInsideWater(this) ;
+        if (isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID)) {
+            boolean b1 = !isHeadInsideWater(this) && isInsideWater(this);
 
             this.motionY = b1 && this.motionY > 0 ? 0 : this.motionY;
 
@@ -144,7 +133,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
                 this.limbSwingAmount += (var12 - this.limbSwingAmount) * 0.4f;
                 this.limbSwing += this.limbSwingAmount;
 
-            } else {
+            }
+            else {
                 super.moveEntity(this.motionX, this.motionY, this.motionZ);
 
                 this.motionX *= 0.8f;
@@ -160,11 +150,11 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     @Redirect(method = "addMovementStat",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayer;isInsideOfMaterial(Lnet/minecraft/src/Material;)Z"))
     private boolean addNewSwimExhaustion(EntityPlayer player, Material material, double par1, double par3, double par5) {
         if (player.isInsideOfMaterial(material)) {
-            if (((ICustomMovementEntity)player).isPose(EnumPose.SWIMMING)) {
+            if (((ICustomMovementEntity) player).llm_$isAnimation(SWIMMING_ID)) {
                 int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
                 if (var7 > 0) {
                     this.addStat(StatList.distanceDoveStat, var7);
-                    this.addExhaustion(0.15f * (float)var7 * 0.01f);
+                    this.addExhaustion(0.15f * (float) var7 * 0.01f);
                 }
                 return false;
             }
@@ -175,23 +165,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Inject(method = "moveEntityWithHeading",at = @At("HEAD"),cancellable = true)
     private void disableMoveIfFastSwimming(float par1, float par2, CallbackInfo ci) {
-        if (isInsideWater(this) && ((ICustomMovementEntity)this).isPose(EnumPose.SWIMMING) && this.canSwim()){
+        if (isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID) && this.canSwim()) {
             ci.cancel();
         }
-    }
-
-    @Unique
-    public boolean isEntityFeetInsideOpaqueBlock() {
-        for (int count = 0; count < 8; ++count) {
-            float i = ((float)((count >> 0) % 2) - 0.5f) * this.width * 0.8f;
-            float j = ((float)((count >> 1) % 2) - 0.5f) * 0.1f;
-            float k = ((float)((count >> 2) % 2) - 0.5f) * this.width * 0.8f;
-            int x = MathHelper.floor_double(this.posX + (double)i);
-            int feetY = MathHelper.floor_double(this.posY + 0.5 + (double)j);
-            int z = MathHelper.floor_double(this.posZ + (double)k);
-            if (!this.worldObj.canBlockSuffocateEntity(x, feetY, z)) continue;
-            return true;
-        }
-        return false;
     }
 }

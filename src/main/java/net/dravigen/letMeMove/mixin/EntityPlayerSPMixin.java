@@ -1,6 +1,6 @@
 package net.dravigen.letMeMove.mixin;
 
-import net.dravigen.letMeMove.EnumPose;
+import net.dravigen.letMeMove.render.AnimationRegistry;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 import org.objectweb.asm.Opcodes;
@@ -23,12 +23,12 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
     private boolean handleCollisionBetter(EntityPlayerSP instance, int par1, int par2, int par3) {
         double height = instance.boundingBox.maxY - instance.boundingBox.minY;
         double var1 = this.boundingBox.minY - MathHelper.floor_double(this.boundingBox.minY);
-        return height <= 1.5 ? height <= 1 ? false : this.isBlockTranslucent(par1, var1 > 0 ? MathHelper.floor_double(par2-var1+0.05) : par2, par3) : this.isBlockTranslucent(par1,par2,par3);
+        return height <= 1.5 ? height <= 1 ? false : this.isBlockTranslucent(par1, var1 > 0 ? MathHelper.floor_double(par2 - var1 + 0.05) : par2, par3) : this.isBlockTranslucent(par1, par2, par3);
     }
 
     @Redirect(method = "onLivingUpdate",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isSneaking()Z"))
     private boolean disableSprintOnCrawl(EntityPlayerSP instance) {
-        if (instance.isSneaking() || ((ICustomMovementEntity)instance).isPose(EnumPose.SWIMMING)) {
+        if (instance.isSneaking() || ((ICustomMovementEntity) instance).llm_$isAnimation(AnimationRegistry.SWIMMING_ID)) {
             instance.setSprinting(false);
             return true;
         }
@@ -37,7 +37,7 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 
     @Redirect(method = "onLivingUpdate",at = @At(value = "FIELD", target = "Lnet/minecraft/src/MovementInput;sneak:Z", ordinal = 0, opcode = Opcodes.GETFIELD))
     private boolean disableVanillaSneakLowerCamera(MovementInput instance) {
-        return ((ICustomMovementEntity)this).isPose(EnumPose.SNEAKING);
+        return ((ICustomMovementEntity) this).llm_$isAnimation(AnimationRegistry.CROUCHING_ID);
     }
 
     @ModifyVariable(method = "pushOutOfBlocks", at = @At("HEAD"), ordinal = 1, argsOnly = true)

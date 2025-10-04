@@ -1,105 +1,72 @@
 package net.dravigen.letMeMove.mixin;
 
-import net.dravigen.letMeMove.EnumPose;
+import net.dravigen.letMeMove.render.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
-import net.dravigen.letMeMove.utils.LMMUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.dravigen.letMeMove.utils.AnimationUtils;
+import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static net.dravigen.letMeMove.render.AnimationRegistry.*;
 
 @Mixin(EntityLivingBase.class)
 public abstract class EntityLivingBaseMixin extends Entity implements ICustomMovementEntity {
-
-    @Shadow public float limbSwingAmount;
-
-    @Shadow public float limbSwing;
 
     public EntityLivingBaseMixin(World par1World) {
         super(par1World);
     }
 
     @Unique
-    private int customMovementState = 0;
+    private ResourceLocation currentAnimation = STANDING_ID;
     @Unique
     private float leaningPitch;
+    @Unique
+    private float lastLeaningPitch;
 
-    @Environment(EnvType.CLIENT)
     @Override
-    public float letMeMove_$getLeaningPitch() {
-        return LMMUtils.lerp(Minecraft.getMinecraft().getTimer().renderPartialTicks, this.lastLeaningPitch, this.leaningPitch);
-    }
-    @Override
-    public int letMeMove_$getCustomMovementState() {
-        return this.customMovementState;
+    public float llm_$getLeaningPitch() {
+        return GeneralUtils.lerp(Minecraft.getMinecraft().getTimer().renderPartialTicks, this.lastLeaningPitch, this.leaningPitch);
     }
 
     @Override
-    public void letMeMove_$setLeaningPitch(float pitch) {
+    public void llm_$setLeaningPitch(float pitch) {
+        this.lastLeaningPitch = this.leaningPitch;
         this.leaningPitch = pitch;
     }
 
     @Override
-    public void letMeMove_$setCustomMovementState(EnumPose state) {
-        this.customMovementState = state.ordinal();
+    public ResourceLocation llm_$getAnimationID() {
+        return this.currentAnimation;
     }
 
-
-    @Unique
-    private float lastLeaningPitch;
-
-    @Inject(method = "onLivingUpdate",at = @At("HEAD"))
-    private void updateLeaningPitch(CallbackInfo ci) {
-        this.lastLeaningPitch = this.leaningPitch;
-
-        if (this.customMovementState == EnumPose.DIVING.ordinal()) {
-
-            this.limbSwingAmount = 0;
-            this.limbSwing = 0;
-
-            float pitch = (this.fallDistance - 2) / 10;
-            pitch = pitch > 1 ? 1 : pitch;
-
-            this.leaningPitch = pitch + 1;
-        }
-        else if (this.customMovementState == EnumPose.SWIMMING.ordinal()) {
-            if (this.inWater) {
-                float pitch = (this.rotationPitch + 90) / 90f;
-
-                float difference = pitch - this.leaningPitch;
-
-                if (Math.abs(difference) <= 0.09) {
-                    this.leaningPitch = pitch;
-                }else {
-                    if (difference > 0) {
-                        this.leaningPitch = this.leaningPitch + 0.09f;
-                    } else {
-                        this.leaningPitch = this.leaningPitch - 0.09f;
-                    }
-                }
-            } else if (!this.onGround && this.fallDistance > 2) {
-                float pitch = (this.fallDistance-2) / 10;
-                pitch = pitch > 1 ? 1 : pitch;
-
-                this.limbSwingAmount = (float) Math.abs(this.motionY);
-
-                this.leaningPitch = pitch + 1;
-            }
-            else this.leaningPitch = Math.min(1.0F, this.leaningPitch + 0.09F);
-        }
-        else {
-            this.leaningPitch = Math.max(0.0F, this.leaningPitch - 0.09F);
-        }
+    @Override
+    public boolean llm_$isAnimation(ResourceLocation animationID) {
+        return this.currentAnimation.equals(animationID);
     }
+
+    @Override
+    public AnimationCustom llm_$getAnimation() {
+        return AnimationUtils.getAnimationFromID(this.currentAnimation);
+    }
+
+    @Override
+    public void llm_$setAnimation(ResourceLocation ID) {
+        this.currentAnimation = ID;
+    }
+
 
     @Inject(method = "getSpeedModifier",at = @At("RETURN"), cancellable = true)
-    private void applyCurrentPoseSpeedMultiplier(CallbackInfoReturnable<Float> cir) {
-        cir.setReturnValue(cir.getReturnValueF() * EnumPose.getPose(this.customMovementState).movementMultiplier);
+    private void applyAnimationSpeedModifier(CallbackInfoReturnable<Float> cir) {
+        cir.setReturnValue(cir.getReturnValueF() * AnimationUtils.getAnimationFromID(this.currentAnimation).speedModifier);
+    }
+
+    @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;isInsideOfMaterial(Lnet/minecraft/src/Material;)Z"))
+    private boolean customBreathCheck(EntityLivingBase instance, Material material) {
+        return GeneralUtils.isHeadInsideWater(instance);
     }
 }

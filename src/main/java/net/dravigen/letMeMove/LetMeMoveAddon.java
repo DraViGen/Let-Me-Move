@@ -2,20 +2,16 @@ package net.dravigen.letMeMove;
 
 import btw.AddonHandler;
 import btw.BTWAddon;
+import net.dravigen.letMeMove.render.AnimationRegistry;
 
 public class LetMeMoveAddon extends BTWAddon {
-    private static LetMeMoveAddon instance;
-
-    public static LetMeMoveAddon getInstance() {
-        return instance == null ? (new LetMeMoveAddon()) : instance;
-    }
-
     public LetMeMoveAddon() {
         super();
     }
 
     @Override
     public void initialize() {
+        AnimationRegistry.registerAllAnimation();
         AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
     }
 }
