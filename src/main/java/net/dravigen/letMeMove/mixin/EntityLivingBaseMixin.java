@@ -55,7 +55,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
     @Inject(method = "onLivingUpdate",at = @At("HEAD"))
     private void updateLeaningPitch(CallbackInfo ci) {
         this.lastLeaningPitch = this.leaningPitch;
-        if (this.customMovementState == EnumPose.CRAWLING.ordinal()) {
+        if (this.customMovementState == EnumPose.DIVING.ordinal()) {
             if (this.inWater) {
                 float pitch = (this.rotationPitch + 90) / 90f;
 
@@ -63,13 +63,23 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
                 if (Math.abs(difference) <= 0.09) {
                     this.leaningPitch = pitch;
-                }else {
+                } else {
                     if (difference > 0) {
                         this.leaningPitch = this.leaningPitch + 0.09f;
                     } else {
                         this.leaningPitch = this.leaningPitch - 0.09f;
                     }
                 }
+            }
+        }
+        if (this.customMovementState == EnumPose.DIVING.ordinal() || this.customMovementState == EnumPose.CRAWLING.ordinal()){
+        if (!this.onGround && this.fallDistance > 2) {
+                float pitch = (this.fallDistance-2) / 10;
+                pitch = pitch > 1 ? 1 : pitch;
+
+                this.limbSwingAmount = (float) Math.abs(this.motionY);
+
+                this.leaningPitch = pitch + 1;
             } else if (!this.onGround && this.fallDistance > 2) {
                 float pitch = (this.fallDistance-2) / 10;
                 pitch = pitch > 1 ? 1 : pitch;

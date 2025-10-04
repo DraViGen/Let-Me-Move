@@ -39,7 +39,7 @@ public abstract class ModelBipedMixin extends ModelBase {
     private void a(Entity entity, float par2, float par3, float par4, float par5, float par6, float par7, CallbackInfo ci) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
         float leaningPitch = customMoveEntity.letMeMove_$getLeaningPitch();
-        if (((ICustomMovementEntity) entity).isPose(EnumPose.CRAWLING)) {
+        if (((ICustomMovementEntity) entity).isPose(EnumPose.CRAWLING) || ((ICustomMovementEntity) entity).isPose(EnumPose.DIVING)) {
             float var1 = 1.62f - (1.62f - 1.25f) * leaningPitch;
             GL11.glTranslatef(0, var1, 0);
             GL11.glRotatef(90 * leaningPitch, 1, 0, 0);
@@ -52,7 +52,10 @@ public abstract class ModelBipedMixin extends ModelBase {
 
         ci.cancel();
 
-        boolean bl2 = customMoveEntity.isPose(EnumPose.CRAWLING);
+        boolean bl2 = customMoveEntity.isPose(EnumPose.DIVING);
+        if (!bl2){
+            bl2 = customMoveEntity.isPose(EnumPose.CRAWLING);
+        }
         float leaningPitch =  Math.min(1.0F,customMoveEntity.letMeMove_$getLeaningPitch());
 
         leaningPitch = livingEntity.inWater && bl2 ? 1 : leaningPitch;
@@ -86,7 +89,7 @@ public abstract class ModelBipedMixin extends ModelBase {
         this.bipedRightArm.rotateAngleZ = 0.0F;
         this.bipedLeftArm.rotateAngleZ = 0.0F;
 
-        if (!customMoveEntity.isPose(EnumPose.CRAWLING) || customMoveEntity.isPose(EnumPose.CRAWLING) && livingEntity.inWater) {
+        if (!customMoveEntity.isPose(EnumPose.CRAWLING) || customMoveEntity.isPose(EnumPose.DIVING) && livingEntity.inWater) {
             this.bipedRightLeg.rotateAngleX = MathHelper.cos(f * 0.6662F) * 1.4F * g / k;
             this.bipedLeftLeg.rotateAngleX = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k;
         } else {
