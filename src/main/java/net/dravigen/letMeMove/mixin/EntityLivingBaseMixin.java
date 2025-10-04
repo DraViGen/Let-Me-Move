@@ -2,7 +2,7 @@ package net.dravigen.letMeMove.mixin;
 
 import net.dravigen.letMeMove.EnumPose;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
-import net.dravigen.letMeMove.utils.ModernUtils;
+import net.dravigen.letMeMove.utils.LMMUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.src.*;
@@ -19,6 +19,8 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Shadow public float limbSwingAmount;
 
+    @Shadow public float limbSwing;
+
     public EntityLivingBaseMixin(World par1World) {
         super(par1World);
     }
@@ -31,7 +33,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
     @Environment(EnvType.CLIENT)
     @Override
     public float letMeMove_$getLeaningPitch() {
-        return ModernUtils.lerp(Minecraft.getMinecraft().getTimer().renderPartialTicks, this.lastLeaningPitch, this.leaningPitch);
+        return LMMUtils.lerp(Minecraft.getMinecraft().getTimer().renderPartialTicks, this.lastLeaningPitch, this.leaningPitch);
     }
     @Override
     public int letMeMove_$getCustomMovementState() {
@@ -55,7 +57,18 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
     @Inject(method = "onLivingUpdate",at = @At("HEAD"))
     private void updateLeaningPitch(CallbackInfo ci) {
         this.lastLeaningPitch = this.leaningPitch;
-        if (this.customMovementState == EnumPose.CRAWLING.ordinal()) {
+
+        if (this.customMovementState == EnumPose.DIVING.ordinal()) {
+
+            this.limbSwingAmount = 0;
+            this.limbSwing = 0;
+
+            float pitch = (this.fallDistance - 2) / 10;
+            pitch = pitch > 1 ? 1 : pitch;
+
+            this.leaningPitch = pitch + 1;
+        }
+        else if (this.customMovementState == EnumPose.SWIMMING.ordinal()) {
             if (this.inWater) {
                 float pitch = (this.rotationPitch + 90) / 90f;
 

@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 public enum EnumPose {
     STANDING(1.8F, 1),
     SNEAKING(1.5F, 0.3f),
-    CRAWLING(0.7F, 0.15f);
+    SWIMMING(0.8F, 0.15f),
+    DIVING(1F, 1F);
 
     public final float height;
     public final float movementMultiplier;
