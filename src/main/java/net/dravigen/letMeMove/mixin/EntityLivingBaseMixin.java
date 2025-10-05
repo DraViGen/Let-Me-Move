@@ -7,9 +7,7 @@ import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static net.dravigen.letMeMove.render.AnimationRegistry.*;
@@ -69,4 +67,29 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
     private boolean customBreathCheck(EntityLivingBase instance, Material material) {
         return GeneralUtils.isHeadInsideWater(instance);
     }
+
+    @ModifyArg(method = "moveEntityWithHeading",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;moveFlying(FFF)V", ordinal = 2), index = 2)
+    private float flySpeedModifier(float par1) {
+        if (this.llm_$isAnimation(SKYDIVING_ID)) {
+            this.motionY *= 0.98;
+            return this.llm_$getAnimation().speedModifier;
+        }
+        else if (this.llm_$isAnimation(HIGH_FALLING_ID)) {
+            return 0.01f;
+        }
+        else {
+            return par1;
+        }
+    }
+
+/*
+    @ModifyConstant(method = "moveEntityWithHeading", constant = @Constant(doubleValue = 0.08))
+    private double slowFallWhileSkyDiving(double constant) {
+        if (this.llm_$isAnimation(SKYDIVING_ID)) {
+            return 0.04;
+        }
+        else {
+            return constant;
+        }
+    }*/
 }

@@ -13,15 +13,25 @@ import static net.dravigen.letMeMove.render.AnimationRegistry.*;
 
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {
-    
+
     @Inject(method = "render",at = @At("HEAD"))
-    private void rotateBody(Entity entity, float par2, float par3, float par4, float par5, float par6, float par7, CallbackInfo ci) {
-        ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
-        float leaningPitch = customMoveEntity.llm_$getLeaningPitch();
-        if (((ICustomMovementEntity) entity).llm_$isAnimation(SWIMMING_ID) || ((ICustomMovementEntity) entity).llm_$isAnimation(DIVING_ID)) {
-            float var1 = 1.62f - (1.62f - 1.25f) * leaningPitch;
-            GL11.glTranslatef(0, var1, 0);
-            GL11.glRotatef(90 * leaningPitch, 1, 0, 0);
+    private void rotateBody(Entity entity, float f, float g, float h, float i, float j, float u, CallbackInfo ci) {
+        ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
+
+        if (customEntity.llm_$getAnimation().needLeaningUpdate) {
+            float leaningPitch = customEntity.llm_$getLeaningPitch();
+            float var1 = 1.62f - (1.62f - 1.25f) * (leaningPitch > 1 ? 1 : leaningPitch);
+            if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) {
+                GL11.glTranslatef(0, 0, 0);
+                GL11.glRotatef(22.5f * leaningPitch, 0, 1, 0);
+                GL11.glRotatef(10 * leaningPitch, 0, 0, 1);
+                GL11.glRotatef(45 * leaningPitch, 1, 0, 0);
+
+            }
+            else {
+                GL11.glTranslatef(0, var1, 0);
+                GL11.glRotatef(90 * leaningPitch, 1, 0, 0);
+            }
         }
     }
 

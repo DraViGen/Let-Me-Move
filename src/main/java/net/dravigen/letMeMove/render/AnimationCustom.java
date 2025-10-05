@@ -13,17 +13,18 @@ public class AnimationCustom {
     private final ResourceLocation animationIdentifier;
     public float height;
     public float speedModifier;
+    public boolean needLeaningUpdate;
 
-    public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier) {
+    public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier, boolean needLeaningUpdate) {
         this.animationIdentifier = animationIdentifier;
         this.height = height;
         this.speedModifier = speedModifier;
+        this.needLeaningUpdate = needLeaningUpdate;
     }
 
     public ResourceLocation getID() {
         return this.animationIdentifier;
     }
-
 
     public void setConditions(IAnimationCondition animationCondition) {
         this.conditons = animationCondition;
