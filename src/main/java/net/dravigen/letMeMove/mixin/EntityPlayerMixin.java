@@ -27,6 +27,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     @Shadow public abstract float getMovementSpeedModifierFromEffects();
     @Shadow public abstract boolean canSwim();
 
+    @Shadow public PlayerCapabilities capabilities;
+
     public EntityPlayerMixin(World par1World) {
         super(par1World);
     }
@@ -98,7 +100,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
             customPlayer.llm_$setAnimation(STANDING_ID);
         }
 
-        if (isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID)) {
+        if (!this.capabilities.isFlying && isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID)) {
             boolean b1 = !isHeadInsideWater(this) && isInsideWater(this);
 
             this.motionY = b1 && this.motionY > 0 ? 0 : this.motionY;
@@ -165,7 +167,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Inject(method = "moveEntityWithHeading",at = @At("HEAD"),cancellable = true)
     private void disableMoveIfFastSwimming(float par1, float par2, CallbackInfo ci) {
-        if (isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID) && this.canSwim()) {
+        if (!this.capabilities.isFlying && isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID) && this.canSwim()) {
             ci.cancel();
         }
     }

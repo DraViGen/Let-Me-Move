@@ -1,11 +1,12 @@
 package net.dravigen.letMeMove.render;
 
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
-import net.dravigen.letMeMove.utils.AnimationUtils;
+import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
 import org.lwjgl.input.Keyboard;
 
 
+import static net.dravigen.letMeMove.utils.AnimationUtils.*;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 
@@ -19,22 +20,22 @@ public class AnimationRegistry {
 
 
     public static void registerAllAnimation() {
-        AnimationCustom standing = AnimationUtils.registerAnimation(STANDING_ID, 1.8f, 1, false);
+        AnimationCustom standing = registerAnimation(STANDING_ID, 1.8f, 1, false);
         registerStanding(standing);
 
-        AnimationCustom crouching = AnimationUtils.registerAnimation(CROUCHING_ID, 1.4f, 0.3f, false);
+        AnimationCustom crouching = registerAnimation(CROUCHING_ID, 1.4f, 0.3f, false);
         registerCrouching(crouching);
 
-        AnimationCustom swimming = AnimationUtils.registerAnimation(SWIMMING_ID, 0.8f, 0.15f, true);
+        AnimationCustom swimming = registerAnimation(SWIMMING_ID, 0.8f, 0.15f, true);
         registerSwimming(swimming);
 
-        AnimationCustom diving = AnimationUtils.registerAnimation(DIVING_ID, 1f, 0.1f, true);
+        AnimationCustom diving = registerAnimation(DIVING_ID, 1f, 0.1f, true);
         registerDiving(diving);
 
-        AnimationCustom highFalling = AnimationUtils.registerAnimation(HIGH_FALLING_ID, 1.8f, 0.05f, true);
+        AnimationCustom highFalling = registerAnimation(HIGH_FALLING_ID, 1.8f, 0.05f, true);
         registerHighFalling(highFalling);
 
-        AnimationCustom skyDiving = AnimationUtils.registerAnimation(SKYDIVING_ID, 1f, 0.2f, true);
+        AnimationCustom skyDiving = registerAnimation(SKYDIVING_ID, 1f, 0.2f, true);
         registerSkyDiving(skyDiving);
 
     }
@@ -93,7 +94,7 @@ public class AnimationRegistry {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
         float goal = 0;
 
-        smoothUpdate(goal, customEntity);
+        customEntity.llm_$setLeaningPitch(goal);
     }
 
     public static void swimmingLeaningUpdate(EntityLivingBase entity) {
@@ -107,7 +108,7 @@ public class AnimationRegistry {
             goal = 1;
         }
 
-        smoothUpdate(goal, customEntity);
+        customEntity.llm_$setLeaningPitch(goal);
     }
 
     public static void divingLeaningUpdate(EntityLivingBase entity) {
@@ -119,7 +120,7 @@ public class AnimationRegistry {
         float pitch = (float) ((-entity.motionY) * 1.25f);
         float goal = (pitch > 1 ? 1 : pitch) + 1;
 
-        smoothUpdate(goal, customEntity);
+        customEntity.llm_$setLeaningPitch(goal);
     }
 
     public static void highFallingLeaningUpdate(EntityLivingBase entity) {
@@ -133,225 +134,123 @@ public class AnimationRegistry {
     public static void skyDivingLeaningUpdate(EntityLivingBase entity) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
 
-        smoothUpdate(entity.moveForward > 0 ? 1.2f : 1, customEntity);
+        float goal = entity.moveForward > 0 ? 1.2f : 1;
+
+        customEntity.llm_$setLeaningPitch(goal);
     }
 
-    private static void smoothUpdate(float goal, ICustomMovementEntity customEntity) {
-        float leaningPitch = customEntity.llm_$getLeaningPitch();
-        leaningPitch = leaningPitch > 4 ? leaningPitch % 5 : leaningPitch;
-        float difference = goal - leaningPitch;
-
-        if (Math.abs(difference) <= 0.0125) {
-            customEntity.llm_$setLeaningPitch(goal);
-        }
-        else {
-            if (difference > 0) {
-                customEntity.llm_$setLeaningPitch(leaningPitch + 0.0125f);
-            }
-            else {
-                customEntity.llm_$setLeaningPitch(leaningPitch - 0.0125f);
-            }
-        }
-    }
-
-
-    private static void exampleAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
-
-        model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
-        model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
-        model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
-        model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
-
-        model.bipedBody.rotateAngleY = 0.0F;
-
-        model.bipedRightArm.rotationPointZ = 0.0F;
-        model.bipedRightArm.rotationPointX = -5.0F;
-
-        model.bipedLeftArm.rotationPointZ = 0.0F;
-        model.bipedLeftArm.rotationPointX = 5.0F;
-
-        float k = 1.0F;
-
-        model.bipedRightArm.rotateAngleX = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 2.0F * g * 0.5F / k;
-        model.bipedLeftArm.rotateAngleX = MathHelper.cos(f * 0.6662F) * 2.0F * g * 0.5F / k;
-
-        model.bipedRightArm.rotateAngleZ = 0.0F;
-        model.bipedLeftArm.rotateAngleZ = 0.0F;
-
-        model.bipedRightLeg.rotateAngleX = MathHelper.cos(f * 0.6662F) * 1.4F * g / k;
-        model.bipedLeftLeg.rotateAngleX = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k;
-
-        model.bipedRightLeg.rotateAngleY = 0.0F;
-        model.bipedLeftLeg.rotateAngleY = 0.0F;
-
-        model.bipedRightLeg.rotateAngleZ = 0.0F;
-        model.bipedLeftLeg.rotateAngleZ = 0.0F;
-
-        if (model.isRiding) {
-            model.bipedRightArm.rotateAngleX += (float) (-Math.PI / 5);
-            model.bipedLeftArm.rotateAngleX += (float) (-Math.PI / 5);
-
-            model.bipedRightLeg.rotateAngleX = -1.4137167F;
-            model.bipedRightLeg.rotateAngleY = (float) (Math.PI / 10);
-
-            model.bipedRightLeg.rotateAngleZ = 0.07853982F;
-            model.bipedLeftLeg.rotateAngleX = -1.4137167F;
-
-            model.bipedLeftLeg.rotateAngleY = (float) (-Math.PI / 10);
-            model.bipedLeftLeg.rotateAngleZ = -0.07853982F;
-        }
-
-        if (model.heldItemLeft != 0) {
-            model.bipedLeftArm.rotateAngleX = model.bipedLeftArm.rotateAngleX * 0.5f - 0.31415927f * (float) model.heldItemLeft;
-        }
-        if (model.heldItemRight != 0) {
-            model.bipedRightArm.rotateAngleX = model.bipedRightArm.rotateAngleX * 0.5f - 0.31415927f * (float) model.heldItemRight;
-        }
-
-        model.bipedRightArm.rotateAngleY = 0.0F;
-        model.bipedLeftArm.rotateAngleY = 0.0F;
-
-        if (model.aimedBow) {
-            model.bipedRightArm.rotateAngleY = -0.1F + model.bipedHead.rotateAngleY;
-            model.bipedLeftArm.rotateAngleY = 0.1F + model.bipedHead.rotateAngleY + 0.4F;
-            model.bipedRightArm.rotateAngleX = (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX;
-            model.bipedLeftArm.rotateAngleX = (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX;
-        }
-
-        handSwinging(entity, model, h);
-
-        model.bipedBody.rotateAngleX = 0.0F;
-
-        model.bipedRightLeg.rotationPointZ = 0.1F;
-        model.bipedLeftLeg.rotationPointZ = 0.1F;
-
-        model.bipedRightLeg.rotationPointY = 12.0F;
-        model.bipedLeftLeg.rotationPointY = 12.0F;
-
-        model.bipedHead.rotationPointY = 0.0F;
-        model.bipedHeadwear.rotationPointY = 0.0f;
-
-        model.bipedBody.rotationPointY = 0.0F;
-
-        model.bipedLeftArm.rotationPointY = 2.0F;
-        model.bipedRightArm.rotationPointY = 2.0F;
-
-        if (entity instanceof EntityPlayer) {
-            if (entity.getCurrentItemOrArmor(2) == null) {
-                model.bipedCloak.rotationPointZ = 0.0F;
-                model.bipedCloak.rotationPointY = 0.0F;
-            }
-            else {
-                model.bipedCloak.rotationPointZ = -1.1F;
-                model.bipedCloak.rotationPointY = -0.85F;
-            }
-        }
-    }
 
     private static void commonAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
 
+        resetAnimationRotationPoints(model);
+
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
-        model.bipedBody.rotateAngleY = 0.0F;
-
-        model.bipedRightArm.rotationPointZ = 0.0F;
-        model.bipedRightArm.rotationPointX = -5.0F;
-
-        model.bipedLeftArm.rotationPointZ = 0.0F;
-        model.bipedLeftArm.rotationPointX = 5.0F;
+        float[] rArm = new float[3];
+        float[] lArm = new float[3];
+        float[] body = new float[3];
 
         float k = 1.0F;
 
-        model.bipedRightArm.rotateAngleX = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 2.0F * g * 0.5F / k;
-        model.bipedLeftArm.rotateAngleX = MathHelper.cos(f * 0.6662F) * 2.0F * g * 0.5F / k;
+        rArm[0] = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 2.0F * g * 0.5F / k
+                + (model.isRiding ? (float) (-Math.PI / 5) : 0);
+        rArm[1] = model.aimedBow ? -0.1F + model.bipedHead.rotateAngleY : 0.0F;
+        rArm[2] = model.aimedBow ? 0.1F + model.bipedHead.rotateAngleY + 0.4F : 0.0F;
 
-        model.bipedRightArm.rotateAngleZ = 0.0F;
-        model.bipedLeftArm.rotateAngleZ = 0.0F;
+        lArm[0] = MathHelper.cos(f * 0.6662F) * 2.0F * g * 0.5F / k
+                + (model.isRiding ? (float) (-Math.PI / 5) : 0);
+        lArm[1] = 0.0F;
+        lArm[2] = 0.0F;
 
-        model.bipedRightLeg.rotateAngleX = MathHelper.cos(f * 0.6662F) * 1.4F * g / k;
-        model.bipedLeftLeg.rotateAngleX = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k;
+        body[0] = 0;
+        body[1] = 0;
+        body[2] = 0;
 
-        model.bipedRightLeg.rotateAngleY = 0.0F;
-        model.bipedLeftLeg.rotateAngleY = 0.0F;
+        rArm[0] = model.aimedBow ?
+                (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX
+                : model.heldItemRight != 0 ?
+                rArm[0] * 0.5f - 0.31415927f * (float) model.heldItemRight
+                : rArm[0];
 
-        model.bipedRightLeg.rotateAngleZ = 0.0F;
-        model.bipedLeftLeg.rotateAngleZ = 0.0F;
+        lArm[0] = model.aimedBow ?
+                (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX
+                : model.heldItemLeft != 0 ?
+                lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft
+                : lArm[0];
 
-        if (model.isRiding) {
-            model.bipedRightArm.rotateAngleX += (float) (-Math.PI / 5);
-            model.bipedLeftArm.rotateAngleX += (float) (-Math.PI / 5);
+        if (!(model.onGround <= 0.0F)) {
+            float onGround = model.onGround;
+            body[1] = MathHelper.sin(MathHelper.sqrt_float(onGround) * (float) (Math.PI * 2)) * 0.2F;
 
-            model.bipedRightLeg.rotateAngleX = -1.4137167F;
-            model.bipedRightLeg.rotateAngleY = (float) (Math.PI / 10);
+            model.bipedRightArm.rotationPointZ = MathHelper.sin(body[1]) * 5.0F;
+            model.bipedRightArm.rotationPointX = -MathHelper.cos(body[1]) * 5.0F;
 
-            model.bipedRightLeg.rotateAngleZ = 0.07853982F;
-            model.bipedLeftLeg.rotateAngleX = -1.4137167F;
+            model.bipedLeftArm.rotationPointZ = -MathHelper.sin(body[1]) * 5.0F;
+            model.bipedLeftArm.rotationPointX = MathHelper.cos(body[1]) * 5.0F;
 
-            model.bipedLeftLeg.rotateAngleY = (float) (-Math.PI / 10);
-            model.bipedLeftLeg.rotateAngleZ = -0.07853982F;
+            rArm[1] = rArm[1] + body[1];
+
+            lArm[1] = lArm[1] + body[1];
+            lArm[0] = lArm[0] + body[1];
+
+            onGround = 1.0F - model.onGround;
+            onGround *= onGround;
+            onGround *= onGround;
+            onGround = 1.0F - onGround;
+            float v = MathHelper.sin(onGround * (float) Math.PI);
+            float v1 = MathHelper.sin(model.onGround * (float) Math.PI) * -(model.bipedHead.rotateAngleX - 0.7F) * 0.75F;
+
+            rArm[0] = (float) (rArm[0] - (v * 1.2 + v1));
+            rArm[1] = rArm[1] + body[1] * 2.0F;
+            rArm[2] = rArm[2] + MathHelper.sin(model.onGround * (float) Math.PI) * -0.4F;
         }
-
-        if (model.heldItemLeft != 0) {
-            model.bipedLeftArm.rotateAngleX = model.bipedLeftArm.rotateAngleX * 0.5f - 0.31415927f * (float) model.heldItemLeft;
-        }
-        if (model.heldItemRight != 0) {
-            model.bipedRightArm.rotateAngleX = model.bipedRightArm.rotateAngleX * 0.5f - 0.31415927f * (float) model.heldItemRight;
-        }
-
-        model.bipedRightArm.rotateAngleY = 0.0F;
-        model.bipedLeftArm.rotateAngleY = 0.0F;
-
-        if (model.aimedBow) {
-            model.bipedRightArm.rotateAngleY = -0.1F + model.bipedHead.rotateAngleY;
-            model.bipedLeftArm.rotateAngleY = 0.1F + model.bipedHead.rotateAngleY + 0.4F;
-            model.bipedRightArm.rotateAngleX = (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX;
-            model.bipedLeftArm.rotateAngleX = (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX;
-        }
-
-        handSwinging(entity, model, h);
 
         boolean isCrouching = customMoveEntity.llm_$isAnimation(CROUCHING_ID);
+
         if (isCrouching) {
-            model.bipedBody.rotateAngleX = 0.5F;
+            body[0] = 0.5F;
 
-            model.bipedRightArm.rotateAngleX += 0.4F;
-            model.bipedLeftArm.rotateAngleX += 0.4F;
+            rArm[0] += 0.4F;
+            model.bipedRightArm.rotationPointY = 5.2F;
 
-            model.bipedRightLeg.rotationPointZ = 4.0F;
-            model.bipedLeftLeg.rotationPointZ = 4.0F;
+            lArm[0] += 0.4F;
+            model.bipedLeftArm.rotationPointY = 5.2F;
 
             model.bipedRightLeg.rotationPointY = 12.2F;
+            model.bipedRightLeg.rotationPointZ = 4.0F;
+
             model.bipedLeftLeg.rotationPointY = 12.2F;
+            model.bipedLeftLeg.rotationPointZ = 4.0F;
 
             model.bipedHead.rotationPointY = 4.2F;
             model.bipedHeadwear.rotationPointY = 4.2f;
 
             model.bipedBody.rotationPointY = 3.2F;
-
-            model.bipedLeftArm.rotationPointY = 5.2F;
-            model.bipedRightArm.rotationPointY = 5.2F;
         }
-        else {
-            model.bipedBody.rotateAngleX = 0.0F;
 
-            model.bipedRightLeg.rotationPointZ = 0.1F;
-            model.bipedLeftLeg.rotationPointZ = 0.1F;
+        setSmoothAllRotation(model.bipedRightArm, rArm[0], rArm[1], rArm[2], 0.05f);
 
-            model.bipedRightLeg.rotationPointY = 12.0F;
-            model.bipedLeftLeg.rotationPointY = 12.0F;
+        setSmoothAllRotation(model.bipedLeftArm, lArm[0], lArm[1], lArm[2], 0.05f);
 
-            model.bipedHead.rotationPointY = 0.0F;
-            model.bipedHeadwear.rotationPointY = 0.0f;
+        setSmoothAllRotation(model.bipedRightLeg,
+                model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F) * 1.4F * g / k,
+                model.isRiding ? (float) (Math.PI / 10) : 0 ,
+                model.isRiding ? 0.07853982F : 0,
+                0.05f
+        );
 
-            model.bipedBody.rotationPointY = 0.0F;
+        setSmoothAllRotation(model.bipedLeftLeg,
+                model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k,
+                model.isRiding ? (float) (Math.PI / 10) : 0 ,
+                model.isRiding ? 0.07853982F : 0,
+                0.05f
+        );
 
-            model.bipedLeftArm.rotationPointY = 2.0F;
-            model.bipedRightArm.rotationPointY = 2.0F;
-        }
+        setSmoothAllRotation(model.bipedBody, body[0], body[1], body[2], 0.1f);
 
         if (entity instanceof EntityPlayer) {
             if (entity.getCurrentItemOrArmor(2) == null) {
@@ -377,127 +276,104 @@ public class AnimationRegistry {
 
     private static void swimmingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
-
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
 
+        resetAnimationRotationPoints(model);
+
+        setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
+
         leaningPitch = entity.inWater ? 1 : leaningPitch;
+        f = entity.inWater ? f : f * 2;
+        g = entity.inWater ? g : g * 2;
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
+
         if (leaningPitch > 0.0F) {
             model.bipedHead.rotateAngleX = lerpAngle(leaningPitch, model.bipedHead.rotateAngleX, (float) (-Math.PI / 4));
         }
         else {
             model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
         }
+
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
-        model.bipedBody.rotateAngleY = 0.0F;
-
-        model.bipedRightArm.rotationPointZ = 0.0F;
-        model.bipedRightArm.rotationPointX = -5.0F;
-
-        model.bipedLeftArm.rotationPointZ = 0.0F;
-        model.bipedLeftArm.rotationPointX = 5.0F;
+        float[] rArm = new float[3];
+        float[] lArm = new float[3];
+        float[] rLeg = new float[3];
+        float[] lLeg = new float[3];
 
         float k = 1.0F;
 
-        model.bipedRightArm.rotateAngleX = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 2.0F * g * 0.5F / k;
-        model.bipedLeftArm.rotateAngleX = MathHelper.cos(f * 0.6662F) * 2.0F * g * 0.5F / k;
+        rArm[0] = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 2.0F * g * 0.5F / k;
+        rArm[1] = 0.0F;
+        rArm[2] = 0.0F;
 
-        model.bipedRightArm.rotateAngleZ = 0.0F;
-        model.bipedLeftArm.rotateAngleZ = 0.0F;
+        lArm[0] = MathHelper.cos(f * 0.6662F) * 2.0F * g * 0.5F / k;
+        lArm[1] = 0.0F;
+        lArm[2] = 0.0F;
 
-        if (entity.inWater) {
-            model.bipedRightLeg.rotateAngleX = MathHelper.cos(f * 0.6662F) * 1.4F * g / k;
-            model.bipedLeftLeg.rotateAngleX = MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k;
-        }
-        else {
-            model.bipedRightLeg.rotateAngleX = 0;
-            model.bipedLeftLeg.rotateAngleX = 0;
-        }
+        rLeg[0] = entity.inWater ? MathHelper.cos(f * 0.6662F) * 1.4F * g / k : 0;
+        rLeg[1] = 0.0F;
+        rLeg[2] = 0.0F;
 
-        model.bipedRightLeg.rotateAngleY = 0.0F;
-        model.bipedLeftLeg.rotateAngleY = 0.0F;
+        lLeg[0] = entity.inWater ? MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k : 0;
+        lLeg[1] = 0.0F;
+        lLeg[2] = 0.0F;
 
-        model.bipedRightLeg.rotateAngleZ = 0.0F;
-        model.bipedLeftLeg.rotateAngleZ = 0.0F;
 
-        if (model.heldItemLeft != 0) {
-            model.bipedLeftArm.rotateAngleX = model.bipedLeftArm.rotateAngleX * 0.5f - 0.31415927f * (float) model.heldItemLeft;
-        }
-        if (model.heldItemRight != 0) {
-            model.bipedRightArm.rotateAngleX = model.bipedRightArm.rotateAngleX * 0.5f - 0.31415927f * (float) model.heldItemRight;
-        }
+        rArm[0] = model.heldItemRight != 0 ? rArm[0] * 0.5f - 0.31415927f * (float) model.heldItemRight : rArm[0];
+        lArm[0] = model.heldItemLeft != 0 ? lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft : lArm[0];
 
-        model.bipedRightArm.rotateAngleY = 0.0F;
-        model.bipedLeftArm.rotateAngleY = 0.0F;
+        rArm[0] = model.aimedBow ? (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX : rArm[0];
+        lArm[0] = model.aimedBow ? (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX : lArm[0];
 
-        if (model.aimedBow) {
-            model.bipedRightArm.rotateAngleY = -0.1F + model.bipedHead.rotateAngleY;
-            model.bipedLeftArm.rotateAngleY = 0.1F + model.bipedHead.rotateAngleY + 0.4F;
-            model.bipedRightArm.rotateAngleX = (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX;
-            model.bipedLeftArm.rotateAngleX = (float) (-Math.PI / 2) + model.bipedHead.rotateAngleX;
-        }
-
-        handSwinging(entity, model, h);
-
-        model.bipedBody.rotateAngleX = 0.0F;
-
-        model.bipedRightLeg.rotationPointZ = 0.1F;
-        model.bipedLeftLeg.rotationPointZ = 0.1F;
-
-        model.bipedRightLeg.rotationPointY = 12.0F;
-        model.bipedLeftLeg.rotationPointY = 12.0F;
-
-        model.bipedHead.rotationPointY = 0.0F;
-        model.bipedHeadwear.rotationPointY = 0.0f;
-
-        model.bipedBody.rotationPointY = 0.0F;
-
-        model.bipedLeftArm.rotationPointY = 2.0F;
-        model.bipedRightArm.rotationPointY = 2.0F;
+        rArm[1] = model.aimedBow ? -0.1F + model.bipedHead.rotateAngleY : rArm[1];
+        lArm[1] = model.aimedBow ? 0.1F + model.bipedHead.rotateAngleY + 0.4F : lArm[1];
 
         if (leaningPitch > 0.0F) {
             float l = f % 26.0F;
             float m = model.onGround > 0.0F ? 0.0F : leaningPitch;
             if (l < 14.0F) {
-                model.bipedLeftArm.rotateAngleX = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, 0.0F);
-                model.bipedRightArm.rotateAngleX = lerp(m, model.bipedRightArm.rotateAngleX, 0.0F);
+                rArm[0] = lerp(m, rArm[0], 0.0F);
+                rArm[1] = lerp(m, rArm[1], (float) Math.PI);
+                rArm[2] = lerp(m, rArm[2], (float) Math.PI - 1.8707964F * method_2807(l) / method_2807(14.0F));
 
-                model.bipedLeftArm.rotateAngleY = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, (float) Math.PI);
-                model.bipedRightArm.rotateAngleY = lerp(m, model.bipedRightArm.rotateAngleY, (float) Math.PI);
-
-                model.bipedLeftArm.rotateAngleZ = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleZ, (float) Math.PI + 1.8707964F * method_2807(l) / method_2807(14.0F));
-                model.bipedRightArm.rotateAngleZ = lerp(m, model.bipedRightArm.rotateAngleZ, (float) Math.PI - 1.8707964F * method_2807(l) / method_2807(14.0F));
+                lArm[0] = lerpAngle(leaningPitch, lArm[0], 0.0F);
+                lArm[1] = lerpAngle(leaningPitch, lArm[1], (float) Math.PI);
+                lArm[2] = lerpAngle(leaningPitch, lArm[2], (float) Math.PI + 1.8707964F * method_2807(l) / method_2807(14.0F));
             }
             else if (l >= 14.0F && l < 22.0F) {
                 float o = (l - 14.0F) / 8.0F;
-                model.bipedLeftArm.rotateAngleX = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, (float) (Math.PI / 2) * o);
-                model.bipedRightArm.rotateAngleX = lerp(m, model.bipedRightArm.rotateAngleX, (float) (Math.PI / 2) * o);
+                rArm[0] = lerp(m, rArm[0], (float) (Math.PI / 2) * o);
+                rArm[1] = lerp(m, rArm[1], (float) Math.PI);
+                rArm[2] = lerp(m, rArm[2], 1.2707963F + 1.8707964F * o);
 
-                model.bipedLeftArm.rotateAngleY = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, (float) Math.PI);
-                model.bipedRightArm.rotateAngleY = lerp(m, model.bipedRightArm.rotateAngleY, (float) Math.PI);
-
-                model.bipedLeftArm.rotateAngleZ = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleZ, 5.012389F - 1.8707964F * o);
-                model.bipedRightArm.rotateAngleZ = lerp(m, model.bipedRightArm.rotateAngleZ, 1.2707963F + 1.8707964F * o);
+                lArm[0] = lerpAngle(leaningPitch, lArm[0], (float) (Math.PI / 2) * o);
+                lArm[1] = lerpAngle(leaningPitch, lArm[1], (float) Math.PI);
+                lArm[2] = lerpAngle(leaningPitch, lArm[2], 5.012389F - 1.8707964F * o);
             }
             else if (l >= 22.0F && l < 26.0F) {
                 float o = (l - 22.0F) / 4.0F;
-                model.bipedLeftArm.rotateAngleX = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
-                model.bipedRightArm.rotateAngleX = lerp(m, model.bipedRightArm.rotateAngleX, (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
+                rArm[0] = lerp(m, rArm[0], (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
+                rArm[1] = lerp(m, rArm[1], (float) Math.PI);
+                rArm[2] = lerp(m, rArm[2], (float) Math.PI);
 
-                model.bipedLeftArm.rotateAngleY = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, (float) Math.PI);
-                model.bipedRightArm.rotateAngleY = lerp(m, model.bipedRightArm.rotateAngleY, (float) Math.PI);
-
-                model.bipedLeftArm.rotateAngleZ = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleZ, (float) Math.PI);
-                model.bipedRightArm.rotateAngleZ = lerp(m, model.bipedRightArm.rotateAngleZ, (float) Math.PI);
+                lArm[0] = lerpAngle(leaningPitch, lArm[0], (float) (Math.PI / 2) - (float) (Math.PI / 2) * o);
+                lArm[1] = lerpAngle(leaningPitch, lArm[1], (float) Math.PI);
+                lArm[2] = lerpAngle(leaningPitch, lArm[2], (float) Math.PI);
             }
 
-            model.bipedLeftLeg.rotateAngleX = lerp(leaningPitch, model.bipedLeftLeg.rotateAngleX, 0.3F * MathHelper.cos(f * 0.33333334F + (float) Math.PI));
-            model.bipedRightLeg.rotateAngleX = lerp(leaningPitch, model.bipedRightLeg.rotateAngleX, 0.3F * MathHelper.cos(f * 0.33333334F));
+            lLeg[0] = lerp(leaningPitch, lLeg[0], 0.3F * MathHelper.cos(f * 0.33333334F + (float) Math.PI));
+            rLeg[0] = lerp(leaningPitch, rLeg[0], 0.3F * MathHelper.cos(f * 0.33333334F));
 
         }
+
+        setSmoothAllRotation(model.bipedRightArm, rArm[0], rArm[1], rArm[2], 0.03f);
+        setSmoothAllRotation(model.bipedLeftArm, lArm[0], lArm[1], lArm[2], 0.03f);
+
+        setSmoothAllRotation(model.bipedRightLeg, rLeg[0], rLeg[1], rLeg[2], 0.03f);
+        setSmoothAllRotation(model.bipedLeftLeg, lLeg[0], lLeg[1], lLeg[2], 0.03f);
 
         if (entity instanceof EntityPlayer) {
             if (entity.getCurrentItemOrArmor(2) == null) {
@@ -513,8 +389,11 @@ public class AnimationRegistry {
 
     private static void divingAnimation(ModelBiped model, EntityLivingBase entity, float h, float i, float j) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
-
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
+
+        resetAnimationRotationPoints(model);
+
+        setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         if (leaningPitch > 0.0F) {
@@ -526,71 +405,29 @@ public class AnimationRegistry {
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
-        model.bipedBody.rotateAngleY = 0.0F;
-
-        model.bipedRightArm.rotationPointZ = 0.0F;
-        model.bipedRightArm.rotationPointX = -5.0F;
-
-        model.bipedLeftArm.rotationPointZ = 0.0F;
-        model.bipedLeftArm.rotationPointX = 5.0F;
-
-        model.bipedRightArm.rotateAngleX = 0;
-        model.bipedLeftArm.rotateAngleX = 0;
-
-        model.bipedRightArm.rotateAngleZ = 0.0F;
-        model.bipedLeftArm.rotateAngleZ = 0.0F;
-
-        model.bipedRightLeg.rotateAngleX = 0;
-        model.bipedLeftLeg.rotateAngleX = 0;
-
-        model.bipedRightLeg.rotateAngleY = 0.0F;
-        model.bipedLeftLeg.rotateAngleY = 0.0F;
-
-        model.bipedRightLeg.rotateAngleZ = 0.0F;
-        model.bipedLeftLeg.rotateAngleZ = 0.0F;
-
-        if (model.heldItemLeft != 0) {
-            model.bipedLeftArm.rotateAngleX = model.bipedLeftArm.rotateAngleX * 0.5f - 0.31415927f * (float) model.heldItemLeft;
-        }
-        if (model.heldItemRight != 0) {
-            model.bipedRightArm.rotateAngleX = model.bipedRightArm.rotateAngleX * 0.5f - 0.31415927f * (float) model.heldItemRight;
-        }
-
-        model.bipedRightArm.rotateAngleY = 0.0F;
-        model.bipedLeftArm.rotateAngleY = 0.0F;
-
-        handSwinging(entity, model, h);
-
-        model.bipedBody.rotateAngleX = 0.0F;
-
-        model.bipedRightLeg.rotationPointZ = 0.1F;
-        model.bipedLeftLeg.rotationPointZ = 0.1F;
-
-        model.bipedRightLeg.rotationPointY = 12.0F;
-        model.bipedLeftLeg.rotationPointY = 12.0F;
-
-        model.bipedHead.rotationPointY = 0.0F;
-        model.bipedHeadwear.rotationPointY = 0.0f;
-
-        model.bipedBody.rotationPointY = 0.0F;
-
-        model.bipedLeftArm.rotationPointY = 2.0F;
-        model.bipedRightArm.rotationPointY = 2.0F;
 
         if (leaningPitch > 0.0F) {
             float m = model.onGround > 0.0F ? 0.0F : leaningPitch;
-            model.bipedLeftArm.rotateAngleX = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, 0.0F);
-            model.bipedRightArm.rotateAngleX = lerp(m, model.bipedRightArm.rotateAngleX, 0.0F);
 
-            model.bipedLeftArm.rotateAngleY = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, (float) Math.PI);
-            model.bipedRightArm.rotateAngleY = lerp(m, model.bipedRightArm.rotateAngleY, (float) Math.PI);
+            setSmoothAllRotation(model.bipedRightArm,
+                    lerp(m, model.bipedRightArm.rotateAngleX, 0.0F),
+                    lerp(m, model.bipedRightArm.rotateAngleY, (float) Math.PI),
+                    lerp(m, model.bipedRightArm.rotateAngleZ, (float) Math.PI - 1.8707964F * method_2807(0) / method_2807(14.0F))
+            );
 
-            model.bipedLeftArm.rotateAngleZ = lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleZ, (float) Math.PI + 1.8707964F * method_2807(0) / method_2807(14.0F));
-            model.bipedRightArm.rotateAngleZ = lerp(m, model.bipedRightArm.rotateAngleZ, (float) Math.PI - 1.8707964F * method_2807(0) / method_2807(14.0F));
+            setSmoothAllRotation(model.bipedLeftArm,
+                    lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, 0.0F),
+                    lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, (float) Math.PI),
+                    lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleZ, (float) Math.PI + 1.8707964F * method_2807(0) / method_2807(14.0F))
+            );
 
-            model.bipedLeftLeg.rotateAngleX = lerp(leaningPitch, model.bipedLeftLeg.rotateAngleX, 0.3F * MathHelper.cos((float) Math.PI));
-            model.bipedRightLeg.rotateAngleX = lerp(leaningPitch, model.bipedRightLeg.rotateAngleX, 0.3F * MathHelper.cos(0));
+            float n = customMoveEntity.llm_$getLeaningPitch();
 
+            model.bipedRightLeg.rotationPointY = 11.3f;
+            model.bipedLeftLeg.rotationPointY = 11.3f;
+
+            setSmoothAllRotation(model.bipedRightLeg, -1f + n / 2, 0, 0);
+            setSmoothAllRotation(model.bipedLeftLeg, -1f + n / 2, 0, 0);
         }
 
         if (entity instanceof EntityPlayer) {
@@ -609,65 +446,40 @@ public class AnimationRegistry {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
         float leaning = customEntity.llm_$getLeaningPitch();
 
+        resetAnimationRotationPoints(model);
+
+        setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
+
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = 0.25f + MathHelper.cos(leaning) / 2;
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
-        model.bipedRightArm.rotationPointZ = 0.0F;
-        model.bipedRightArm.rotationPointX = -5.0F;
+        float halfSinLean = -MathHelper.sin(leaning) * 1 / 2;
 
-        model.bipedLeftArm.rotationPointZ = 0.0F;
-        model.bipedLeftArm.rotationPointX = 5.0F;
+        setSmoothAllRotation(model.bipedRightArm, halfSinLean, halfSinLean, 1.5f + MathHelper.sin(leaning));
+        setSmoothAllRotation(model.bipedLeftArm, halfSinLean, halfSinLean, -1.5f - MathHelper.cos(leaning));
 
-        model.bipedRightArm.rotateAngleZ = 1.5f + MathHelper.sin(leaning);
-        model.bipedRightArm.rotateAngleX = -MathHelper.sin(leaning) * 1/2;
-        model.bipedRightArm.rotateAngleY = -MathHelper.sin(leaning) * 1/2;
-
-        model.bipedLeftArm.rotateAngleZ = -1.5f - MathHelper.cos(leaning);
-        model.bipedLeftArm.rotateAngleX = -MathHelper.sin(leaning) * 1/2;
-        model.bipedLeftArm.rotateAngleY = -MathHelper.sin(leaning) * 1/2;
-
-        model.bipedRightLeg.rotateAngleX = MathHelper.cos(leaning);
-        model.bipedLeftLeg.rotateAngleX = MathHelper.sin(leaning);
+        setSmoothAllRotation(model.bipedRightLeg, MathHelper.cos(leaning), 0, 0);
+        setSmoothAllRotation(model.bipedLeftLeg, MathHelper.sin(leaning), 0, 0);
     }
 
     private static void skyDivingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
+        resetAnimationRotationPoints(model);
+
+        setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = -0.5f;
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
-        model.bipedBody.rotateAngleY = 0.0F;
-        model.bipedRightArm.rotateAngleX = 0f;
-        model.bipedLeftArm.rotateAngleX = 0f;
-        model.bipedRightArm.rotateAngleY = 0f;
-        model.bipedLeftArm.rotateAngleY = 0f;
-        model.bipedRightArm.rotateAngleZ = 0f;
-        model.bipedLeftArm.rotateAngleZ = 0f;
+        boolean fMove = entity.moveForward > 0;
 
+        setSmoothAllRotation(model.bipedRightArm, 0.5f, 0, fMove ? 0.5f : 2);
+        setSmoothAllRotation(model.bipedLeftArm, 0.5f, 0, fMove ? -0.5f : -2);
 
-        model.bipedRightArm.rotationPointZ = 0.0F;
-        model.bipedRightArm.rotationPointX = -5.0F;
-        model.bipedLeftArm.rotationPointZ = 0.0F;
-        model.bipedLeftArm.rotationPointX = 5.0F;
-
-        if (entity.moveForward > 0) {
-            model.bipedRightArm.rotateAngleZ = 0.5f;
-            model.bipedLeftArm.rotateAngleZ = -0.5f;
-        }
-        else {
-            model.bipedRightArm.rotateAngleZ = 2f;
-            model.bipedLeftArm.rotateAngleZ = -2f;
-        }
-        model.bipedRightArm.rotateAngleX = 0.5f;
-        model.bipedLeftArm.rotateAngleX = 0.5f;
-
-        model.bipedRightLeg.rotateAngleX = 0.5f;
-        model.bipedLeftLeg.rotateAngleX = 0.5f;
-        model.bipedRightLeg.rotateAngleZ = 0.15f;
-        model.bipedLeftLeg.rotateAngleZ = -0.15f;
-
+        setSmoothAllRotation(model.bipedRightLeg, 0.5f, 0, 0.15f);
+        setSmoothAllRotation(model.bipedLeftLeg, 0.5f, 0, -0.15f);
     }
 }

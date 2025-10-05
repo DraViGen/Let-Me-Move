@@ -1,9 +1,11 @@
 package net.dravigen.letMeMove.mixin.render;
 
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
+import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -14,24 +16,41 @@ import static net.dravigen.letMeMove.render.AnimationRegistry.*;
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {
 
+    @Unique
+    float prevXRotation = 0;
+    @Unique
+    float prevYRotation = 0;
+    @Unique
+    float prevZRotation = 0;
+
     @Inject(method = "render",at = @At("HEAD"))
     private void rotateBody(Entity entity, float f, float g, float h, float i, float j, float u, CallbackInfo ci) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
 
+
+        float leaningPitch = customEntity.llm_$getLeaningPitch();
+
         if (customEntity.llm_$getAnimation().needLeaningUpdate) {
-            float leaningPitch = customEntity.llm_$getLeaningPitch();
-            float var1 = 1.62f - (1.62f - 1.25f) * (leaningPitch > 1 ? 1 : leaningPitch);
+            float yOffset = 1.62f - (1.62f - 1.25f) * (leaningPitch > 1 ? 1 : leaningPitch);
             if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) {
                 GL11.glTranslatef(0, 0, 0);
-                GL11.glRotatef(22.5f * leaningPitch, 0, 1, 0);
-                GL11.glRotatef(10 * leaningPitch, 0, 0, 1);
-                GL11.glRotatef(45 * leaningPitch, 1, 0, 0);
+                GL11.glRotatef(prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation,(22.5f * leaningPitch) % 360, 0.01f), 0, 1, 0);
+                GL11.glRotatef(prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation,(10 * leaningPitch) % 360, 0.01f), 0, 0, 1);
+                GL11.glRotatef(prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation,(45 * leaningPitch) % 360, 0.01f), 1, 0, 0);
 
             }
             else {
-                GL11.glTranslatef(0, var1, 0);
-                GL11.glRotatef(90 * leaningPitch, 1, 0, 0);
+                GL11.glTranslatef(0, yOffset, 0);
+                GL11.glRotatef(prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation,0,0.01f), 0, 1, 0);
+                GL11.glRotatef(prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation,0,0.01f), 0, 0, 1);
+                GL11.glRotatef(prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation,90 * leaningPitch,0.02f), 1, 0, 0);
             }
+        }
+        else {
+            GL11.glTranslatef(0, 0, 0);
+            GL11.glRotatef(prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation,0,0.025f), 0, 1, 0);
+            GL11.glRotatef(prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation,0,0.025f), 0, 0, 1);
+            GL11.glRotatef(prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation,90 * leaningPitch,0.05f), 1, 0, 0);
         }
     }
 

@@ -53,32 +53,37 @@ public class GeneralUtils {
         return -65.0F * f + f * f;
     }
 
+    public static float incrementUntilGoal(float currentValue, float goalValue, float easeFactor) {
 
-    public static void handSwinging(EntityLivingBase livingEntity, ModelBiped model, float f) {
-        if (!(model.onGround <= 0.0F)) {
-            float g = model.onGround;
-            model.bipedBody.rotateAngleY = MathHelper.sin(MathHelper.sqrt_float(g) * (float) (Math.PI * 2)) * 0.2F;
+        float difference = goalValue - currentValue;
 
-            model.bipedRightArm.rotationPointZ = MathHelper.sin(model.bipedBody.rotateAngleY) * 5.0F;
-            model.bipedRightArm.rotationPointX = -MathHelper.cos(model.bipedBody.rotateAngleY) * 5.0F;
+        float stepSize = difference * easeFactor;
 
-            model.bipedLeftArm.rotationPointZ = -MathHelper.sin(model.bipedBody.rotateAngleY) * 5.0F;
-            model.bipedLeftArm.rotationPointX = MathHelper.cos(model.bipedBody.rotateAngleY) * 5.0F;
+        return currentValue + stepSize;
+    }
 
-            model.bipedRightArm.rotateAngleY = model.bipedRightArm.rotateAngleY + model.bipedBody.rotateAngleY;
+    public static float incrementAngleUntilGoal(float currentValue, float goalValue, float easeFactor) {
 
-            model.bipedLeftArm.rotateAngleY = model.bipedLeftArm.rotateAngleY + model.bipedBody.rotateAngleY;
-            model.bipedLeftArm.rotateAngleX = model.bipedLeftArm.rotateAngleX + model.bipedBody.rotateAngleY;
-            g = 1.0F - model.onGround;
-            g *= g;
-            g *= g;
-            g = 1.0F - g;
-            float h = MathHelper.sin(g * (float) Math.PI);
-            float i = MathHelper.sin(model.onGround * (float) Math.PI) * -(model.bipedHead.rotateAngleX - 0.7F) * 0.75F;
+        float difference = goalValue - currentValue;
 
-            model.bipedRightArm.rotateAngleX = (float) (model.bipedRightArm.rotateAngleX - (h * 1.2 + i));
-            model.bipedRightArm.rotateAngleY = model.bipedRightArm.rotateAngleY + model.bipedBody.rotateAngleY * 2.0F;
-            model.bipedRightArm.rotateAngleZ = model.bipedRightArm.rotateAngleZ + MathHelper.sin(model.onGround * (float) Math.PI) * -0.4F;
+        difference = difference % 360.0F;
+
+        if (difference > 180.0F) {
+            difference -= 360.0F;
         }
+        else if (difference < -180.0F) {
+            difference += 360.0F;
+        }
+
+        float stepSize = difference * easeFactor;
+
+        float newValue = currentValue + stepSize;
+
+        newValue = newValue % 360.0F;
+        if (newValue < 0) {
+            newValue += 360.0F;
+        }
+
+        return newValue;
     }
 }
