@@ -1,11 +1,11 @@
 package net.dravigen.letMeMove.render;
 
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
+import net.dravigen.letMeMove.utils.AnimationUtils;
 import net.minecraft.src.*;
 import org.lwjgl.input.Keyboard;
 
 
-import static net.dravigen.letMeMove.utils.AnimationUtils.*;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 
@@ -19,42 +19,42 @@ public class AnimationRegistry {
 
 
     public static void registerAllAnimation() {
-        AnimationCustom standing = registerAnimation(
+        AnimationCustom standing = AnimationUtils.registerAnimation(
                 STANDING_ID,
                 1.8f,
                 1,
                 false);
         registerStanding(standing);
 
-        AnimationCustom crouching = registerAnimation(
+        AnimationCustom crouching = AnimationUtils.registerAnimation(
                 CROUCHING_ID,
                 1.4f,
                 0.3f,
                 false);
         registerCrouching(crouching);
 
-        AnimationCustom swimming = registerAnimation(
+        AnimationCustom swimming = AnimationUtils.registerAnimation(
                 SWIMMING_ID,
                 0.8f,
                 0.15f,
                 true);
         registerSwimming(swimming);
 
-        AnimationCustom diving = registerAnimation(
+        AnimationCustom diving = AnimationUtils.registerAnimation(
                 DIVING_ID,
                 0.8f,
                 0.015f,
                 true);
         registerDiving(diving);
 
-        AnimationCustom highFalling = registerAnimation(
+        AnimationCustom highFalling = AnimationUtils.registerAnimation(
                 HIGH_FALLING_ID,
                 1.8f,
                 0.005f,
                 true);
         registerHighFalling(highFalling);
 
-        AnimationCustom skyDiving = registerAnimation(
+        AnimationCustom skyDiving = AnimationUtils.registerAnimation(
                 SKYDIVING_ID,
                 1f,
                 0.2f,
@@ -225,7 +225,7 @@ public class AnimationRegistry {
     private static void commonAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
 
-        resetAnimationRotationPoints(model);
+        AnimationUtils.resetAnimationRotationPoints(model);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
@@ -314,23 +314,23 @@ public class AnimationRegistry {
             model.bipedBody.rotationPointY = 3.2F;
         }
 
-        setSmoothAllRotation(model.bipedRightArm, rArm[0], rArm[1], rArm[2], 0.1f, 0.025f, 0.025f);
+        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, rArm[0], rArm[1], rArm[2], 0.1f, 0.025f, 0.025f);
 
-        setSmoothAllRotation(model.bipedLeftArm, lArm[0], lArm[1], lArm[2], 0.1f, 0.025f, 0.025f);
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, lArm[0], lArm[1], lArm[2], 0.1f, 0.025f, 0.025f);
 
-        setSmoothAllRotation(model.bipedRightLeg,
+        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg,
                 model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F) * 1.4F * g / k,
                 model.isRiding ? (float) (Math.PI / 10) : 0,
                 model.isRiding ? 0.07853982F : 0,
                 0.1f, 0.025f, 0.025f);
 
-        setSmoothAllRotation(model.bipedLeftLeg,
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg,
                 model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k,
                 model.isRiding ? (float) (Math.PI / 10) : 0,
                 model.isRiding ? 0.07853982F : 0,
                 0.1f, 0.025f, 0.025f);
 
-        setSmoothAllRotation(model.bipedBody, body[0], body[1], body[2], 0.2f);
+        AnimationUtils.setSmoothAllRotation(model.bipedBody, body[0], body[1], body[2], 0.2f);
 
         if (entity instanceof EntityPlayer) {
             if (entity.getCurrentItemOrArmor(2) == null) {
@@ -358,9 +358,9 @@ public class AnimationRegistry {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
 
-        resetAnimationRotationPoints(model);
+        AnimationUtils.resetAnimationRotationPoints(model);
 
-        setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
+        AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
 
         leaningPitch = entity.inWater ? 1 : leaningPitch;
         f = entity.inWater ? f : f * 2;
@@ -445,13 +445,13 @@ public class AnimationRegistry {
         rArm[0] += model.onGround * 2;
         rArm[2] += model.onGround * 2;
 
-        setSmoothAllRotation(model.bipedRightArm, rArm[0], rArm[1], rArm[2], 0.03f);
+        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, rArm[0], rArm[1], rArm[2], 0.03f);
 
-        setSmoothAllRotation(model.bipedLeftArm, lArm[0], lArm[1], lArm[2], 0.03f);
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, lArm[0], lArm[1], lArm[2], 0.03f);
 
-        setSmoothAllRotation(model.bipedRightLeg, rLeg[0], rLeg[1], rLeg[2], 0.03f);
+        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, rLeg[0], rLeg[1], rLeg[2], 0.03f);
 
-        setSmoothAllRotation(model.bipedLeftLeg, lLeg[0], lLeg[1], lLeg[2], 0.03f);
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, lLeg[0], lLeg[1], lLeg[2], 0.03f);
 
         if (entity instanceof EntityPlayer) {
             if (entity.getCurrentItemOrArmor(2) == null) {
@@ -469,9 +469,9 @@ public class AnimationRegistry {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
 
-        resetAnimationRotationPoints(model);
+        AnimationUtils.resetAnimationRotationPoints(model);
 
-        setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
+        AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
 
@@ -487,14 +487,14 @@ public class AnimationRegistry {
 
         if (leaningPitch > 0.0F) {
 
-            setSmoothAllRotation(model.bipedRightArm,
+            AnimationUtils.setSmoothAllRotation(model.bipedRightArm,
                     lerp(leaningPitch, model.bipedRightArm.rotateAngleX, 0.0F),
                     lerp(leaningPitch, model.bipedRightArm.rotateAngleY, (float) Math.PI),
                     lerp(leaningPitch, model.bipedRightArm.rotateAngleZ, (float) Math.PI - 1.8707964F * method_2807(0) / method_2807(14.0F)),
                     0.015f
             );
 
-            setSmoothAllRotation(model.bipedLeftArm,
+            AnimationUtils.setSmoothAllRotation(model.bipedLeftArm,
                     lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, 0.0F),
                     lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, (float) Math.PI),
                     lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleZ, (float) Math.PI + 1.8707964F * method_2807(0) / method_2807(14.0F)),
@@ -506,9 +506,9 @@ public class AnimationRegistry {
             model.bipedRightLeg.rotationPointY = 11.3f;
             model.bipedLeftLeg.rotationPointY = 11.3f;
 
-            setSmoothAllRotation(model.bipedRightLeg, -1f + n / 2, 0, 0);
+            AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, -1f + n / 2, 0, 0);
 
-            setSmoothAllRotation(model.bipedLeftLeg, -1f + n / 2, 0, 0);
+            AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, -1f + n / 2, 0, 0);
         }
 
         if (entity instanceof EntityPlayer) {
@@ -527,9 +527,9 @@ public class AnimationRegistry {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
         float leaning = customEntity.llm_$getLeaningPitch();
 
-        resetAnimationRotationPoints(model);
+        AnimationUtils.resetAnimationRotationPoints(model);
 
-        setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
+        AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = 0.25f;
@@ -538,19 +538,19 @@ public class AnimationRegistry {
 
         float halfSinLean = -MathHelper.sin(leaning) * 1 / 2;
 
-        setSmoothAllRotation(model.bipedRightArm, halfSinLean, halfSinLean, 1.5f + MathHelper.sin(leaning), 0.03f);
+        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, halfSinLean, halfSinLean, 1.5f + MathHelper.sin(leaning), 0.03f);
 
-        setSmoothAllRotation(model.bipedLeftArm, halfSinLean, halfSinLean, -1.5f - MathHelper.cos(leaning), 0.03f);
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, halfSinLean, halfSinLean, -1.5f - MathHelper.cos(leaning), 0.03f);
 
-        setSmoothAllRotation(model.bipedRightLeg, MathHelper.cos(leaning), 0, 0, 0.02f);
+        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, MathHelper.cos(leaning), 0, 0, 0.02f);
 
-        setSmoothAllRotation(model.bipedLeftLeg, MathHelper.sin(leaning), 0, 0, 0.02f);
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, MathHelper.sin(leaning), 0, 0, 0.02f);
     }
 
     private static void skyDivingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j) {
-        resetAnimationRotationPoints(model);
+        AnimationUtils.resetAnimationRotationPoints(model);
 
-        setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
+        AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,0.1f);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = -0.5f;
@@ -559,12 +559,12 @@ public class AnimationRegistry {
 
         boolean fMove = entity.moveForward > 0;
 
-        setSmoothAllRotation(model.bipedRightArm, 0.5f, 0, fMove ? 0.5f : 2);
+        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, 0.5f, 0, fMove ? 0.5f : 2);
 
-        setSmoothAllRotation(model.bipedLeftArm, 0.5f, 0, fMove ? -0.5f : -2);
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, 0.5f, 0, fMove ? -0.5f : -2);
 
-        setSmoothAllRotation(model.bipedRightLeg, 0.5f, 0, 0.15f);
+        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, 0.5f, 0, 0.15f);
 
-        setSmoothAllRotation(model.bipedLeftLeg, 0.5f, 0, -0.15f);
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, 0.5f, 0, -0.15f);
     }
 }

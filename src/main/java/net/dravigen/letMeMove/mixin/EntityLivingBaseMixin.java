@@ -60,7 +60,6 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
         this.currentAnimation = ID;
     }
 
-
     @Inject(method = "getSpeedModifier",at = @At("RETURN"), cancellable = true)
     private void applyAnimationSpeedModifier(CallbackInfoReturnable<Float> cir) {
         cir.setReturnValue(cir.getReturnValueF() * AnimationUtils.getAnimationFromID(this.currentAnimation).speedModifier);
