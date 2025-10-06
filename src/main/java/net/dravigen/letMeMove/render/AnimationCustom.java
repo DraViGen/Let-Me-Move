@@ -8,7 +8,8 @@ import net.minecraft.src.*;
 public class AnimationCustom {
 
     private IAnimationRender animationRender;
-    private IAnimationCondition conditons;
+    private IAnimationCondition activationConditions;
+    private IAnimationCondition generalConditions;
     private IAnimationLeaning leaningUpdate;
     private final ResourceLocation animationIdentifier;
     public float height;
@@ -26,8 +27,12 @@ public class AnimationCustom {
         return this.animationIdentifier;
     }
 
-    public void setConditions(IAnimationCondition animationCondition) {
-        this.conditons = animationCondition;
+    public void setActivationConditions(IAnimationCondition animationCondition) {
+        this.activationConditions = animationCondition;
+    }
+
+    public void setGeneralConditions(IAnimationCondition animationCondition) {
+        this.generalConditions = animationCondition;
     }
 
     public void setAnimationRender(IAnimationRender render) {
@@ -38,8 +43,12 @@ public class AnimationCustom {
         this.leaningUpdate = leaningUpdate;
     }
 
-    public boolean isConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-        return this.conditons.isConditionsMet(player, axisAlignedBB);
+    public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
+        return this.activationConditions.isConditionsMet(player, axisAlignedBB);
+    }
+
+    public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
+        return this.generalConditions.isConditionsMet(player, axisAlignedBB);
     }
 
     public void renderAnimation(Minecraft mc, ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u) {

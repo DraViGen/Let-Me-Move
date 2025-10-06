@@ -20,6 +20,7 @@ public class AnimationUtils {
     public static AnimationCustom registerAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needLeaningUpdate) {
         AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needLeaningUpdate);
         animationsMap.put(identifier, animation);
+
         return animation;
     }
 
@@ -69,6 +70,12 @@ public class AnimationUtils {
         setSmoothRotation(part, type.Z, rotZ, factor);
     }
 
+    public static void setSmoothAllRotation(ModelRenderer part, float rotX, float rotY, float rotZ, float factorX, float factorY, float factorZ) {
+        setSmoothRotation(part, type.X, rotX, factorX);
+        setSmoothRotation(part, type.Y, rotY, factorY);
+        setSmoothRotation(part, type.Z, rotZ, factorZ);
+    }
+
     public static void setSmoothRotation(ModelRenderer part, type type, float rot, float factor) {
         if (type == AnimationUtils.type.X) {
             part.rotateAngleX = GeneralUtils.incrementUntilGoal(part.rotateAngleX, rot, factor);
@@ -79,9 +86,5 @@ public class AnimationUtils {
         else if (type == AnimationUtils.type.Z) {
             part.rotateAngleZ = GeneralUtils.incrementUntilGoal(part.rotateAngleZ, rot, factor);
         }
-    }
-
-    public static void handSwinging(EntityLivingBase livingEntity, ModelBiped model, float f) {
-
     }
 }

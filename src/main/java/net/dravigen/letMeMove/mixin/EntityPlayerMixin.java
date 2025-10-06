@@ -7,12 +7,11 @@ import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.List;
 
 import static net.dravigen.letMeMove.render.AnimationRegistry.*;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
@@ -26,7 +25,6 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     @Shadow public abstract void addMovementStat(double par1, double par3, double par5);
     @Shadow public abstract float getMovementSpeedModifierFromEffects();
     @Shadow public abstract boolean canSwim();
-
     @Shadow public PlayerCapabilities capabilities;
 
     public EntityPlayerMixin(World par1World) {
@@ -42,65 +40,72 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         ResourceLocation newID = new ResourceLocation("");
 
         for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
-            if (animation.isConditonsMet((EntityPlayer) (Object) this, this.boundingBox)) {
+            if (animation.isActivationConditonsMet((EntityPlayer) (Object) this, this.boundingBox)) {
                 newID = animation.getID();
+
                 break;
             }
         }
 
         newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
 
-        List moveRangeCollisionList = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox);
+        AxisAlignedBB bounds = this.boundingBox.copy();
+
+        boolean noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds).isEmpty();
 
         if (!newID.equals(customPlayer.llm_$getAnimationID())) {
             AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
             float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
 
             if (dHeight > 0) {
-                moveRangeCollisionList = this.worldObj.getCollidingBoundingBoxes(this, this.boundingBox.addCoord(0, dHeight, 0));
+                noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0)).isEmpty();
             }
 
-            if (moveRangeCollisionList.isEmpty()) {
+            if (noCollisionWithBlock) {
                 customPlayer.llm_$setAnimation(newID);
             }
             else {
+                dHeight = 0;
+
                 for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
-                    AxisAlignedBB bounds = this.boundingBox.copy();
+                    bounds = this.boundingBox.copy();
+
                     float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
-                    if (dNewHeight < dHeight) {
-                        dHeight = dNewHeight;
 
+                    if (testAnimation.isGeneralConditonsMet((EntityPlayer) (Object) this, bounds) && dNewHeight > dHeight) {
 
-                        moveRangeCollisionList = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0));
+                        noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dNewHeight, 0)).isEmpty();
 
-                        if (moveRangeCollisionList.isEmpty()) {
-                            customPlayer.llm_$setAnimation(testAnimation.getID());
-                            break;
+                        if (noCollisionWithBlock) {
+                            dHeight = dNewHeight;
+                            newID = testAnimation.getID();
                         }
                     }
                 }
+
+                if (!newID.equals(STANDING_ID) && !newID.equals(customPlayer.llm_$getAnimationID())) {
+                    customPlayer.llm_$setAnimation(newID);
+                }
             }
         }
-        else if ((this.isEntityInsideOpaqueBlock() || !worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty()) && !GeneralUtils.isEntityFeetInsideOpaqueBlock(this)) {
+        else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
             customPlayer.llm_$setAnimation(SWIMMING_ID);
         }
 
         AnimationCustom currentAnimation = customPlayer.llm_$getAnimation();
 
         this.setSize(0.6f, currentAnimation.height);
-        if (this.worldObj.isRemote) {
-            this.yOffset = currentAnimation.height - 0.18f;
-        }
     }
 
     @Inject(method = "onLivingUpdate",at = @At("HEAD"))
     private void handleFastSwim(CallbackInfo ci) {
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
+
         if (!this.canSwim()) {
             customPlayer.llm_$setAnimation(STANDING_ID);
         }
 
-        if (!this.capabilities.isFlying && isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID)) {
+        if (isFastSwim()) {
             boolean b1 = !isHeadInsideWater(this) && isInsideWater(this);
 
             this.motionY = b1 && this.motionY > 0 ? 0 : this.motionY;
@@ -143,31 +148,35 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
                 this.motionY *= 0.8f;
                 this.motionZ *= 0.8f;
                 this.limbSwingAmount = 0;
-
                 this.motionY -= 0.02;
             }
         }
     }
 
+    @Unique
+    private boolean isFastSwim() {
+        return !this.isEating() && !this.capabilities.isFlying && isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID);
+    }
+
     @Redirect(method = "addMovementStat",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayer;isInsideOfMaterial(Lnet/minecraft/src/Material;)Z"))
     private boolean addNewSwimExhaustion(EntityPlayer player, Material material, double par1, double par3, double par5) {
-        if (player.isInsideOfMaterial(material)) {
-            if (((ICustomMovementEntity) player).llm_$isAnimation(SWIMMING_ID)) {
-                int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
-                if (var7 > 0) {
-                    this.addStat(StatList.distanceDoveStat, var7);
-                    this.addExhaustion(0.15f * (float) var7 * 0.01f);
-                }
-                return false;
+        if (isFastSwim() && (par1 > 0 || par3 > 0)) {
+            int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
+
+            if (var7 > 0) {
+                this.addStat(StatList.distanceDoveStat, var7);
+                this.addExhaustion(0.2f * (float) var7 * 0.01f);
             }
-            return true;
+
+            return false;
         }
-        return false;
+
+        return player.isInsideOfMaterial(Material.water);
     }
 
     @Inject(method = "moveEntityWithHeading",at = @At("HEAD"),cancellable = true)
     private void disableMoveIfFastSwimming(float par1, float par2, CallbackInfo ci) {
-        if (!this.capabilities.isFlying && isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID) && this.canSwim()) {
+        if (isFastSwim() && this.canSwim()) {
             ci.cancel();
         }
     }
