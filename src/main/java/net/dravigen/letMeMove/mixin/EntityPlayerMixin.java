@@ -1,5 +1,7 @@
 package net.dravigen.letMeMove.mixin;
 
+import btw.world.util.data.DataEntry;
+import net.dravigen.letMeMove.LetMeMoveAddon;
 import net.dravigen.letMeMove.render.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.utils.AnimationUtils;
@@ -18,7 +20,6 @@ import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 @Mixin(EntityPlayer.class)
 public abstract class EntityPlayerMixin extends EntityLivingBase {
-    @Shadow protected boolean sleeping;
     @Shadow public abstract float getEyeHeight();
     @Shadow public abstract void addStat(StatBase par1StatBase, int par2);
     @Shadow public abstract void addExhaustion(float par1);
@@ -26,70 +27,87 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     @Shadow public abstract float getMovementSpeedModifierFromEffects();
     @Shadow public abstract boolean canSwim();
     @Shadow public PlayerCapabilities capabilities;
+    @Shadow protected boolean sleeping;
+    @Shadow public abstract <T> T getData(DataEntry.PlayerDataEntry<T> var1);
 
     public EntityPlayerMixin(World par1World) {
         super(par1World);
     }
+
+    @Unique boolean updatedOnce = false;
 
     @Inject(method = "onUpdate", at = @At("HEAD"))
     private void updateAnimation(CallbackInfo ci) {
         if (this.sleeping) return;
 
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
+        EntityPlayer player = (EntityPlayer) (Object) this;
+        ResourceLocation id = LetMeMoveAddon.getDataID(player, LetMeMoveAddon.CURRENT_ANIMATION);
 
-        ResourceLocation newID = new ResourceLocation("");
-
-        for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
-            if (animation.isActivationConditonsMet((EntityPlayer) (Object) this, this.boundingBox)) {
-                newID = animation.getID();
-
-                break;
-            }
+        if (!id.equals(customPlayer.llm_$getAnimationID())) {
+            customPlayer.llm_$setAnimation(id);
         }
 
-        newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
+        if (this.worldObj.isRemote) {
+            if (this.updatedOnce) {
+                ResourceLocation newID = new ResourceLocation("");
 
-        AxisAlignedBB bounds = this.boundingBox.copy();
+                for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
+                    if (animation.isActivationConditonsMet(player, this.boundingBox)) {
+                        newID = animation.getID();
 
-        boolean noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds).isEmpty();
-
-        if (!newID.equals(customPlayer.llm_$getAnimationID())) {
-            AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
-            float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
-
-            if (dHeight > 0) {
-                noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0)).isEmpty();
-            }
-
-            if (noCollisionWithBlock) {
-                customPlayer.llm_$setAnimation(newID);
-            }
-            else {
-                dHeight = 0;
-
-                for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
-                    bounds = this.boundingBox.copy();
-
-                    float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
-
-                    if (testAnimation.isGeneralConditonsMet((EntityPlayer) (Object) this, bounds) && dNewHeight > dHeight) {
-
-                        noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dNewHeight, 0)).isEmpty();
-
-                        if (noCollisionWithBlock) {
-                            dHeight = dNewHeight;
-                            newID = testAnimation.getID();
-                        }
+                        break;
                     }
                 }
 
-                if (!newID.equals(STANDING_ID) && !newID.equals(customPlayer.llm_$getAnimationID())) {
-                    customPlayer.llm_$setAnimation(newID);
+                newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
+
+                AxisAlignedBB bounds = this.boundingBox.copy();
+
+                boolean noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds).isEmpty();
+
+                if (!newID.equals(customPlayer.llm_$getAnimationID())) {
+                    AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
+                    float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
+
+                    if (dHeight > 0) {
+                        noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0)).isEmpty();
+                    }
+
+                    if (noCollisionWithBlock) {
+                        customPlayer.llm_$setAnimation(newID);
+                    }
+                    else {
+                        dHeight = 0;
+
+                        for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
+                            bounds = this.boundingBox.copy();
+
+                            float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
+
+                            if (testAnimation.isGeneralConditonsMet(player, bounds) && dNewHeight > dHeight) {
+
+                                noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dNewHeight, 0)).isEmpty();
+
+                                if (noCollisionWithBlock) {
+                                    dHeight = dNewHeight;
+                                    newID = testAnimation.getID();
+                                }
+                            }
+                        }
+
+                        if (!newID.equals(STANDING_ID) && !newID.equals(customPlayer.llm_$getAnimationID())) {
+                            customPlayer.llm_$setAnimation(newID);
+                        }
+                    }
+                }
+                else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
+                    customPlayer.llm_$setAnimation(SWIMMING_ID);
                 }
             }
-        }
-        else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
-            customPlayer.llm_$setAnimation(SWIMMING_ID);
+            else {
+                this.updatedOnce = true;
+            }
         }
 
         AnimationCustom currentAnimation = customPlayer.llm_$getAnimation();
@@ -100,6 +118,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     @Inject(method = "onLivingUpdate",at = @At("HEAD"))
     private void handleFastSwim(CallbackInfo ci) {
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
+
+        if (customPlayer.llm_$getAnimation() == null) return;
 
         if (!this.canSwim()) {
             customPlayer.llm_$setAnimation(STANDING_ID);
@@ -160,6 +180,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Redirect(method = "addMovementStat",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayer;isInsideOfMaterial(Lnet/minecraft/src/Material;)Z"))
     private boolean addNewSwimExhaustion(EntityPlayer player, Material material, double par1, double par3, double par5) {
+        if (((ICustomMovementEntity) this).llm_$getAnimation() == null) return player.isInsideOfMaterial(Material.water);
+
         if (isFastSwim() && (par1 > 0 || par3 > 0)) {
             int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
 
@@ -176,6 +198,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Inject(method = "moveEntityWithHeading",at = @At("HEAD"),cancellable = true)
     private void disableMoveIfFastSwimming(float par1, float par2, CallbackInfo ci) {
+        if (((ICustomMovementEntity) this).llm_$getAnimation() == null) return;
+
         if (isFastSwim() && this.canSwim()) {
             ci.cancel();
         }

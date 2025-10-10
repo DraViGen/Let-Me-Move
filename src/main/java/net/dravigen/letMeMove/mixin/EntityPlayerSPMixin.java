@@ -5,15 +5,10 @@ import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 
 @Mixin(value = EntityPlayerSP.class,remap = false)
 public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
-    @Shadow protected abstract boolean isBlockTranslucent(int par1, int par2, int par3);
 
     public EntityPlayerSPMixin(World par1World, String par2Str) {
         super(par1World, par2Str);

@@ -7,6 +7,8 @@
     "EntityLivingBaseMixin",
     "EntityPlayerMixin",
     "EntityPlayerMPMixin",
+    "NetServerHandlerMixin",
+    "ServerConfigurationManagerMixin",
     "render.EntityRendererMixin",
     "render.RenderPlayerMixin"
   ],
@@ -14,6 +16,7 @@
     "EntityPlayerSPMixin",
     "MinecraftMixin",
     "MovementInputFromOptionsMixin",
+    "NetClientHandlerMixin",
     "render.ModelBipedMixin"
   ],
   "injectors": {

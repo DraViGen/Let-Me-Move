@@ -1,5 +1,7 @@
 package net.dravigen.letMeMove.mixin;
 
+import net.dravigen.letMeMove.LetMeMoveAddon;
+import net.dravigen.letMeMove.packet.PacketUtils;
 import net.dravigen.letMeMove.render.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.utils.AnimationUtils;
@@ -22,12 +24,9 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
         super(par1World);
     }
 
-    @Unique
-    private ResourceLocation currentAnimation = STANDING_ID;
-    @Unique
-    private float leaningPitch;
-    @Unique
-    private float lastLeaningPitch;
+    @Unique private float leaningPitch;
+    @Unique private float lastLeaningPitch;
+    @Unique private ResourceLocation currentAnimation;
 
     @Override
     public float llm_$getLeaningPitch() {
@@ -42,31 +41,57 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Override
     public ResourceLocation llm_$getAnimationID() {
-        return this.currentAnimation;
+        if ((EntityLivingBase)(Object)this instanceof EntityPlayer player) {
+            return this.currentAnimation;
+        }
+        else return null;
     }
 
     @Override
     public boolean llm_$isAnimation(ResourceLocation animationID) {
-        return this.currentAnimation.equals(animationID);
+        if ((EntityLivingBase)(Object)this instanceof EntityPlayer player) {
+            if (this.currentAnimation == null) return false;
+
+            return this.currentAnimation.equals(animationID);
+        }
+        else return false;
     }
 
     @Override
     public AnimationCustom llm_$getAnimation() {
-        return AnimationUtils.getAnimationFromID(this.currentAnimation);
+        if ((EntityLivingBase)(Object)this instanceof EntityPlayer player) {
+            if (this.currentAnimation == null) this.currentAnimation = STANDING_ID;
+
+            return AnimationUtils.getAnimationFromID(this.currentAnimation);
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
     public void llm_$setAnimation(ResourceLocation ID) {
-        this.currentAnimation = ID;
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player) {
+
+            if (this.worldObj.isRemote) {
+                PacketUtils.animationCtoSSync(ID);
+            }
+            this.currentAnimation = ID;
+            player.setData(LetMeMoveAddon.CURRENT_ANIMATION, String.valueOf(ID));
+        }
     }
 
     @Inject(method = "getSpeedModifier",at = @At("RETURN"), cancellable = true)
     private void applyAnimationSpeedModifier(CallbackInfoReturnable<Float> cir) {
-        cir.setReturnValue(cir.getReturnValueF() * AnimationUtils.getAnimationFromID(this.currentAnimation).speedModifier);
+        if (this.llm_$getAnimation() == null) return;
+
+        cir.setReturnValue(cir.getReturnValueF() * this.llm_$getAnimation().speedModifier);
     }
 
     @ModifyArg(method = "moveEntityWithHeading",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;moveFlying(FFF)V", ordinal = 2), index = 2)
     private float flySpeedModifier(float par1) {
+        if (this.llm_$getAnimation() == null) return par1;
+
         if ((EntityLivingBase)(Object)this instanceof EntityPlayer player && !player.capabilities.isFlying) {
             if (this.llm_$isAnimation(SKYDIVING_ID)) {
                 if (this.moveForward == 0) {

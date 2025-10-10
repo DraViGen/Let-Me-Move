@@ -59,9 +59,9 @@ public class AnimationUtils {
     }
 
     public static void setSmoothAllRotation(ModelRenderer part, float rotX, float rotY, float rotZ) {
-        setSmoothRotation(part, type.X, rotX, 0.01f);
-        setSmoothRotation(part, type.Y, rotY, 0.01f);
-        setSmoothRotation(part, type.Z, rotZ, 0.01f);
+        setSmoothRotation(part, type.X, rotX, 0.1f);
+        setSmoothRotation(part, type.Y, rotY, 0.1f);
+        setSmoothRotation(part, type.Z, rotZ, 0.1f);
     }
 
     public static void setSmoothAllRotation(ModelRenderer part, float rotX, float rotY, float rotZ, float factor) {
