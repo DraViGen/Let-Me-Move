@@ -5,18 +5,15 @@ import net.dravigen.letMeMove.utils.AnimationUtils;
 import net.minecraft.src.*;
 import org.lwjgl.input.Keyboard;
 
-
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
-
 public class AnimationRegistry {
-    public final static ResourceLocation STANDING_ID = new ResourceLocation("LMM","standing");
-    public final static ResourceLocation CROUCHING_ID = new ResourceLocation("LMM","crouching");
-    public final static ResourceLocation SWIMMING_ID = new ResourceLocation("LMM","crawling");
-    public final static ResourceLocation DIVING_ID = new ResourceLocation("LMM","diving");
-    public final static ResourceLocation HIGH_FALLING_ID = new ResourceLocation("LMM","falling");
-    public final static ResourceLocation SKYDIVING_ID = new ResourceLocation("LMM","skyDiving");
-
+    public final static ResourceLocation STANDING_ID = new ResourceLocation("LMM", "standing");
+    public final static ResourceLocation CROUCHING_ID = new ResourceLocation("LMM", "crouching");
+    public final static ResourceLocation SWIMMING_ID = new ResourceLocation("LMM", "crawling");
+    public final static ResourceLocation DIVING_ID = new ResourceLocation("LMM", "diving");
+    public final static ResourceLocation HIGH_FALLING_ID = new ResourceLocation("LMM", "falling");
+    public final static ResourceLocation SKYDIVING_ID = new ResourceLocation("LMM", "skyDiving");
 
     public static void registerAllAnimation() {
         AnimationCustom standing = AnimationUtils.registerAnimation(
@@ -364,7 +361,7 @@ public class AnimationRegistry {
 
         AnimationUtils.resetAnimationRotationPoints(model);
 
-        AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,
+        AnimationUtils.setSmoothAllRotation(model.bipedBody, 0, 0, 0,
                 0.4f * delta);
 
         leaningPitch = entity.inWater ? 1 : leaningPitch;
@@ -480,7 +477,7 @@ public class AnimationRegistry {
 
         AnimationUtils.resetAnimationRotationPoints(model);
 
-        AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,
+        AnimationUtils.setSmoothAllRotation(model.bipedBody, 0, 0, 0,
                 0.5f * delta);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
@@ -541,7 +538,7 @@ public class AnimationRegistry {
 
         AnimationUtils.resetAnimationRotationPoints(model);
 
-        AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,
+        AnimationUtils.setSmoothAllRotation(model.bipedBody, 0, 0, 0,
                 0.4f * delta);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
@@ -567,7 +564,7 @@ public class AnimationRegistry {
     private static void skyDivingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
         AnimationUtils.resetAnimationRotationPoints(model);
 
-        AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,
+        AnimationUtils.setSmoothAllRotation(model.bipedBody, 0, 0, 0,
                 0.4f * delta);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);

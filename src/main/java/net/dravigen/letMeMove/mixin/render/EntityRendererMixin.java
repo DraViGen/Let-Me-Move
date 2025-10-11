@@ -24,8 +24,8 @@ public abstract class EntityRendererMixin {
     @Shadow private float debugCamPitch;
 
 
-    @Redirect(method = "orientCamera",at = @At(value = "FIELD", target = "Lnet/minecraft/src/GameSettings;thirdPersonView:I",opcode = Opcodes.GETFIELD))
-     private int betterThirdPerson(GameSettings instance, float par1) {
+    @Redirect(method = "orientCamera", at = @At(value = "FIELD", target = "Lnet/minecraft/src/GameSettings;thirdPersonView:I", opcode = Opcodes.GETFIELD))
+    private int betterThirdPerson(GameSettings instance, float par1) {
         if (instance.thirdPersonView > 0) {
             EntityLivingBase var2 = this.mc.renderViewEntity;
             double var4 = var2.prevPosX + (var2.posX - var2.prevPosX) * (double) par1;
@@ -69,7 +69,8 @@ public abstract class EntityRendererMixin {
                                     var6 - var18 + (double) var22,
                                     var8 - var16 + (double) var23));
 
-                    if (var24 == null || !((var25 = var24.hitVec.distanceTo(this.mc.theWorld.getWorldVec3Pool().getVecFromPool(var4, var6, var8))) < var27)) continue;
+                    if (var24 == null || !((var25 = var24.hitVec.distanceTo(this.mc.theWorld.getWorldVec3Pool().getVecFromPool(var4, var6, var8))) < var27))
+                        continue;
 
                     var27 = var25;
                 }
@@ -88,14 +89,14 @@ public abstract class EntityRendererMixin {
         return 0;
     }
 
-    @Redirect(method = "orientCamera",at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glTranslatef(FFF)V",ordinal = 4), remap = false)
+    @Redirect(method = "orientCamera", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glTranslatef(FFF)V", ordinal = 4), remap = false)
     private void a(float x, float y, float z) {
         GL11.glTranslatef(x, 0, z);
     }
 
     @Inject(method = "setupViewBobbing", at = @At("HEAD"), cancellable = true)
     private void disableBobbingWhileFastSwim(float par1, CallbackInfo ci) {
-        if (((ICustomMovementEntity)this.mc.thePlayer).llm_$isAnimation(AnimationRegistry.SWIMMING_ID)) {
+        if (((ICustomMovementEntity) this.mc.thePlayer).llm_$isAnimation(AnimationRegistry.SWIMMING_ID)) {
             ci.cancel();
         }
     }

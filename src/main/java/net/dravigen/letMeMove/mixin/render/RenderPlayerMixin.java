@@ -7,8 +7,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(RenderPlayer.class)
-public class RenderPlayerMixin {
-    @Redirect(method = "renderFirstPersonArm",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/ModelRenderer;render(F)V"))
+public abstract class RenderPlayerMixin {
+
+    @Redirect(method = "renderFirstPersonArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/ModelRenderer;render(F)V"))
     private void renderArm(ModelRenderer arm, float var2) {
         arm.rotateAngleX = 0;
         arm.rotateAngleY = 0;

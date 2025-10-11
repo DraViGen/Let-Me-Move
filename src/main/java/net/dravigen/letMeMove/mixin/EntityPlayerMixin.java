@@ -1,6 +1,5 @@
 package net.dravigen.letMeMove.mixin;
 
-import btw.world.util.data.DataEntry;
 import net.dravigen.letMeMove.LetMeMoveAddon;
 import net.dravigen.letMeMove.render.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
@@ -20,21 +19,21 @@ import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 @Mixin(EntityPlayer.class)
 public abstract class EntityPlayerMixin extends EntityLivingBase {
+
+    @Shadow public PlayerCapabilities capabilities;
+    @Shadow protected boolean sleeping;
+    @Unique boolean updatedOnce = false;
+
+    public EntityPlayerMixin(World par1World) {
+        super(par1World);
+    }
+
     @Shadow public abstract float getEyeHeight();
     @Shadow public abstract void addStat(StatBase par1StatBase, int par2);
     @Shadow public abstract void addExhaustion(float par1);
     @Shadow public abstract void addMovementStat(double par1, double par3, double par5);
     @Shadow public abstract float getMovementSpeedModifierFromEffects();
     @Shadow public abstract boolean canSwim();
-    @Shadow public PlayerCapabilities capabilities;
-    @Shadow protected boolean sleeping;
-    @Shadow public abstract <T> T getData(DataEntry.PlayerDataEntry<T> var1);
-
-    public EntityPlayerMixin(World par1World) {
-        super(par1World);
-    }
-
-    @Unique boolean updatedOnce = false;
 
     @Inject(method = "onUpdate", at = @At("HEAD"))
     private void updateAnimation(CallbackInfo ci) {
@@ -115,7 +114,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         this.setSize(0.6f, currentAnimation.height);
     }
 
-    @Inject(method = "onLivingUpdate",at = @At("HEAD"))
+    @Inject(method = "onLivingUpdate", at = @At("HEAD"))
     private void handleFastSwim(CallbackInfo ci) {
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
 
@@ -132,8 +131,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
             if (this.moveForward > 0) {
                 Vec3 look = this.getLookVec();
-
                 Vec3 direction = look;
+
                 if ((isInsideWater(this) && look.yCoord < 0 && look.yCoord > -0.2) || b1 && look.yCoord > 0 && look.yCoord < 0.45) {
                     direction = Vec3.createVectorHelper(look.xCoord, 0, look.zCoord);
                 }
@@ -178,9 +177,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         return !this.isEating() && !this.capabilities.isFlying && isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID);
     }
 
-    @Redirect(method = "addMovementStat",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayer;isInsideOfMaterial(Lnet/minecraft/src/Material;)Z"))
+    @Redirect(method = "addMovementStat", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayer;isInsideOfMaterial(Lnet/minecraft/src/Material;)Z"))
     private boolean addNewSwimExhaustion(EntityPlayer player, Material material, double par1, double par3, double par5) {
-        if (((ICustomMovementEntity) this).llm_$getAnimation() == null) return player.isInsideOfMaterial(Material.water);
+        if (((ICustomMovementEntity) this).llm_$getAnimation() == null)
+            return player.isInsideOfMaterial(Material.water);
 
         if (isFastSwim() && (par1 > 0 || par3 > 0)) {
             int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
@@ -196,7 +196,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         return player.isInsideOfMaterial(Material.water);
     }
 
-    @Inject(method = "moveEntityWithHeading",at = @At("HEAD"),cancellable = true)
+    @Inject(method = "moveEntityWithHeading", at = @At("HEAD"), cancellable = true)
     private void disableMoveIfFastSwimming(float par1, float par2, CallbackInfo ci) {
         if (((ICustomMovementEntity) this).llm_$getAnimation() == null) return;
 

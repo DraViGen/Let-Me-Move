@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(MovementInputFromOptions.class)
 public abstract class MovementInputFromOptionsMixin extends MovementInput {
-    @Redirect(method = "updatePlayerMoveState",at = @At(value = "FIELD", target = "Lnet/minecraft/src/MovementInputFromOptions;sneak:Z",opcode = Opcodes.GETFIELD))
 
+    @Redirect(method = "updatePlayerMoveState", at = @At(value = "FIELD", target = "Lnet/minecraft/src/MovementInputFromOptions;sneak:Z", opcode = Opcodes.GETFIELD))
     private boolean disableVanillaSneakSlow(MovementInputFromOptions instance) {
         return false;
     }

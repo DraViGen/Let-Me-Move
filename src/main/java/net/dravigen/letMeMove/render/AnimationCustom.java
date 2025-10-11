@@ -7,14 +7,14 @@ import net.minecraft.src.*;
 
 public class AnimationCustom {
 
-    private IAnimationRender animationRender;
-    private IAnimationCondition activationConditions;
-    private IAnimationCondition generalConditions;
-    private IAnimationLeaning leaningUpdate;
     private final ResourceLocation animationIdentifier;
     public float height;
     public float speedModifier;
     public boolean needLeaningUpdate;
+    private IAnimationRender animationRender;
+    private IAnimationCondition activationConditions;
+    private IAnimationCondition generalConditions;
+    private IAnimationLeaning leaningUpdate;
 
     public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier, boolean needLeaningUpdate) {
         this.animationIdentifier = animationIdentifier;

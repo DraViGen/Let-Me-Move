@@ -12,9 +12,6 @@ import net.minecraft.src.ResourceLocation;
 import static net.dravigen.letMeMove.render.AnimationRegistry.STANDING_ID;
 
 public class LetMeMoveAddon extends BTWAddon {
-    public LetMeMoveAddon() {
-        super();
-    }
     private static final String CURRENT_ANIMATION_NAME = "CurrentAnimation";
     public static final DataEntry.PlayerDataEntry<String> CURRENT_ANIMATION = DataProvider.getBuilder(String.class)
             .name(CURRENT_ANIMATION_NAME)
@@ -24,6 +21,10 @@ public class LetMeMoveAddon extends BTWAddon {
             .player()
             .syncPlayer()
             .buildPlayer();
+
+    public LetMeMoveAddon() {
+        super();
+    }
 
     public static ResourceLocation getDataID(EntityPlayer player, DataEntry.PlayerDataEntry<String> animation) {
         String[] s = player.getData(animation).split(":");
@@ -35,7 +36,6 @@ public class LetMeMoveAddon extends BTWAddon {
         AnimationRegistry.registerAllAnimation();
         AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
     }
-
 
     @Override
     public void preInitialize() {

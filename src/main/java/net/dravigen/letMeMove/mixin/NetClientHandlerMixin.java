@@ -19,5 +19,4 @@ public abstract class NetClientHandlerMixin extends NetHandler {
             PacketUtils.handleAnimationSync(packet, this.mc.thePlayer);
         }
     }
-
 }

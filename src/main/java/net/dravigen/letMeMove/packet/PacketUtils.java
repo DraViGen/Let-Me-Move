@@ -2,7 +2,6 @@ package net.dravigen.letMeMove.packet;
 
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
-
 import java.io.*;
 
 public class PacketUtils {
@@ -15,7 +14,8 @@ public class PacketUtils {
         try {
             dos.writeUTF(ID.getResourceDomain());
             dos.writeUTF(ID.getResourcePath());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -23,6 +23,7 @@ public class PacketUtils {
 
         serverHandler.sendPacket(packet);
     }
+
     public static void animationCtoSSync(ResourceLocation ID) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(bos);
@@ -31,7 +32,8 @@ public class PacketUtils {
         try {
             dos.writeUTF(ID.getResourceDomain());
             dos.writeUTF(ID.getResourcePath());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -48,7 +50,7 @@ public class PacketUtils {
 
                 ResourceLocation ID = new ResourceLocation(dis.readUTF(), dis.readUTF());
 
-                ((ICustomMovementEntity)player).llm_$setAnimation(ID);
+                ((ICustomMovementEntity) player).llm_$setAnimation(ID);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

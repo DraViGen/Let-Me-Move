@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.dravigen.letMeMove.render.AnimationRegistry.*;
 
-
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {
 
@@ -26,13 +25,14 @@ public abstract class ModelBipedMixin extends ModelBase {
     @Unique long prevTime;
     @Unique boolean prevForward;
     @Unique float delta = 0;
-    @Inject(method = "render",at = @At("HEAD"))
+
+    @Inject(method = "render", at = @At("HEAD"))
     private void rotateBody(Entity entity, float f, float g, float h, float i, float j, float u, CallbackInfo ci) {
         if (!(entity instanceof EntityPlayer player)) return;
 
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
-
         AnimationCustom animation = customEntity.llm_$getAnimation();
+
         if (animation == null) return;
 
         float leaningPitch = customEntity.llm_$getLeaningPitch();
@@ -43,7 +43,6 @@ public abstract class ModelBipedMixin extends ModelBase {
         }
 
         prevForward = player.moveForward > 0;
-
         delta = (System.currentTimeMillis() - prevTime) / 25f;
 
         boolean tr = transitionTime > 0;
@@ -85,19 +84,16 @@ public abstract class ModelBipedMixin extends ModelBase {
         if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) GL11.glTranslatef(0, -prevOffset, 0);
     }
 
-    @Inject(method = "setRotationAngles",at = @At("HEAD"),cancellable = true)
+    @Inject(method = "setRotationAngles", at = @At("HEAD"), cancellable = true)
     public void setAngles(float f, float g, float h, float i, float j, float u, Entity livingEntity, CallbackInfo ci) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) livingEntity;
 
         if (customEntity.llm_$getAnimation() == null) return;
 
         if (livingEntity instanceof EntityPlayer player) {
-
             ci.cancel();
 
-            float deltaT = delta;
-
-            customEntity.llm_$getAnimation().renderAnimation(Minecraft.getMinecraft(), (ModelBiped) (Object) this, player, f, g, h, i, j, u, deltaT);
+            customEntity.llm_$getAnimation().renderAnimation(Minecraft.getMinecraft(), (ModelBiped) (Object) this, player, f, g, h, i, j, u, delta);
         }
     }
 }

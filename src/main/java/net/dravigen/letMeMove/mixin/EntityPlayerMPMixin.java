@@ -10,11 +10,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityPlayerMP.class)
 public abstract class EntityPlayerMPMixin extends EntityPlayer {
+
     public EntityPlayerMPMixin(World par1World, String par2Str) {
         super(par1World, par2Str);
     }
 
-    @Inject(method = "getEyeHeight",at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getEyeHeight", at = @At("RETURN"), cancellable = true)
     private void customEyeHeight(CallbackInfoReturnable<Float> cir) {
         if (this.sleeping) {
             cir.setReturnValue(0.18f);

@@ -19,14 +19,13 @@ import static net.dravigen.letMeMove.render.AnimationRegistry.*;
 public abstract class EntityLivingBaseMixin extends Entity implements ICustomMovementEntity {
 
     @Shadow public float moveForward;
+    @Unique private float leaningPitch;
+    @Unique private float lastLeaningPitch;
+    @Unique private ResourceLocation currentAnimation;
 
     public EntityLivingBaseMixin(World par1World) {
         super(par1World);
     }
-
-    @Unique private float leaningPitch;
-    @Unique private float lastLeaningPitch;
-    @Unique private ResourceLocation currentAnimation;
 
     @Override
     public float llm_$getLeaningPitch() {
@@ -41,7 +40,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Override
     public ResourceLocation llm_$getAnimationID() {
-        if ((EntityLivingBase)(Object)this instanceof EntityPlayer player) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player) {
             return this.currentAnimation;
         }
         else return null;
@@ -49,7 +48,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Override
     public boolean llm_$isAnimation(ResourceLocation animationID) {
-        if ((EntityLivingBase)(Object)this instanceof EntityPlayer player) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player) {
             if (this.currentAnimation == null) return false;
 
             return this.currentAnimation.equals(animationID);
@@ -59,7 +58,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Override
     public AnimationCustom llm_$getAnimation() {
-        if ((EntityLivingBase)(Object)this instanceof EntityPlayer player) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player) {
             if (this.currentAnimation == null) this.currentAnimation = STANDING_ID;
 
             return AnimationUtils.getAnimationFromID(this.currentAnimation);
@@ -76,23 +75,25 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
             if (this.worldObj.isRemote) {
                 PacketUtils.animationCtoSSync(ID);
             }
+
             this.currentAnimation = ID;
+
             player.setData(LetMeMoveAddon.CURRENT_ANIMATION, String.valueOf(ID));
         }
     }
 
-    @Inject(method = "getSpeedModifier",at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getSpeedModifier", at = @At("RETURN"), cancellable = true)
     private void applyAnimationSpeedModifier(CallbackInfoReturnable<Float> cir) {
         if (this.llm_$getAnimation() == null) return;
 
         cir.setReturnValue(cir.getReturnValueF() * this.llm_$getAnimation().speedModifier);
     }
 
-    @ModifyArg(method = "moveEntityWithHeading",at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;moveFlying(FFF)V", ordinal = 2), index = 2)
+    @ModifyArg(method = "moveEntityWithHeading", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;moveFlying(FFF)V", ordinal = 2), index = 2)
     private float flySpeedModifier(float par1) {
         if (this.llm_$getAnimation() == null) return par1;
 
-        if ((EntityLivingBase)(Object)this instanceof EntityPlayer player && !player.capabilities.isFlying) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player && !player.capabilities.isFlying) {
             if (this.llm_$isAnimation(SKYDIVING_ID)) {
                 if (this.moveForward == 0) {
                     this.motionY *= 0.96;

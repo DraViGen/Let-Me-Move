@@ -54,10 +54,6 @@ public class AnimationUtils {
         model.bipedLeftLeg.rotationPointZ = 0.1f;
     }
 
-    public enum type {
-        X,Y,Z
-    }
-
     public static void setSmoothAllRotation(ModelRenderer part, float rotX, float rotY, float rotZ) {
         setSmoothRotation(part, type.X, rotX, 0.1f);
         setSmoothRotation(part, type.Y, rotY, 0.1f);
@@ -87,5 +83,9 @@ public class AnimationUtils {
         else if (type == AnimationUtils.type.Z) {
             part.rotateAngleZ = GeneralUtils.incrementUntilGoal(part.rotateAngleZ, rot, factor);
         }
+    }
+
+    public enum type {
+        X, Y, Z
     }
 }

@@ -12,17 +12,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerConfigurationManager.class)
-public class ServerConfigurationManagerMixin {
+public abstract class ServerConfigurationManagerMixin {
 
     @Inject(method = "playerLoggedIn", at = @At("HEAD"))
     private void loadPlayerAnimation(EntityPlayerMP player, CallbackInfo ci) {
         ResourceLocation id = LetMeMoveAddon.getDataID(player, LetMeMoveAddon.CURRENT_ANIMATION);
-        ((ICustomMovementEntity)player).llm_$setAnimation(id);
+        ((ICustomMovementEntity) player).llm_$setAnimation(id);
         PacketUtils.animationStoCSync(id, player.playerNetServerHandler);
     }
 
-    @Inject(method = "playerLoggedOut",at = @At("TAIL"))
+    @Inject(method = "playerLoggedOut", at = @At("TAIL"))
     private void savePlayerAnimation(EntityPlayerMP player, CallbackInfo ci) {
-        player.setData(LetMeMoveAddon.CURRENT_ANIMATION, String.valueOf(((ICustomMovementEntity)player).llm_$getAnimationID()));
+        player.setData(LetMeMoveAddon.CURRENT_ANIMATION, String.valueOf(((ICustomMovementEntity) player).llm_$getAnimationID()));
     }
 }
