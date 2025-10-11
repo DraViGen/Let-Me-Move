@@ -71,15 +71,8 @@ public class AnimationRegistry {
                 false
         ));
 
-        standing.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, tr) ->
-        {
-            float delta = (System.currentTimeMillis() - prevTime) / 25f;
-            delta = tr ? delta : 1;
-
-            commonAnimation(model, entity, f, g, h, i, j, tr, delta);
-
-            prevTime = System.currentTimeMillis();
-        }
+        standing.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
+                commonAnimation(model, entity, f, g, h, i, j, delta)
         ));
 
         standing.setLeaningUpdate((AnimationRegistry::
@@ -96,15 +89,8 @@ public class AnimationRegistry {
                 player.isSneaking() && (player.onGround || player.fallDistance < 10)
         ));
 
-        crouching.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, tr) ->
-        {
-            float delta = (System.currentTimeMillis() - prevTime) / 25f;
-            delta = tr ? delta : 1;
-
-            commonAnimation(model, entity, f, g, h, i, j, tr, delta);
-
-            prevTime = System.currentTimeMillis();
-        }
+        crouching.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
+                commonAnimation(model, entity, f, g, h, i, j, delta)
         ));
 
         crouching.setLeaningUpdate((AnimationRegistry::
@@ -127,15 +113,8 @@ public class AnimationRegistry {
             return conditionA || conditionB;
         }));
 
-        swimming.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, tr) ->
-        {
-            float delta = (System.currentTimeMillis() - prevTime) / 25f;
-            delta = tr ? delta : 1;
-
-            swimmingAnimation(model, entity, f, g, h, i, j, tr, delta);
-
-            prevTime = System.currentTimeMillis();
-        }
+        swimming.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
+                swimmingAnimation(model, entity, f, g, h, i, j, delta)
         ));
 
         swimming.setLeaningUpdate((AnimationRegistry::
@@ -152,15 +131,8 @@ public class AnimationRegistry {
                 Keyboard.isKeyDown(Keyboard.KEY_C) && !player.onGround && !isInsideWater(player)
         ));
 
-        diving.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, tr) ->
-        {
-            float delta = (System.currentTimeMillis() - prevTime) / 25f;
-            delta = tr ? delta : 1;
-
-            divingAnimation(model, entity, h, i, j, tr, delta);
-
-            prevTime = System.currentTimeMillis();
-        }
+        diving.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
+                divingAnimation(model, entity, h, i, j, delta)
         ));
 
         diving.setLeaningUpdate((AnimationRegistry::
@@ -177,15 +149,8 @@ public class AnimationRegistry {
                         && !player.isSneaking() && !player.capabilities.isFlying
         ));
 
-        highFalling.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, tr) ->
-        {
-            float delta = (System.currentTimeMillis() - prevTime) / 25f;
-            delta = tr ? delta : 1;
-
-            highFallingAnimation(model, entity, f, g, h, i, j, tr, delta);
-
-            prevTime = System.currentTimeMillis();
-        }
+        highFalling.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
+                highFallingAnimation(model, entity, f, g, h, i, j, delta)
         ));
 
         highFalling.setLeaningUpdate((AnimationRegistry::
@@ -202,15 +167,8 @@ public class AnimationRegistry {
                         && player.isSneaking() && !player.capabilities.isFlying
         ));
 
-        skyDiving.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, tr) ->
-        {
-            float delta = (System.currentTimeMillis() - prevTime) / 25f;
-            delta = tr ? delta : 1;
-
-            skyDivingAnimation(model, entity, f, g, h, i, j, tr, delta);
-
-            prevTime = System.currentTimeMillis();
-        }
+        skyDiving.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
+                skyDivingAnimation(model, entity, f, g, h, i, j, delta)
         ));
 
         skyDiving.setLeaningUpdate((AnimationRegistry::
@@ -263,10 +221,7 @@ public class AnimationRegistry {
         customEntity.llm_$setLeaningPitch(goal);
     }
 
-
-    static long prevTime;
-
-    private static void commonAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, boolean tr, float delta) {
+    private static void commonAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
 
         AnimationUtils.resetAnimationRotationPoints(model);
@@ -360,26 +315,26 @@ public class AnimationRegistry {
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightArm,
                 rArm[0], rArm[1], rArm[2],
-                tr ? 0.3f * delta : 1, delta, delta);
+                0.3f * delta, delta, delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftArm,
                 lArm[0], lArm[1], lArm[2],
-                tr ? 0.3f * delta : 1, delta, delta);
+                0.3f * delta, delta, delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightLeg,
                 model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F) * 1.4F * g / k,
                 model.isRiding ? (float) (Math.PI / 10) : 0,
                 model.isRiding ? 0.07853982F : 0,
-                tr ? 0.3f * delta : 1, delta, delta);
+                0.3f * delta, delta, delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg,
                 model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k,
                 model.isRiding ? (float) (Math.PI / 10) : 0,
                 model.isRiding ? 0.07853982F : 0,
-                tr ? 0.3f * delta : 1, delta, delta);
+                0.3f * delta, delta, delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedBody, body[0], body[1], body[2],
-                tr ? 0.6f * delta : 1);
+                0.6f * delta);
 
         if (entity instanceof EntityPlayer) {
             if (entity.getCurrentItemOrArmor(2) == null) {
@@ -403,14 +358,14 @@ public class AnimationRegistry {
         }
     }
 
-    private static void swimmingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, boolean tr, float delta) {
+    private static void swimmingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
 
         AnimationUtils.resetAnimationRotationPoints(model);
 
         AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,
-                tr ? 0.4f * delta : 1);
+                0.4f * delta);
 
         leaningPitch = entity.inWater ? 1 : leaningPitch;
         f = entity.inWater ? f : f * 2;
@@ -496,16 +451,16 @@ public class AnimationRegistry {
         rArm[2] += model.onGround * 2;
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightArm, rArm[0], rArm[1], rArm[2],
-                tr ? 0.3f * delta : 1);
+                0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, lArm[0], lArm[1], lArm[2],
-                tr ? 0.3f * delta : 1);
+                0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, rLeg[0], rLeg[1], rLeg[2],
-                tr ? 0.3f * delta : 1);
+                0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, lLeg[0], lLeg[1], lLeg[2],
-                tr ? 0.3f * delta : 1);
+                0.3f * delta);
 
         if (entity instanceof EntityPlayer) {
             if (entity.getCurrentItemOrArmor(2) == null) {
@@ -519,14 +474,14 @@ public class AnimationRegistry {
         }
     }
 
-    private static void divingAnimation(ModelBiped model, EntityLivingBase entity, float h, float i, float j, boolean tr, float delta) {
+    private static void divingAnimation(ModelBiped model, EntityLivingBase entity, float h, float i, float j, float delta) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
 
         AnimationUtils.resetAnimationRotationPoints(model);
 
         AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,
-                tr ? 0.5f * delta : 1);
+                0.5f * delta);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
 
@@ -546,14 +501,14 @@ public class AnimationRegistry {
                     lerp(leaningPitch, model.bipedRightArm.rotateAngleX, 0.0F),
                     lerp(leaningPitch, model.bipedRightArm.rotateAngleY, (float) Math.PI),
                     lerp(leaningPitch, model.bipedRightArm.rotateAngleZ, (float) Math.PI - 1.8707964F * method_2807(0) / method_2807(14.0F)),
-                    tr ? 0.15f * delta : 1
+                    0.15f * delta
             );
 
             AnimationUtils.setSmoothAllRotation(model.bipedLeftArm,
                     lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, 0.0F),
                     lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, (float) Math.PI),
                     lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleZ, (float) Math.PI + 1.8707964F * method_2807(0) / method_2807(14.0F)),
-                    tr ? 0.15f * delta : 1
+                    0.15f * delta
             );
 
             float n = customMoveEntity.llm_$getLeaningPitch();
@@ -580,14 +535,14 @@ public class AnimationRegistry {
         }
     }
 
-    private static void highFallingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, boolean tr, float delta) {
+    private static void highFallingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
         float leaning = customEntity.llm_$getLeaningPitch();
 
         AnimationUtils.resetAnimationRotationPoints(model);
 
         AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,
-                tr ? 0.4f * delta : 1);
+                0.4f * delta);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = 0.25f;
@@ -597,23 +552,23 @@ public class AnimationRegistry {
         float halfSinLean = -MathHelper.sin(leaning) * 1 / 2;
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightArm, halfSinLean, halfSinLean, 1.5f + MathHelper.sin(leaning),
-                tr ? 0.3f * delta : 1);
+                0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, halfSinLean, halfSinLean, -1.5f - MathHelper.cos(leaning),
-                tr ? 0.3f * delta : 1);
+                0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, MathHelper.cos(leaning), 0, 0,
-                tr ? 0.2f * delta : 1);
+                0.2f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, MathHelper.sin(leaning), 0, 0,
-                tr ? 0.2f * delta : 1);
+                0.2f * delta);
     }
 
-    private static void skyDivingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, boolean tr, float delta) {
+    private static void skyDivingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
         AnimationUtils.resetAnimationRotationPoints(model);
 
         AnimationUtils.setSmoothAllRotation(model.bipedBody,0,0,0,
-                tr ? 0.4f * delta : 1);
+                0.4f * delta);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
         model.bipedHead.rotateAngleX = -0.5f;
@@ -623,15 +578,15 @@ public class AnimationRegistry {
         boolean fMove = entity.moveForward > 0;
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightArm, 0.5f, 0, fMove ? 0.5f : 2,
-                fMove ? 0.1f : delta);
+                0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, 0.5f, 0, fMove ? -0.5f : -2,
-                fMove ? 0.1f : delta);
+                0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, 0.5f, 0, 0.15f,
-                fMove ? 0.1f : delta);
+                0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, 0.5f, 0, -0.15f,
-                fMove ? 0.1f : delta);
+                0.3f * delta);
     }
 }

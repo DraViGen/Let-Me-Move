@@ -24,9 +24,12 @@ public abstract class ModelBipedMixin extends ModelBase {
     @Unique long transitionTime = 0;
     @Unique ResourceLocation prevAnimation;
     @Unique long prevTime;
-
+    @Unique boolean prevForward;
+    @Unique float delta = 0;
     @Inject(method = "render",at = @At("HEAD"))
     private void rotateBody(Entity entity, float f, float g, float h, float i, float j, float u, CallbackInfo ci) {
+        if (!(entity instanceof EntityPlayer player)) return;
+
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
 
         AnimationCustom animation = customEntity.llm_$getAnimation();
@@ -34,34 +37,36 @@ public abstract class ModelBipedMixin extends ModelBase {
 
         float leaningPitch = customEntity.llm_$getLeaningPitch();
 
-        if (prevAnimation != animation.getID()) {
+        if (prevAnimation != animation.getID() || (animation.getID().equals(SKYDIVING_ID) && player.moveForward > 0 != prevForward)) {
             prevAnimation = animation.getID();
             transitionTime = 1000;
         }
 
-        float delta = (System.currentTimeMillis() - prevTime) / 25f;
+        prevForward = player.moveForward > 0;
+
+        delta = (System.currentTimeMillis() - prevTime) / 25f;
 
         boolean tr = transitionTime > 0;
 
         if (animation.needLeaningUpdate) {
             if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) {
-                prevOffset = GeneralUtils.incrementUntilGoal(prevOffset, 0.5f, tr ? 0.4f * delta : 1);
-                prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, (7.5f * leaningPitch) % 360, tr ? 0.3f * delta : 1);
-                prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, (16f * leaningPitch) % 360, tr ? 0.3f * delta : 1);
-                prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, (30f * leaningPitch) % 360, tr ? 0.3f * delta : 1);
+                prevOffset = GeneralUtils.incrementUntilGoal(prevOffset, 0.5f, 0.4f * delta);
+                prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, (12f * leaningPitch) % 360, 0.3f * delta);
+                prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, (22.5f * leaningPitch) % 360, 0.3f * delta);
+                prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, (45f * leaningPitch) % 360, 0.3f * delta);
             }
             else {
                 prevOffset = 1.98f - (entity.yOffset + 0.18f);
-                prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, 0, tr ? 0.1f * delta : 1);
-                prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, 0, tr ? 0.1f * delta : 1);
-                prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, 90 * leaningPitch, tr ? 0.2f * delta : 1);
+                prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, 0, 0.1f * delta);
+                prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, 0, 0.1f * delta);
+                prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, 90 * leaningPitch, 0.2f * delta);
             }
         }
         else {
-            prevOffset = GeneralUtils.incrementUntilGoal(prevOffset, 0, tr ? 0.4f * delta : 1);
-            prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, 0, tr ? 0.2f * delta : 1);
-            prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, 0, tr ? 0.2f * delta : 1);
-            prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, 90 * leaningPitch, tr ? 0.35f * delta : 1);
+            prevOffset = GeneralUtils.incrementUntilGoal(prevOffset, 0, 0.4f * delta);
+            prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, 0, 0.2f * delta);
+            prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, 0, 0.2f * delta);
+            prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, 90 * leaningPitch, 0.35f * delta);
         }
 
         if (tr) {
@@ -90,12 +95,9 @@ public abstract class ModelBipedMixin extends ModelBase {
 
             ci.cancel();
 
-            customEntity.llm_$getAnimation().renderAnimation(Minecraft.getMinecraft(), (ModelBiped) (Object) this, player, f, g, h, i, j, u, transitionTime > 0);
-/*
-            if (!Minecraft.getMinecraft().getIsGamePaused()) {
-                if (prevTime + 50 <= System.currentTimeMillis()) {
-                }
-            }*/
+            float deltaT = delta;
+
+            customEntity.llm_$getAnimation().renderAnimation(Minecraft.getMinecraft(), (ModelBiped) (Object) this, player, f, g, h, i, j, u, deltaT);
         }
     }
 }

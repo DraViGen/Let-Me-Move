@@ -51,8 +51,8 @@ public class AnimationCustom {
         return this.generalConditions.isConditionsMet(player, axisAlignedBB);
     }
 
-    public void renderAnimation(Minecraft mc, ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, boolean tr) {
-        this.animationRender.animate(mc, model, entity, f, g, h, i, j, u, tr);
+    public void renderAnimation(Minecraft mc, ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
+        this.animationRender.animate(mc, model, entity, f, g, h, i, j, u, delta);
     }
 
     public void updateLeaning(EntityLivingBase entity) {

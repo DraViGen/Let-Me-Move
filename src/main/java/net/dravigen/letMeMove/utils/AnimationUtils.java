@@ -77,6 +77,7 @@ public class AnimationUtils {
     }
 
     public static void setSmoothRotation(ModelRenderer part, type type, float rot, float factor) {
+        factor = factor == 0 ? 1 : factor;
         if (type == AnimationUtils.type.X) {
             part.rotateAngleX = GeneralUtils.incrementUntilGoal(part.rotateAngleX, rot, factor);
         }

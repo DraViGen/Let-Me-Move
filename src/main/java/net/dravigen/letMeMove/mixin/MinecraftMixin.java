@@ -15,7 +15,6 @@ public class MinecraftMixin {
 
     @Shadow private boolean isGamePaused;
     @Shadow public WorldClient theWorld;
-    @Shadow public EntityLivingBase renderViewEntity;
 
     @Shadow public EntityClientPlayerMP thePlayer;
     @Unique long prevTime;
