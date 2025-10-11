@@ -694,5 +694,4 @@ public class AnimationRegistry {
         AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, sin * 0.5f, 0, 0,
                 0.7f * delta);
     }
-
 }
