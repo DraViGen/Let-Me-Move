@@ -10,17 +10,17 @@ public class AnimationCustom {
     private final ResourceLocation animationIdentifier;
     public float height;
     public float speedModifier;
-    public boolean needLeaningUpdate;
+    public boolean needYOffsetUpdate;
     private IAnimationRender animationRender;
     private IAnimationCondition activationConditions;
     private IAnimationCondition generalConditions;
     private IAnimationLeaning leaningUpdate;
 
-    public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier, boolean needLeaningUpdate) {
+    public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier, boolean needYOffsetUpdate) {
         this.animationIdentifier = animationIdentifier;
         this.height = height;
         this.speedModifier = speedModifier;
-        this.needLeaningUpdate = needLeaningUpdate;
+        this.needYOffsetUpdate = needYOffsetUpdate;
     }
 
     public ResourceLocation getID() {
@@ -51,11 +51,18 @@ public class AnimationCustom {
         return this.generalConditions.isConditionsMet(player, axisAlignedBB);
     }
 
-    public void renderAnimation(Minecraft mc, ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
-        this.animationRender.animate(mc, model, entity, f, g, h, i, j, u, delta);
+    public void renderAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
+        this.animationRender.animate(model, entity, f, g, h, i, j, u, delta);
     }
 
     public void updateLeaning(EntityLivingBase entity) {
         this.leaningUpdate.updateLeaningPitch(entity);
+    }
+
+    public void registerAnimation(IAnimationCondition generalCondition, IAnimationCondition activationCondition, IAnimationRender render, IAnimationLeaning leaningUpdate) {
+        this.setGeneralConditions(generalCondition);
+        this.setActivationConditions(activationCondition);
+        this.setAnimationRender(render);
+        this.setLeaningUpdate(leaningUpdate);
     }
 }

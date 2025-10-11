@@ -44,10 +44,13 @@ public abstract class ModelBipedMixin extends ModelBase {
 
         prevForward = player.moveForward > 0;
         delta = (System.currentTimeMillis() - prevTime) / 25f;
+        delta = delta > 8 ? 8 : delta;
 
         boolean tr = transitionTime > 0;
 
-        if (animation.needLeaningUpdate) {
+        delta = tr ? delta * 0.8f : delta;
+
+        if (animation.needYOffsetUpdate) {
             if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) {
                 prevOffset = GeneralUtils.incrementUntilGoal(prevOffset, 0.5f, 0.4f * delta);
                 prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, (12f * leaningPitch) % 360, 0.3f * delta);
@@ -65,7 +68,7 @@ public abstract class ModelBipedMixin extends ModelBase {
             prevOffset = GeneralUtils.incrementUntilGoal(prevOffset, 0, 0.4f * delta);
             prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, 0, 0.2f * delta);
             prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, 0, 0.2f * delta);
-            prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, 90 * leaningPitch, 0.35f * delta);
+            prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, 0, 0.35f * delta);
         }
 
         if (tr) {
@@ -93,7 +96,7 @@ public abstract class ModelBipedMixin extends ModelBase {
         if (livingEntity instanceof EntityPlayer player) {
             ci.cancel();
 
-            customEntity.llm_$getAnimation().renderAnimation(Minecraft.getMinecraft(), (ModelBiped) (Object) this, player, f, g, h, i, j, u, delta);
+            customEntity.llm_$getAnimation().renderAnimation((ModelBiped) (Object) this, player, f, g, h, i, j, u, delta);
         }
     }
 }

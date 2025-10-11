@@ -8,170 +8,202 @@ import org.lwjgl.input.Keyboard;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 public class AnimationRegistry {
+    public final static ResourceLocation EXAMPLE_ID = new ResourceLocation("LMM", "example");
     public final static ResourceLocation STANDING_ID = new ResourceLocation("LMM", "standing");
     public final static ResourceLocation CROUCHING_ID = new ResourceLocation("LMM", "crouching");
     public final static ResourceLocation SWIMMING_ID = new ResourceLocation("LMM", "crawling");
     public final static ResourceLocation DIVING_ID = new ResourceLocation("LMM", "diving");
-    public final static ResourceLocation HIGH_FALLING_ID = new ResourceLocation("LMM", "falling");
+    public final static ResourceLocation HIGH_FALLING_ID = new ResourceLocation("LMM", "highFalling");
     public final static ResourceLocation SKYDIVING_ID = new ResourceLocation("LMM", "skyDiving");
+    public final static ResourceLocation LOW_FALLING_ID = new ResourceLocation("LMM", "lowFalling");
+
+    public final static int lFalling_height = 3;
+    public final static int hFalling_height = 24;
 
     public static void registerAllAnimation() {
-        AnimationCustom standing = AnimationUtils.registerAnimation(
-                STANDING_ID,
-                1.8f,
-                1,
-                false);
-        registerStanding(standing);
+        registerStanding();
 
-        AnimationCustom crouching = AnimationUtils.registerAnimation(
-                CROUCHING_ID,
-                1.4f,
-                0.3f,
-                false);
-        registerCrouching(crouching);
+        registerCrouching();
 
-        AnimationCustom swimming = AnimationUtils.registerAnimation(
-                SWIMMING_ID,
-                0.8f,
-                0.15f,
-                true);
-        registerSwimming(swimming);
+        registerSwimming();
 
-        AnimationCustom diving = AnimationUtils.registerAnimation(
-                DIVING_ID,
-                0.8f,
-                0.015f,
-                true);
-        registerDiving(diving);
+        registerDiving();
 
-        AnimationCustom highFalling = AnimationUtils.registerAnimation(
-                HIGH_FALLING_ID,
-                1.8f,
-                0.005f,
-                true);
-        registerHighFalling(highFalling);
+        registerHighFalling();
 
-        AnimationCustom skyDiving = AnimationUtils.registerAnimation(
-                SKYDIVING_ID,
-                1f,
-                0.2f,
-                true);
-        registerSkyDiving(skyDiving);
+        registerSkyDiving();
+
+        registerLowFalling();
     }
 
-    private static void registerStanding(AnimationCustom standing) {
-        standing.setGeneralConditions(((player, axisAlignedBB) ->
-                false
-        ));
+    /**
+     * Copy-paste this method to register a new animation.
+     * Create an animation through {@code AnimationUtils.createAnimation();}, with the animation identifier, the height,
+     * the movement speed modifier.
+     * <p>
+     *     After creating the animation, register the general condition, activation condition, rendering logic and leaning
+     *     update logic with {@code registerAnimation();}
+     * </p>
+     *
+     */
+    private static void registerExample() {
+        AnimationCustom example = AnimationUtils.createAnimation(EXAMPLE_ID, 1.8f, 1, false);
 
-        standing.setActivationConditions(((player, bb) ->
-                false
-        ));
-
-        standing.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
-                commonAnimation(model, entity, f, g, h, i, j, delta)
-        ));
-
-        standing.setLeaningUpdate((AnimationRegistry::
-                commonLeaningUpdate
-        ));
+        example.registerAnimation(
+                ((player, axisAlignedBB) ->
+                        player.inWater && player.onGround
+                ),
+                ((player, axisAlignedBB) ->
+                        Keyboard.isKeyDown(Keyboard.KEY_A) && player.inWater && player.onGround
+                ),
+                AnimationRegistry::exampleAnimation,
+                AnimationRegistry::commonLeaningUpdate
+        );
     }
 
-    private static void registerCrouching(AnimationCustom crouching) {
-        crouching.setGeneralConditions(((player, axisAlignedBB) ->
-                player.onGround || player.fallDistance < 10
-        ));
+    /**
+     * Animation registry methods
+     */
+    private static void registerStanding() {
+        AnimationCustom standing = AnimationUtils.createAnimation(STANDING_ID, 1.8f, 1, false);
 
-        crouching.setActivationConditions(((player, bb) ->
-                player.isSneaking() && (player.onGround || player.fallDistance < 10)
-        ));
-
-        crouching.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
-                commonAnimation(model, entity, f, g, h, i, j, delta)
-        ));
-
-        crouching.setLeaningUpdate((AnimationRegistry::
-                commonLeaningUpdate));
+        standing.registerAnimation(
+                ((player, axisAlignedBB) ->
+                        false
+                ),
+                ((player, axisAlignedBB) ->
+                        false
+                ),
+                AnimationRegistry::commonAnimation,
+                AnimationRegistry::commonLeaningUpdate
+        );
     }
 
-    private static void registerSwimming(AnimationCustom swimming) {
-        swimming.setGeneralConditions(((player, axisAlignedBB) ->
-                (player.onGround || isInsideWater(player)) && !player.capabilities.isFlying
-        ));
+    private static void registerCrouching() {
+        AnimationCustom crouching = AnimationUtils.createAnimation(CROUCHING_ID, 1.4f, 0.3f, false);
 
-        swimming.setActivationConditions(((player, bb) -> {
-            boolean conditionA =
-                    Keyboard.isKeyDown(Keyboard.KEY_C) && (player.onGround || isInsideWater(player));
-
-            boolean conditionB =
-                    (isInsideWater(player) && player.getLookVec().yCoord < 0.45 || isHeadInsideWater(player))
-                            && player.isUsingSpecialKey() && player.moveForward > 0 && !player.capabilities.isFlying;
-
-            return conditionA || conditionB;
-        }));
-
-        swimming.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
-                swimmingAnimation(model, entity, f, g, h, i, j, delta)
-        ));
-
-        swimming.setLeaningUpdate((AnimationRegistry::
-                swimmingLeaningUpdate
-        ));
+        crouching.registerAnimation(
+                ((player, axisAlignedBB) ->
+                        player.onGround
+                                || player.fallDistance < 10
+                ),
+                ((player, axisAlignedBB) ->
+                        player.isSneaking()
+                                && (player.onGround || player.fallDistance < 10)
+                ),
+                AnimationRegistry::commonAnimation,
+                AnimationRegistry::commonLeaningUpdate
+        );
     }
 
-    private static void registerDiving(AnimationCustom diving) {
-        diving.setGeneralConditions(((player, axisAlignedBB) ->
-                !player.onGround && !isInsideWater(player)
-        ));
+    private static void registerSwimming() {
+        AnimationCustom swimming = AnimationUtils.createAnimation(SWIMMING_ID, 0.8f, 0.15f, true);
 
-        diving.setActivationConditions(((player, bb) ->
-                Keyboard.isKeyDown(Keyboard.KEY_C) && !player.onGround && !isInsideWater(player)
-        ));
+        swimming.registerAnimation(
+                ((player, axisAlignedBB) ->
+                        (player.onGround || isInsideWater(player))
+                                && !player.capabilities.isFlying
+                ),
+                ((player, axisAlignedBB) -> {
+                    boolean conditionA =
+                            Keyboard.isKeyDown(Keyboard.KEY_C)
+                                    && (player.onGround || isInsideWater(player));
 
-        diving.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
-                divingAnimation(model, entity, h, i, j, delta)
-        ));
+                    boolean conditionB =
+                            (isInsideWater(player) && player.getLookVec().yCoord < 0.45 || isHeadInsideWater(player))
+                                    && player.isUsingSpecialKey()
+                                    && player.moveForward > 0
+                                    && !player.capabilities.isFlying;
 
-        diving.setLeaningUpdate((AnimationRegistry::
-                divingLeaningUpdate));
+                    return conditionA || conditionB;
+                }),
+                AnimationRegistry::swimmingAnimation,
+                AnimationRegistry::swimmingLeaningUpdate
+        );
     }
 
-    private static void registerHighFalling(AnimationCustom highFalling) {
-        highFalling.setGeneralConditions(((player, axisAlignedBB) ->
-                player.fallDistance >= 10 && !player.isSneaking() && !player.capabilities.isFlying
-        ));
+    private static void registerDiving() {
+        AnimationCustom diving = AnimationUtils.createAnimation(DIVING_ID, 0.8f, 0.015f, true);
 
-        highFalling.setActivationConditions(((player, axisAlignedBB) ->
-                !Keyboard.isKeyDown(Keyboard.KEY_C) && player.fallDistance >= 10
-                        && !player.isSneaking() && !player.capabilities.isFlying
-        ));
-
-        highFalling.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
-                highFallingAnimation(model, entity, f, g, h, i, j, delta)
-        ));
-
-        highFalling.setLeaningUpdate((AnimationRegistry::
-                highFallingLeaningUpdate));
+        diving.registerAnimation(
+                ((player, axisAlignedBB) ->
+                        !player.onGround
+                                && !isInsideWater(player)
+                ),
+                ((player, axisAlignedBB) ->
+                        Keyboard.isKeyDown(Keyboard.KEY_C)
+                                && !player.onGround
+                                && !isInsideWater(player)
+                ),
+                AnimationRegistry::divingAnimation,
+                AnimationRegistry::divingLeaningUpdate
+        );
     }
 
-    private static void registerSkyDiving(AnimationCustom skyDiving) {
-        skyDiving.setGeneralConditions(((player, axisAlignedBB) ->
-                player.fallDistance >= 10 && !player.capabilities.isFlying
-        ));
+    private static void registerHighFalling() {
+        AnimationCustom highFalling = AnimationUtils.createAnimation(HIGH_FALLING_ID, 1.8f, 0.005f, true);
 
-        skyDiving.setActivationConditions(((player, axisAlignedBB) ->
-                !Keyboard.isKeyDown(Keyboard.KEY_C) && player.fallDistance >= 10
-                        && player.isSneaking() && !player.capabilities.isFlying
-        ));
-
-        skyDiving.setAnimationRender(((mc, model, entity, f, g, h, i, j, u, delta) ->
-                skyDivingAnimation(model, entity, f, g, h, i, j, delta)
-        ));
-
-        skyDiving.setLeaningUpdate((AnimationRegistry::
-                skyDivingLeaningUpdate));
+        highFalling.registerAnimation(
+                ((player, axisAlignedBB) ->
+                        player.fallDistance >= hFalling_height
+                                && !player.isSneaking()
+                                && !player.capabilities.isFlying
+                ),
+                ((player, axisAlignedBB) ->
+                        !Keyboard.isKeyDown(Keyboard.KEY_C)
+                                && player.fallDistance >= hFalling_height
+                                && !player.isSneaking()
+                                && !player.capabilities.isFlying
+                ),
+                AnimationRegistry::highFallingAnimation,
+                AnimationRegistry::highFallingLeaningUpdate
+        );
     }
 
+    private static void registerSkyDiving() {
+        AnimationCustom skyDiving = AnimationUtils.createAnimation(SKYDIVING_ID, 1f, 0.2f, true);
+
+        skyDiving.registerAnimation(
+                ((player, axisAlignedBB) ->
+                        player.fallDistance >= 10
+                                && !player.capabilities.isFlying
+                ),
+                ((player, axisAlignedBB) ->
+                        !Keyboard.isKeyDown(Keyboard.KEY_C)
+                                && player.fallDistance >= 10
+                                && player.isSneaking()
+                                && !player.capabilities.isFlying
+                ),
+                AnimationRegistry::skyDivingAnimation,
+                AnimationRegistry::skyDivingLeaningUpdate
+        );
+    }
+
+    private static void registerLowFalling() {
+        AnimationCustom lowFalling = AnimationUtils.createAnimation(LOW_FALLING_ID, 1.8f, 0.02f, false);
+
+        lowFalling.registerAnimation(
+                ((player, axisAlignedBB) ->
+                        player.fallDistance >= lFalling_height
+                                && player.fallDistance < hFalling_height
+                                && !player.isSneaking()
+                                && !player.capabilities.isFlying
+                ),
+                ((player, axisAlignedBB) ->
+                        !Keyboard.isKeyDown(Keyboard.KEY_C)
+                                && player.fallDistance >= lFalling_height
+                                && player.fallDistance < hFalling_height
+                                && !player.isSneaking()
+                                && !player.capabilities.isFlying
+                ),
+                AnimationRegistry::lowFallingAnimation,
+                AnimationRegistry::lowFallingLeaningUpdate
+        );
+    }
+
+    /**
+     * Leaning update methods, handle player rotation (0 straight, 1 horizontal, 2 upside down)
+    */
     public static void commonLeaningUpdate(EntityLivingBase entity) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
         float goal = 0;
@@ -206,7 +238,7 @@ public class AnimationRegistry {
 
     public static void highFallingLeaningUpdate(EntityLivingBase entity) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
-        float goal = (entity.fallDistance - 10) / 6;
+        float goal = (entity.fallDistance - hFalling_height) / 6;
 
         customEntity.llm_$setLeaningPitch(goal);
     }
@@ -218,7 +250,48 @@ public class AnimationRegistry {
         customEntity.llm_$setLeaningPitch(goal);
     }
 
-    private static void commonAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
+    public static void lowFallingLeaningUpdate(EntityLivingBase entity) {
+        ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
+
+        float goal = entity.ticksExisted % 200 / 1.75f;
+
+        customEntity.llm_$setLeaningPitch(goal);
+    }
+
+    /**
+     * Copy-paste this method to make new animation, use the same style and order (rotate right arm->left arm->right leg->left leg)
+     */
+    private static void exampleAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
+        ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
+        float leaning = customEntity.llm_$getLeaningPitch();
+
+        AnimationUtils.resetAnimationRotationPoints(model);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedBody, 0, 0, 0,
+                0.6f * delta);
+
+        model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
+        model.bipedHead.rotateAngleX = -0.5f;
+        model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
+        model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
+
+        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, 0.5f, 0, 0.5f,
+                0.3f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, 0.5f, 0, -0.5f,
+                0.3f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, 0.5f, 0, 0,
+                0.3f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, 0.5f, 0, -0,
+                0.3f * delta);
+    }
+
+    /**
+     * Animation rendering methods
+    */
+    private static void commonAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
 
         AnimationUtils.resetAnimationRotationPoints(model);
@@ -312,23 +385,23 @@ public class AnimationRegistry {
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightArm,
                 rArm[0], rArm[1], rArm[2],
-                0.3f * delta, delta, delta);
+                0.4f * delta, 0.3f * delta, 0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftArm,
                 lArm[0], lArm[1], lArm[2],
-                0.3f * delta, delta, delta);
+                0.4f * delta, 0.3f * delta, 0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedRightLeg,
                 model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F) * 1.4F * g / k,
                 model.isRiding ? (float) (Math.PI / 10) : 0,
                 model.isRiding ? 0.07853982F : 0,
-                0.3f * delta, delta, delta);
+                0.4f * delta, 0.3f * delta, 0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg,
                 model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g / k,
                 model.isRiding ? (float) (Math.PI / 10) : 0,
                 model.isRiding ? 0.07853982F : 0,
-                0.3f * delta, delta, delta);
+                0.4f * delta, 0.3f * delta, 0.3f * delta);
 
         AnimationUtils.setSmoothAllRotation(model.bipedBody, body[0], body[1], body[2],
                 0.6f * delta);
@@ -355,7 +428,7 @@ public class AnimationRegistry {
         }
     }
 
-    private static void swimmingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
+    private static void swimmingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
 
@@ -471,7 +544,7 @@ public class AnimationRegistry {
         }
     }
 
-    private static void divingAnimation(ModelBiped model, EntityLivingBase entity, float h, float i, float j, float delta) {
+    private static void divingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
         ICustomMovementEntity customMoveEntity = (ICustomMovementEntity) entity;
         float leaningPitch = Math.min(1.0F, customMoveEntity.llm_$getLeaningPitch());
 
@@ -532,7 +605,7 @@ public class AnimationRegistry {
         }
     }
 
-    private static void highFallingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
+    private static void highFallingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
         float leaning = customEntity.llm_$getLeaningPitch();
 
@@ -546,22 +619,25 @@ public class AnimationRegistry {
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
-        float halfSinLean = -MathHelper.sin(leaning) * 1 / 2;
+        float sin = MathHelper.sin(leaning);
+        float cos = MathHelper.cos(leaning);
+        float cos1 = MathHelper.cos(leaning + 2);
+        float sin1 = MathHelper.sin(leaning + 2);
 
-        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, halfSinLean, halfSinLean, 1.5f + MathHelper.sin(leaning),
+        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, cos, 0, 1.75f + sin,
+                0.4f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, cos1, 0, -1.75f - sin1,
+                0.4f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, cos * 1.5f, 0, 0,
                 0.3f * delta);
 
-        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, halfSinLean, halfSinLean, -1.5f - MathHelper.cos(leaning),
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, sin * 1.5f, 0, 0,
                 0.3f * delta);
-
-        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, MathHelper.cos(leaning), 0, 0,
-                0.2f * delta);
-
-        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, MathHelper.sin(leaning), 0, 0,
-                0.2f * delta);
     }
 
-    private static void skyDivingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float delta) {
+    private static void skyDivingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
         AnimationUtils.resetAnimationRotationPoints(model);
 
         AnimationUtils.setSmoothAllRotation(model.bipedBody, 0, 0, 0,
@@ -586,4 +662,37 @@ public class AnimationRegistry {
         AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, 0.5f, 0, -0.15f,
                 0.3f * delta);
     }
+
+    private static void lowFallingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
+        ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
+        float leaning = customEntity.llm_$getLeaningPitch();
+
+        AnimationUtils.resetAnimationRotationPoints(model);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedBody, 0, 0, 0,
+                0.6f * delta);
+
+        model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
+        model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
+        model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
+        model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
+
+        float sin = MathHelper.sin(leaning);
+        float cos = MathHelper.cos(leaning);
+        float cos1 = MathHelper.cos(leaning + 2);
+        float sin1 = MathHelper.sin(leaning + 2);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, cos * 0.65f, 0, 1.75f + sin * 0.65f,
+                0.6f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, cos1 * 0.65f, 0, -1.75f - sin1 * 0.65f,
+                0.6f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, -sin * 0.5f, 0, 0,
+                0.7f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, sin * 0.5f, 0, 0,
+                0.7f * delta);
+    }
+
 }

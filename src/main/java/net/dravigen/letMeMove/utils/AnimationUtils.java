@@ -17,8 +17,8 @@ public class AnimationUtils {
         return animationsMap.get(ID);
     }
 
-    public static AnimationCustom registerAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needLeaningUpdate) {
-        AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needLeaningUpdate);
+    public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needYOffsetUpdate) {
+        AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needYOffsetUpdate);
         animationsMap.put(identifier, animation);
 
         return animation;
