@@ -3,8 +3,8 @@ package net.dravigen.letMeMove.render;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.utils.AnimationUtils;
 import net.minecraft.src.*;
-import org.lwjgl.input.Keyboard;
 
+import static net.dravigen.letMeMove.LetMeMoveAddon.*;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 public class AnimationRegistry {
@@ -16,6 +16,7 @@ public class AnimationRegistry {
     public final static ResourceLocation HIGH_FALLING_ID = new ResourceLocation("LMM", "highFalling");
     public final static ResourceLocation SKYDIVING_ID = new ResourceLocation("LMM", "skyDiving");
     public final static ResourceLocation LOW_FALLING_ID = new ResourceLocation("LMM", "lowFalling");
+    public final static ResourceLocation DASHING_ID = new ResourceLocation("LMM", "dashing");
 
     public final static int lFalling_height = 3;
     public final static int hFalling_height = 24;
@@ -34,6 +35,8 @@ public class AnimationRegistry {
         registerSkyDiving();
 
         registerLowFalling();
+
+        registerDash();
     }
 
     /**
@@ -50,12 +53,10 @@ public class AnimationRegistry {
         AnimationCustom example = AnimationUtils.createAnimation(EXAMPLE_ID, 1.8f, 1, false);
 
         example.registerAnimation(
-                ((player, axisAlignedBB) ->
-                        player.inWater && player.onGround
-                ),
-                ((player, axisAlignedBB) ->
-                        Keyboard.isKeyDown(Keyboard.KEY_A) && player.inWater && player.onGround
-                ),
+                (player, axisAlignedBB) ->
+                        player.inWater && player.onGround,
+                (player, axisAlignedBB) ->
+                        player.isSneaking() && player.inWater && player.onGround,
                 AnimationRegistry::exampleAnimation,
                 AnimationRegistry::commonLeaningUpdate
         );
@@ -68,12 +69,10 @@ public class AnimationRegistry {
         AnimationCustom standing = AnimationUtils.createAnimation(STANDING_ID, 1.8f, 1, false);
 
         standing.registerAnimation(
-                ((player, axisAlignedBB) ->
-                        false
-                ),
-                ((player, axisAlignedBB) ->
-                        false
-                ),
+                (player, axisAlignedBB) ->
+                        false,
+                (player, axisAlignedBB) ->
+                        false,
                 AnimationRegistry::commonAnimation,
                 AnimationRegistry::commonLeaningUpdate
         );
@@ -83,14 +82,12 @@ public class AnimationRegistry {
         AnimationCustom crouching = AnimationUtils.createAnimation(CROUCHING_ID, 1.4f, 0.3f, false);
 
         crouching.registerAnimation(
-                ((player, axisAlignedBB) ->
+                (player, axisAlignedBB) ->
                         player.onGround
-                                || player.fallDistance < 10
-                ),
-                ((player, axisAlignedBB) ->
+                                || player.fallDistance < 10,
+                (player, axisAlignedBB) ->
                         player.isSneaking()
-                                && (player.onGround || player.fallDistance < 10)
-                ),
+                                && (player.onGround || player.fallDistance < 10),
                 AnimationRegistry::commonAnimation,
                 AnimationRegistry::commonLeaningUpdate
         );
@@ -100,13 +97,12 @@ public class AnimationRegistry {
         AnimationCustom swimming = AnimationUtils.createAnimation(SWIMMING_ID, 0.8f, 0.15f, true);
 
         swimming.registerAnimation(
-                ((player, axisAlignedBB) ->
+                (player, axisAlignedBB) ->
                         (player.onGround || isInsideWater(player))
-                                && !player.capabilities.isFlying
-                ),
-                ((player, axisAlignedBB) -> {
+                                && !player.capabilities.isFlying,
+                (player, axisAlignedBB) -> {
                     boolean conditionA =
-                            Keyboard.isKeyDown(Keyboard.KEY_C)
+                            crawl_key.pressed
                                     && (player.onGround || isInsideWater(player));
 
                     boolean conditionB =
@@ -116,7 +112,7 @@ public class AnimationRegistry {
                                     && !player.capabilities.isFlying;
 
                     return conditionA || conditionB;
-                }),
+                },
                 AnimationRegistry::swimmingAnimation,
                 AnimationRegistry::swimmingLeaningUpdate
         );
@@ -126,15 +122,13 @@ public class AnimationRegistry {
         AnimationCustom diving = AnimationUtils.createAnimation(DIVING_ID, 0.8f, 0.015f, true);
 
         diving.registerAnimation(
-                ((player, axisAlignedBB) ->
+                (player, axisAlignedBB) ->
                         !player.onGround
-                                && !isInsideWater(player)
-                ),
-                ((player, axisAlignedBB) ->
-                        Keyboard.isKeyDown(Keyboard.KEY_C)
+                                && !isInsideWater(player),
+                (player, axisAlignedBB) ->
+                        crawl_key.pressed
                                 && !player.onGround
-                                && !isInsideWater(player)
-                ),
+                                && !isInsideWater(player),
                 AnimationRegistry::divingAnimation,
                 AnimationRegistry::divingLeaningUpdate
         );
@@ -144,17 +138,15 @@ public class AnimationRegistry {
         AnimationCustom highFalling = AnimationUtils.createAnimation(HIGH_FALLING_ID, 1.8f, 0.005f, true);
 
         highFalling.registerAnimation(
-                ((player, axisAlignedBB) ->
+                (player, axisAlignedBB) ->
                         player.fallDistance >= hFalling_height
                                 && !player.isSneaking()
-                                && !player.capabilities.isFlying
-                ),
-                ((player, axisAlignedBB) ->
-                        !Keyboard.isKeyDown(Keyboard.KEY_C)
+                                && !player.capabilities.isFlying,
+                (player, axisAlignedBB) ->
+                        !crawl_key.pressed
                                 && player.fallDistance >= hFalling_height
                                 && !player.isSneaking()
-                                && !player.capabilities.isFlying
-                ),
+                                && !player.capabilities.isFlying,
                 AnimationRegistry::highFallingAnimation,
                 AnimationRegistry::highFallingLeaningUpdate
         );
@@ -164,16 +156,14 @@ public class AnimationRegistry {
         AnimationCustom skyDiving = AnimationUtils.createAnimation(SKYDIVING_ID, 1f, 0.2f, true);
 
         skyDiving.registerAnimation(
-                ((player, axisAlignedBB) ->
+                (player, axisAlignedBB) ->
                         player.fallDistance >= 10
-                                && !player.capabilities.isFlying
-                ),
-                ((player, axisAlignedBB) ->
-                        !Keyboard.isKeyDown(Keyboard.KEY_C)
+                                && !player.capabilities.isFlying,
+                (player, axisAlignedBB) ->
+                        !crawl_key.pressed
                                 && player.fallDistance >= 10
                                 && player.isSneaking()
-                                && !player.capabilities.isFlying
-                ),
+                                && !player.capabilities.isFlying,
                 AnimationRegistry::skyDivingAnimation,
                 AnimationRegistry::skyDivingLeaningUpdate
         );
@@ -183,21 +173,52 @@ public class AnimationRegistry {
         AnimationCustom lowFalling = AnimationUtils.createAnimation(LOW_FALLING_ID, 1.8f, 0.02f, false);
 
         lowFalling.registerAnimation(
-                ((player, axisAlignedBB) ->
+                (player, axisAlignedBB) ->
                         player.fallDistance >= lFalling_height
                                 && player.fallDistance < hFalling_height
                                 && !player.isSneaking()
-                                && !player.capabilities.isFlying
-                ),
-                ((player, axisAlignedBB) ->
-                        !Keyboard.isKeyDown(Keyboard.KEY_C)
+                                && !player.capabilities.isFlying,
+                (player, axisAlignedBB) ->
+                        !crawl_key.pressed
                                 && player.fallDistance >= lFalling_height
                                 && player.fallDistance < hFalling_height
                                 && !player.isSneaking()
-                                && !player.capabilities.isFlying
-                ),
+                                && !player.capabilities.isFlying,
                 AnimationRegistry::lowFallingAnimation,
                 AnimationRegistry::lowFallingLeaningUpdate
+        );
+    }
+
+    static int pressTime = 0;
+    static boolean pressedOnce = false;
+
+    private static void registerDash() {
+        AnimationCustom example = AnimationUtils.createAnimation(DASHING_ID, 1.8f, 1, false);
+
+        example.registerAnimation(
+                (player, axisAlignedBB) ->
+                        player.moveForward == 0 && player.onGround,
+                (player, axisAlignedBB) -> {
+                    if (player.isUsingSpecialKey() || player.moveStrafing != 0) {
+                        if (pressTime < 5 && player.isUsingSpecialKey() && player.moveStrafing != 0 && player.moveForward == 0 && player.onGround) {
+                            if (!pressedOnce) {
+                                pressedOnce = true;
+
+                                return true;
+                            }
+                        }
+
+                        pressTime++;
+                    }
+                    else {
+                        pressTime = 0;
+                        pressedOnce = false;
+                    }
+
+                    return false;
+                },
+                AnimationRegistry::dashAnimation,
+                AnimationRegistry::commonLeaningUpdate
         );
     }
 
@@ -271,7 +292,7 @@ public class AnimationRegistry {
                 0.6f * delta);
 
         model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
-        model.bipedHead.rotateAngleX = -0.5f;
+        model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
@@ -693,5 +714,34 @@ public class AnimationRegistry {
 
         AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, sin * 0.5f, 0, 0,
                 0.7f * delta);
+    }
+
+    private static void dashAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
+        ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
+        float leaning = customEntity.llm_$getLeaningPitch();
+
+        AnimationUtils.resetAnimationRotationPoints(model);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedBody, 0, 0, 0,
+                0.8f * delta);
+
+        model.bipedHead.rotateAngleY = i * (float) (Math.PI / 180.0);
+        model.bipedHead.rotateAngleX = j * (float) (Math.PI / 180.0);
+        model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
+        model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
+
+        float side = Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed ? -1 : 1;
+
+        AnimationUtils.setSmoothAllRotation(model.bipedRightArm, 2f, side, side * -1.25f,
+                0.6f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftArm, 2f, side, side * -1.25f,
+                0.6f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedRightLeg, 1f, 0, side * -1.25f,
+                0.6f * delta);
+
+        AnimationUtils.setSmoothAllRotation(model.bipedLeftLeg, 1f, 0, side * -1.25f,
+                0.6f * delta);
     }
 }

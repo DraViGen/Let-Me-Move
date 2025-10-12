@@ -5,13 +5,15 @@ import btw.BTWAddon;
 import btw.world.util.data.DataEntry;
 import btw.world.util.data.DataProvider;
 import net.dravigen.letMeMove.render.AnimationRegistry;
-import net.minecraft.src.EntityPlayer;
-import net.minecraft.src.NBTTagCompound;
-import net.minecraft.src.ResourceLocation;
+import net.minecraft.src.*;
+import org.lwjgl.input.Keyboard;
+
+import java.security.Key;
 
 import static net.dravigen.letMeMove.render.AnimationRegistry.STANDING_ID;
 
 public class LetMeMoveAddon extends BTWAddon {
+
     private static final String CURRENT_ANIMATION_NAME = "CurrentAnimation";
     public static final DataEntry.PlayerDataEntry<String> CURRENT_ANIMATION = DataProvider.getBuilder(String.class)
             .name(CURRENT_ANIMATION_NAME)
@@ -21,6 +23,10 @@ public class LetMeMoveAddon extends BTWAddon {
             .player()
             .syncPlayer()
             .buildPlayer();
+
+    public static KeyBinding crawl_key;
+
+    public static KeyBinding[] addonKeys;
 
     public LetMeMoveAddon() {
         super();
@@ -33,8 +39,17 @@ public class LetMeMoveAddon extends BTWAddon {
 
     @Override
     public void initialize() {
+        initKeybind();
         AnimationRegistry.registerAllAnimation();
         AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
+    }
+
+    public void initKeybind(){
+        crawl_key = new KeyBinding(StatCollector.translateToLocal("Crawl"), Keyboard.KEY_C);
+
+        addonKeys = new KeyBinding[]{
+                crawl_key,
+        };
     }
 
     @Override

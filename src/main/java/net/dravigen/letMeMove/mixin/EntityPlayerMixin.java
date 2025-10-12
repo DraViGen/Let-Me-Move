@@ -115,60 +115,80 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     }
 
     @Inject(method = "onLivingUpdate", at = @At("HEAD"))
-    private void handleFastSwim(CallbackInfo ci) {
+    private void handleCustomMove(CallbackInfo ci) {
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
 
         if (customPlayer.llm_$getAnimation() == null) return;
 
-        if (!this.canSwim()) {
-            customPlayer.llm_$setAnimation(STANDING_ID);
+        if (customPlayer.llm_$isAnimation(SWIMMING_ID)) {
+            if (!this.canSwim()) {
+                customPlayer.llm_$setAnimation(STANDING_ID);
+            }
+
+            if (isFastSwim()) {
+                boolean b1 = !isHeadInsideWater(this) && isInsideWater(this);
+
+                this.motionY = b1 && this.motionY > 0 ? 0 : this.motionY;
+
+                if (this.moveForward > 0) {
+                    Vec3 look = this.getLookVec();
+                    Vec3 direction = look;
+
+                    if ((isInsideWater(this) && look.yCoord < 0 && look.yCoord > -0.2) || b1 && look.yCoord > 0 && look.yCoord < 0.45) {
+                        direction = Vec3.createVectorHelper(look.xCoord, 0, look.zCoord);
+                    }
+
+                    float speed = 0.2f * this.getMovementSpeedModifierFromEffects();
+
+                    this.motionX = direction.xCoord * speed;
+                    this.motionZ = direction.zCoord * speed;
+
+                    super.moveEntity(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
+                    this.addMovementStat(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
+
+                    this.motionY *= 0.5f;
+
+                    this.prevLimbSwingAmount = this.limbSwingAmount;
+                    double var9 = this.posX - this.prevPosX;
+                    double var10 = this.posZ - this.prevPosZ;
+                    float var12 = MathHelper.sqrt_double(var9 * var9 + var10 * var10) * 4.0f;
+
+                    if (var12 > 1.0f) {
+                        var12 = 1.0f;
+                    }
+
+                    this.limbSwingAmount += (var12 - this.limbSwingAmount) * 0.4f;
+                    this.limbSwing += this.limbSwingAmount;
+                }
+                else {
+                    super.moveEntity(this.motionX, this.motionY, this.motionZ);
+
+                    this.motionX *= 0.8f;
+                    this.motionY *= 0.8f;
+                    this.motionZ *= 0.8f;
+                    this.limbSwingAmount = 0;
+                    this.motionY -= 0.02;
+                }
+            }
         }
+        else if (customPlayer.llm_$isAnimation(DASHING_ID)) {
+            float var1 = this.moveStrafing * 8;
+            float var4 = var1 * var1;
 
-        if (isFastSwim()) {
-            boolean b1 = !isHeadInsideWater(this) && isInsideWater(this);
-
-            this.motionY = b1 && this.motionY > 0 ? 0 : this.motionY;
-
-            if (this.moveForward > 0) {
-                Vec3 look = this.getLookVec();
-                Vec3 direction = look;
-
-                if ((isInsideWater(this) && look.yCoord < 0 && look.yCoord > -0.2) || b1 && look.yCoord > 0 && look.yCoord < 0.45) {
-                    direction = Vec3.createVectorHelper(look.xCoord, 0, look.zCoord);
+            if (var4 >= 1.0E-4f) {
+                if ((var4 = MathHelper.sqrt_float(var4)) < 1.0f) {
+                    var4 = 1.0f;
                 }
 
-                float speed = 0.2f * this.getMovementSpeedModifierFromEffects();
-
-                this.motionX = direction.xCoord * speed;
-                this.motionZ = direction.zCoord * speed;
-
-                super.moveEntity(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
-                this.addMovementStat(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
-
-                this.motionY *= 0.5f;
-
-                this.prevLimbSwingAmount = this.limbSwingAmount;
-                double var9 = this.posX - this.prevPosX;
-                double var10 = this.posZ - this.prevPosZ;
-                float var12 = MathHelper.sqrt_double(var9 * var9 + var10 * var10) * 4.0f;
-
-                if (var12 > 1.0f) {
-                    var12 = 1.0f;
-                }
-
-                this.limbSwingAmount += (var12 - this.limbSwingAmount) * 0.4f;
-                this.limbSwing += this.limbSwingAmount;
-
+                var4 = 1 / var4;
+                float var5 = MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0f);
+                float var6 = MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0f);
+                this.motionX = (var1 *= var4) * var6;
+                this.motionZ = var1 * var5;
             }
-            else {
-                super.moveEntity(this.motionX, this.motionY, this.motionZ);
 
-                this.motionX *= 0.8f;
-                this.motionY *= 0.8f;
-                this.motionZ *= 0.8f;
-                this.limbSwingAmount = 0;
-                this.motionY -= 0.02;
-            }
+            super.moveEntity(this.motionX, this.motionY, this.motionZ);
+            this.addMovementStat(this.motionX, this.motionY, this.motionZ);
         }
     }
 
@@ -197,10 +217,11 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     }
 
     @Inject(method = "moveEntityWithHeading", at = @At("HEAD"), cancellable = true)
-    private void disableMoveIfFastSwimming(float par1, float par2, CallbackInfo ci) {
-        if (((ICustomMovementEntity) this).llm_$getAnimation() == null) return;
+    private void disableMove(float par1, float par2, CallbackInfo ci) {
+        ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
+        if (customPlayer.llm_$getAnimation() == null) return;
 
-        if (isFastSwim() && this.canSwim()) {
+        if (isFastSwim() && this.canSwim() || customPlayer.llm_$isAnimation(DASHING_ID)) {
             ci.cancel();
         }
     }
