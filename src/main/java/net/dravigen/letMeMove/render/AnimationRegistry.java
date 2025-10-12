@@ -189,34 +189,13 @@ public class AnimationRegistry {
         );
     }
 
-    static int pressTime = 0;
-    static boolean pressedOnce = false;
-
     private static void registerDash() {
-        AnimationCustom example = AnimationUtils.createAnimation(DASHING_ID, 1.8f, 1, false);
+        AnimationCustom example = AnimationUtils.createAnimation(DASHING_ID, 1.8f, 1, false, 20);
 
         example.registerAnimation(
                 (player, axisAlignedBB) ->
                         player.moveForward == 0 && player.onGround,
-                (player, axisAlignedBB) -> {
-                    if (player.isUsingSpecialKey() || player.moveStrafing != 0) {
-                        if (pressTime < 5 && player.isUsingSpecialKey() && player.moveStrafing != 0 && player.moveForward == 0 && player.onGround) {
-                            if (!pressedOnce) {
-                                pressedOnce = true;
-
-                                return true;
-                            }
-                        }
-
-                        pressTime++;
-                    }
-                    else {
-                        pressTime = 0;
-                        pressedOnce = false;
-                    }
-
-                    return false;
-                },
+                (player, axisAlignedBB) -> player.isUsingSpecialKey() && player.moveStrafing != 0 && player.moveForward == 0 && player.onGround,
                 AnimationRegistry::dashAnimation,
                 AnimationRegistry::commonLeaningUpdate
         );

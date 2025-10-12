@@ -11,16 +11,19 @@ public class AnimationCustom {
     public float height;
     public float speedModifier;
     public boolean needYOffsetUpdate;
+    public int maxCooldown;
+    public int cooldown = 0;
     private IAnimationRender animationRender;
     private IAnimationCondition activationConditions;
     private IAnimationCondition generalConditions;
     private IAnimationLeaning leaningUpdate;
 
-    public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier, boolean needYOffsetUpdate) {
+    public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier, boolean needYOffsetUpdate, int maxCooldown) {
         this.animationIdentifier = animationIdentifier;
         this.height = height;
         this.speedModifier = speedModifier;
         this.needYOffsetUpdate = needYOffsetUpdate;
+        this.maxCooldown = maxCooldown;
     }
 
     public ResourceLocation getID() {
@@ -44,7 +47,10 @@ public class AnimationCustom {
     }
 
     public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-        return this.activationConditions.isConditionsMet(player, axisAlignedBB);
+        if (!this.hasCooldown() || this.cooldown == 0) {
+            return this.activationConditions.isConditionsMet(player, axisAlignedBB);
+        }
+        else return false;
     }
 
     public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
@@ -57,6 +63,20 @@ public class AnimationCustom {
 
     public void updateLeaning(EntityLivingBase entity) {
         this.leaningUpdate.updateLeaningPitch(entity);
+    }
+
+    public boolean hasCooldown() {
+        return this.maxCooldown != 0;
+    }
+
+    public void startCooldown() {
+        this.cooldown = this.maxCooldown;
+    }
+
+    public void updateCooldown() {
+        if (this.cooldown > 0) {
+            this.cooldown--;
+        }
     }
 
     public void registerAnimation(IAnimationCondition generalCondition, IAnimationCondition activationCondition, IAnimationRender render, IAnimationLeaning leaningUpdate) {

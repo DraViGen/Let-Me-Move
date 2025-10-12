@@ -18,7 +18,14 @@ public class AnimationUtils {
     }
 
     public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needYOffsetUpdate) {
-        AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needYOffsetUpdate);
+        AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needYOffsetUpdate, 0);
+        animationsMap.put(identifier, animation);
+
+        return animation;
+    }
+
+    public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needYOffsetUpdate, int maxCooldown) {
+        AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown);
         animationsMap.put(identifier, animation);
 
         return animation;

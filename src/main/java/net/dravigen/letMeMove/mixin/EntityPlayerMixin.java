@@ -22,7 +22,6 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Shadow public PlayerCapabilities capabilities;
     @Shadow protected boolean sleeping;
-    @Unique boolean updatedOnce = false;
 
     public EntityPlayerMixin(World par1World) {
         super(par1World);
@@ -48,64 +47,63 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         }
 
         if (this.worldObj.isRemote) {
-            if (this.updatedOnce) {
-                ResourceLocation newID = new ResourceLocation("");
+            ResourceLocation newID = new ResourceLocation("");
 
-                for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
-                    if (animation.isActivationConditonsMet(player, this.boundingBox)) {
-                        newID = animation.getID();
+            for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
+                animation.updateCooldown();
+            }
 
-                        break;
-                    }
-                }
+            for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
+                if (animation.isActivationConditonsMet(player, this.boundingBox)) {
+                    newID = animation.getID();
 
-                newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
-
-                AxisAlignedBB bounds = this.boundingBox.copy();
-
-                boolean noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds).isEmpty();
-
-                if (!newID.equals(customPlayer.llm_$getAnimationID())) {
-                    AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
-                    float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
-
-                    if (dHeight > 0) {
-                        noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0)).isEmpty();
-                    }
-
-                    if (noCollisionWithBlock) {
-                        customPlayer.llm_$setAnimation(newID);
-                    }
-                    else {
-                        dHeight = 0;
-
-                        for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
-                            bounds = this.boundingBox.copy();
-
-                            float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
-
-                            if (testAnimation.isGeneralConditonsMet(player, bounds) && dNewHeight > dHeight) {
-
-                                noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dNewHeight, 0)).isEmpty();
-
-                                if (noCollisionWithBlock) {
-                                    dHeight = dNewHeight;
-                                    newID = testAnimation.getID();
-                                }
-                            }
-                        }
-
-                        if (!newID.equals(STANDING_ID) && !newID.equals(customPlayer.llm_$getAnimationID())) {
-                            customPlayer.llm_$setAnimation(newID);
-                        }
-                    }
-                }
-                else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
-                    customPlayer.llm_$setAnimation(SWIMMING_ID);
+                    break;
                 }
             }
-            else {
-                this.updatedOnce = true;
+
+            newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
+
+            AxisAlignedBB bounds = this.boundingBox.copy();
+
+            boolean noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds).isEmpty();
+
+            if (!newID.equals(customPlayer.llm_$getAnimationID())) {
+                AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
+                float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
+
+                if (dHeight > 0) {
+                    noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0)).isEmpty();
+                }
+
+                if (noCollisionWithBlock) {
+                    customPlayer.llm_$setAnimation(newID);
+                }
+                else {
+                    dHeight = 0;
+
+                    for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
+                        bounds = this.boundingBox.copy();
+
+                        float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
+
+                        if (testAnimation.isGeneralConditonsMet(player, bounds) && dNewHeight > dHeight) {
+
+                            noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dNewHeight, 0)).isEmpty();
+
+                            if (noCollisionWithBlock) {
+                                dHeight = dNewHeight;
+                                newID = testAnimation.getID();
+                            }
+                        }
+                    }
+
+                    if (!newID.equals(STANDING_ID) && !newID.equals(customPlayer.llm_$getAnimationID())) {
+                        customPlayer.llm_$setAnimation(newID);
+                    }
+                }
+            }
+            else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
+                customPlayer.llm_$setAnimation(SWIMMING_ID);
             }
         }
 

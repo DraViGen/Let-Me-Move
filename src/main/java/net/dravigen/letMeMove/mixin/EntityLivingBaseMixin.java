@@ -78,6 +78,8 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
             this.currentAnimation = ID;
 
+            this.llm_$getAnimation().startCooldown();
+
             player.setData(LetMeMoveAddon.CURRENT_ANIMATION, String.valueOf(ID));
         }
     }
