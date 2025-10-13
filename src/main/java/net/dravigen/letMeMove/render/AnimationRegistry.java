@@ -319,6 +319,7 @@ public class AnimationRegistry {
      */
     private static void exampleAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
+
         float leaning = customEntity.llm_$getLeaningPitch();
 
         AnimationUtils.resetAnimationRotationPoints(model);
