@@ -1,6 +1,5 @@
 package net.dravigen.letMeMove.mixin;
 
-import net.dravigen.letMeMove.LetMeMoveAddon;
 import net.dravigen.letMeMove.render.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.utils.AnimationUtils;
@@ -11,7 +10,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.dravigen.letMeMove.render.AnimationRegistry.*;
@@ -40,70 +38,76 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
         EntityPlayer player = (EntityPlayer) (Object) this;
-        ResourceLocation id = LetMeMoveAddon.getDataID(player, LetMeMoveAddon.CURRENT_ANIMATION);
-
-        if (!id.equals(customPlayer.llm_$getAnimationID())) {
-            customPlayer.llm_$setAnimation(id);
-        }
 
         if (this.worldObj.isRemote) {
+            for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
+                animation.updateAnimationTime(customPlayer.llm_$getAnimationID());
+            }
+
+            if (Minecraft.getMinecraft().gameSettings.keyBindLeft.pressed) {
+                customPlayer.llm_$setSide(ICustomMovementEntity.side.LEFT);
+            }
+            else if (Minecraft.getMinecraft().gameSettings.keyBindRight.pressed) {
+                customPlayer.llm_$setSide(ICustomMovementEntity.side.RIGHT);
+            }
+
             ResourceLocation newID = new ResourceLocation("");
 
-            for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
-                animation.updateCooldown();
-            }
+            if (customPlayer.llm_$getAnimation().timeRendered == customPlayer.llm_$getAnimation().duration) {
+                for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
+                    if (!animation.isGeneralConditonsMet(player, this.boundingBox)) continue;
 
-            for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
-                if (animation.isActivationConditonsMet(player, this.boundingBox)) {
-                    newID = animation.getID();
+                    if (animation.isActivationConditonsMet(player, this.boundingBox)) {
+                        newID = animation.getID();
 
-                    break;
-                }
-            }
-
-            newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
-
-            AxisAlignedBB bounds = this.boundingBox.copy();
-
-            boolean noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds).isEmpty();
-
-            if (!newID.equals(customPlayer.llm_$getAnimationID())) {
-                AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
-                float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
-
-                if (dHeight > 0) {
-                    noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0)).isEmpty();
+                        break;
+                    }
                 }
 
-                if (noCollisionWithBlock) {
-                    customPlayer.llm_$setAnimation(newID);
-                }
-                else {
-                    dHeight = 0;
+                newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
 
-                    for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
-                        bounds = this.boundingBox.copy();
+                AxisAlignedBB bounds = this.boundingBox.copy();
 
-                        float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
+                boolean noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds).isEmpty();
 
-                        if (testAnimation.isGeneralConditonsMet(player, bounds) && dNewHeight > dHeight) {
+                if (!newID.equals(customPlayer.llm_$getAnimationID())) {
+                    AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
+                    float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
 
-                            noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dNewHeight, 0)).isEmpty();
-
-                            if (noCollisionWithBlock) {
-                                dHeight = dNewHeight;
-                                newID = testAnimation.getID();
-                            }
-                        }
+                    if (dHeight > 0) {
+                        noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dHeight, 0)).isEmpty();
                     }
 
-                    if (!newID.equals(STANDING_ID) && !newID.equals(customPlayer.llm_$getAnimationID())) {
+                    if (noCollisionWithBlock) {
                         customPlayer.llm_$setAnimation(newID);
                     }
+                    else {
+                        dHeight = 0;
+
+                        for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
+                            bounds = this.boundingBox.copy();
+
+                            float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
+
+                            if (testAnimation.isGeneralConditonsMet(player, bounds) && dNewHeight > dHeight) {
+
+                                noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds.addCoord(0, dNewHeight, 0)).isEmpty();
+
+                                if (noCollisionWithBlock) {
+                                    dHeight = dNewHeight;
+                                    newID = testAnimation.getID();
+                                }
+                            }
+                        }
+
+                        if (!newID.equals(STANDING_ID) && !newID.equals(customPlayer.llm_$getAnimationID())) {
+                            customPlayer.llm_$setAnimation(newID);
+                        }
+                    }
                 }
-            }
-            else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
-                customPlayer.llm_$setAnimation(SWIMMING_ID);
+                else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
+                    customPlayer.llm_$setAnimation(SWIMMING_ID);
+                }
             }
         }
 
@@ -112,13 +116,21 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         this.setSize(0.6f, currentAnimation.height);
     }
 
+    @Unique boolean movedOnce = false;
+
     @Inject(method = "onLivingUpdate", at = @At("HEAD"))
     private void handleCustomMove(CallbackInfo ci) {
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
+        double prevX = this.posX;
+        double prevY = this.posY;
+        double prevZ = this.posZ;
 
-        if (customPlayer.llm_$getAnimation() == null) return;
+        AnimationCustom animation = customPlayer.llm_$getAnimation();
+        if (animation == null) return;
 
-        if (customPlayer.llm_$isAnimation(SWIMMING_ID)) {
+        ResourceLocation id = animation.getID();
+
+        if (id.equals(SWIMMING_ID)) {
             if (!this.canSwim()) {
                 customPlayer.llm_$setAnimation(STANDING_ID);
             }
@@ -142,7 +154,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
                     this.motionZ = direction.zCoord * speed;
 
                     super.moveEntity(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
-                    this.addMovementStat(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
+                    this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
 
                     this.motionY *= 0.5f;
 
@@ -160,6 +172,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
                 }
                 else {
                     super.moveEntity(this.motionX, this.motionY, this.motionZ);
+                    this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
 
                     this.motionX *= 0.8f;
                     this.motionY *= 0.8f;
@@ -169,24 +182,35 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
                 }
             }
         }
-        else if (customPlayer.llm_$isAnimation(DASHING_ID)) {
-            float var1 = this.moveStrafing * 8;
-            float var4 = var1 * var1;
+        else if (id.equals(DASHING_ID)) {
+            if (!movedOnce) {
+                float var1 = this.moveStrafing * 8;
+                float var4 = var1 * var1;
 
-            if (var4 >= 1.0E-4f) {
-                if ((var4 = MathHelper.sqrt_float(var4)) < 1.0f) {
-                    var4 = 1.0f;
+                if (var4 >= 1.0E-4f) {
+                    if ((var4 = MathHelper.sqrt_float(var4)) < 1.0f) {
+                        var4 = 1.0f;
+                    }
+
+                    var4 = 1 / var4;
+                    float var5 = MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0f);
+                    float var6 = MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0f);
+                    this.motionX = (var1 *= var4) * var6;
+                    this.motionZ = var1 * var5;
                 }
 
-                var4 = 1 / var4;
-                float var5 = MathHelper.sin(this.rotationYaw * (float)Math.PI / 180.0f);
-                float var6 = MathHelper.cos(this.rotationYaw * (float)Math.PI / 180.0f);
-                this.motionX = (var1 *= var4) * var6;
-                this.motionZ = var1 * var5;
-            }
+                super.moveEntity(this.motionX, this.motionY, this.motionZ);
+                this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
 
-            super.moveEntity(this.motionX, this.motionY, this.motionZ);
-            this.addMovementStat(this.motionX, this.motionY, this.motionZ);
+                movedOnce = true;
+            }
+        }
+        else if (id.equals(ROLLING_ID)) {
+            super.moveEntityWithHeading(this.moveStrafing, 1.5f);
+            this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
+        }
+        else {
+            movedOnce = false;
         }
     }
 
@@ -195,23 +219,47 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         return !this.isEating() && !this.capabilities.isFlying && isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID);
     }
 
-    @Redirect(method = "addMovementStat", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayer;isInsideOfMaterial(Lnet/minecraft/src/Material;)Z"))
-    private boolean addNewSwimExhaustion(EntityPlayer player, Material material, double par1, double par3, double par5) {
-        if (((ICustomMovementEntity) this).llm_$getAnimation() == null)
-            return player.isInsideOfMaterial(Material.water);
+    @Inject(method = "addMovementStat", at = @At(value = "HEAD"), cancellable = true)
+    private void customExhaustion(double par1, double par3, double par5, CallbackInfo ci) {
+        AnimationCustom animation = ((ICustomMovementEntity) this).llm_$getAnimation();
 
-        if (isFastSwim() && (par1 > 0 || par3 > 0)) {
+        if (animation == null) return;
+
+        ResourceLocation id = animation.getID();
+
+        if (isFastSwim() || id.equals(SWIMMING_ID) && this.onGround) {
             int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
 
             if (var7 > 0) {
                 this.addStat(StatList.distanceDoveStat, var7);
-                this.addExhaustion(0.2f * (float) var7 * 0.01f);
+                float modifier = isInsideWater(this) ? 1 : 0.75f;
+                this.addExhaustion(1.75f * modifier * var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
             }
 
-            return false;
+            ci.cancel();
         }
+        else if (id.equals(DASHING_ID)) {
+            int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par5 * par5) * 100.0f);
 
-        return player.isInsideOfMaterial(Material.water);
+            if (var7 > 0) {
+                this.addStat(StatList.distanceWalkedStat, var7);
+                this.addExhaustion(2f * (float)var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
+
+            }
+
+            ci.cancel();
+        }
+        else if (id.equals(ROLLING_ID)) {
+            int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par5 * par5) * 100.0f);
+
+            if (var7 > 0) {
+                this.addStat(StatList.distanceWalkedStat, var7);
+                this.addExhaustion(1.25f * (float)var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
+
+            }
+
+            ci.cancel();
+        }
     }
 
     @Inject(method = "moveEntityWithHeading", at = @At("HEAD"), cancellable = true)
@@ -219,7 +267,9 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
         if (customPlayer.llm_$getAnimation() == null) return;
 
-        if (isFastSwim() && this.canSwim() || customPlayer.llm_$isAnimation(DASHING_ID)) {
+        ResourceLocation id = customPlayer.llm_$getAnimationID();
+
+        if (isFastSwim() || id.equals(DASHING_ID) && !movedOnce || id.equals(ROLLING_ID)) {
             ci.cancel();
         }
     }

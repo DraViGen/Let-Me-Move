@@ -19,9 +19,11 @@ import static net.dravigen.letMeMove.render.AnimationRegistry.*;
 public abstract class EntityLivingBaseMixin extends Entity implements ICustomMovementEntity {
 
     @Shadow public float moveForward;
+
     @Unique private float leaningPitch;
     @Unique private float lastLeaningPitch;
     @Unique private ResourceLocation currentAnimation;
+    @Unique private side side;
 
     public EntityLivingBaseMixin(World par1World) {
         super(par1World);
@@ -70,18 +72,35 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Override
     public void llm_$setAnimation(ResourceLocation ID) {
-        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player && this.currentAnimation != null) {
 
             if (this.worldObj.isRemote) {
                 PacketUtils.animationCtoSSync(ID);
             }
 
-            this.currentAnimation = ID;
+            if (!ID.equals(this.currentAnimation)) {
+                this.llm_$getAnimation().startCooldown();
+            }
 
-            this.llm_$getAnimation().startCooldown();
+            this.currentAnimation = ID;
 
             player.setData(LetMeMoveAddon.CURRENT_ANIMATION, String.valueOf(ID));
         }
+    }
+
+    @Override
+    public side llm_$getSide() {
+        return this.side;
+    }
+
+    @Override
+    public float llm_$getSideValue() {
+        return side.equals(ICustomMovementEntity.side.LEFT) ? -1 : 1;
+    }
+
+    @Override
+    public void llm_$setSide(side side) {
+        this.side = side;
     }
 
     @Inject(method = "getSpeedModifier", at = @At("RETURN"), cancellable = true)
@@ -121,5 +140,18 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
         }
 
         return par1;
+    }
+
+    @ModifyArg(method = "entityLivingBaseFall", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;attackEntityFrom(Lnet/minecraft/src/DamageSource;F)Z"), index = 1)
+    private float lessFallDamageIfRolling(float damage){
+        if ((EntityLivingBase)(Object)this instanceof EntityPlayer) {
+            int t = this.llm_$getAnimation().timeRendered;
+
+            if (this.llm_$isAnimation(ROLLING_ID) && t >= 10 && t <= 20) {
+                return damage * 0.85f;
+            }
+        }
+
+        return damage;
     }
 }

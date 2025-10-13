@@ -58,7 +58,7 @@ public abstract class ModelBipedMixin extends ModelBase {
                 prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, (45f * leaningPitch) % 360, 0.3f * delta);
             }
             else {
-                prevOffset = 1.98f - (entity.yOffset + 0.18f);
+                prevOffset = animation.yOffset != 0 ? animation.yOffset : 1.98f - (entity.yOffset + 0.18f);
                 prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, 0, 0.1f * delta);
                 prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, 0, 0.1f * delta);
                 prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, 90 * leaningPitch, 0.2f * delta);

@@ -18,14 +18,19 @@ public class AnimationUtils {
     }
 
     public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needYOffsetUpdate) {
-        AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needYOffsetUpdate, 0);
-        animationsMap.put(identifier, animation);
-
-        return animation;
+        return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, 0, 0, 0);
     }
 
     public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needYOffsetUpdate, int maxCooldown) {
-        AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown);
+        return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown, 0, 0);
+    }
+
+    public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needYOffsetUpdate, int maxCooldown, int duration) {
+        return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown, duration, 0);
+    }
+
+    public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier, boolean needYOffsetUpdate, int maxCooldown, int duration, float yOffset) {
+        AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown, duration, yOffset);
         animationsMap.put(identifier, animation);
 
         return animation;
@@ -61,25 +66,31 @@ public class AnimationUtils {
         model.bipedLeftLeg.rotationPointZ = 0.1f;
     }
 
-    public static void setSmoothAllRotation(ModelRenderer part, float rotX, float rotY, float rotZ) {
-        setSmoothRotation(part, type.X, rotX, 0.1f);
-        setSmoothRotation(part, type.Y, rotY, 0.1f);
-        setSmoothRotation(part, type.Z, rotZ, 0.1f);
+    public static void smoothRotateAll(ModelRenderer part, float rotX, float rotY, float rotZ) {
+        smoothRotate(part, type.X, rotX, 0.1f);
+        smoothRotate(part, type.Y, rotY, 0.1f);
+        smoothRotate(part, type.Z, rotZ, 0.1f);
     }
 
-    public static void setSmoothAllRotation(ModelRenderer part, float rotX, float rotY, float rotZ, float factor) {
-        setSmoothRotation(part, type.X, rotX, factor);
-        setSmoothRotation(part, type.Y, rotY, factor);
-        setSmoothRotation(part, type.Z, rotZ, factor);
+    public static void smoothRotateAll(ModelRenderer part, float rotX, float rotY, float rotZ, float factor) {
+        smoothRotate(part, type.X, rotX, factor);
+        smoothRotate(part, type.Y, rotY, factor);
+        smoothRotate(part, type.Z, rotZ, factor);
     }
 
-    public static void setSmoothAllRotation(ModelRenderer part, float rotX, float rotY, float rotZ, float factorX, float factorY, float factorZ) {
-        setSmoothRotation(part, type.X, rotX, factorX);
-        setSmoothRotation(part, type.Y, rotY, factorY);
-        setSmoothRotation(part, type.Z, rotZ, factorZ);
+    public static void smoothRotateAll(ModelRenderer part, float[] rots, float factor) {
+        smoothRotate(part, type.X, rots[0], factor);
+        smoothRotate(part, type.Y, rots[1], factor);
+        smoothRotate(part, type.Z, rots[2], factor);
     }
 
-    public static void setSmoothRotation(ModelRenderer part, type type, float rot, float factor) {
+    public static void smoothRotateAll(ModelRenderer part, float rotX, float rotY, float rotZ, float factorX, float factorY, float factorZ) {
+        smoothRotate(part, type.X, rotX, factorX);
+        smoothRotate(part, type.Y, rotY, factorY);
+        smoothRotate(part, type.Z, rotZ, factorZ);
+    }
+
+    public static void smoothRotate(ModelRenderer part, type type, float rot, float factor) {
         factor = factor == 0 ? 1 : factor;
         if (type == AnimationUtils.type.X) {
             part.rotateAngleX = GeneralUtils.incrementUntilGoal(part.rotateAngleX, rot, factor);
