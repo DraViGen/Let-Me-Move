@@ -6,6 +6,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.src.ResourceLocation;
 
 public interface ICustomMovementEntity {
+    enum side{
+        LEFT, RIGHT
+    }
 
     @Environment(EnvType.CLIENT)
     float llm_$getLeaningPitch();
@@ -19,4 +22,10 @@ public interface ICustomMovementEntity {
     void llm_$setAnimation(ResourceLocation animation);
 
     boolean llm_$isAnimation(ResourceLocation animationID);
+
+    side llm_$getSide();
+
+    float llm_$getSideValue();
+
+    void llm_$setSide(side side);
 }

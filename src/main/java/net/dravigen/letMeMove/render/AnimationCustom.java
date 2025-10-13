@@ -13,17 +13,22 @@ public class AnimationCustom {
     public boolean needYOffsetUpdate;
     public int maxCooldown;
     public int cooldown = 0;
+    public float yOffset;
+    public int duration;
+    public int timeRendered;
     private IAnimationRender animationRender;
     private IAnimationCondition activationConditions;
     private IAnimationCondition generalConditions;
     private IAnimationLeaning leaningUpdate;
 
-    public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier, boolean needYOffsetUpdate, int maxCooldown) {
+    public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier, boolean needYOffsetUpdate, int maxCooldown, int duration, float yOffset) {
         this.animationIdentifier = animationIdentifier;
         this.height = height;
         this.speedModifier = speedModifier;
         this.needYOffsetUpdate = needYOffsetUpdate;
         this.maxCooldown = maxCooldown;
+        this.duration = duration;
+        this.yOffset = yOffset;
     }
 
     public ResourceLocation getID() {
@@ -73,7 +78,21 @@ public class AnimationCustom {
         this.cooldown = this.maxCooldown;
     }
 
-    public void updateCooldown() {
+    public void updateAnimationTime(ResourceLocation currentAnimaiton) {
+        if (currentAnimaiton.equals(this.animationIdentifier)) {
+            if (this.cooldown == 0) {
+                if (this.timeRendered < this.duration) {
+                    this.timeRendered++;
+                }
+                else {
+                    this.startCooldown();
+                }
+            }
+        }
+        else {
+            timeRendered = 0;
+        }
+
         if (this.cooldown > 0) {
             this.cooldown--;
         }

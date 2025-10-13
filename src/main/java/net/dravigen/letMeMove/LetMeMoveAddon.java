@@ -8,8 +8,6 @@ import net.dravigen.letMeMove.render.AnimationRegistry;
 import net.minecraft.src.*;
 import org.lwjgl.input.Keyboard;
 
-import java.security.Key;
-
 import static net.dravigen.letMeMove.render.AnimationRegistry.STANDING_ID;
 
 public class LetMeMoveAddon extends BTWAddon {
@@ -25,6 +23,7 @@ public class LetMeMoveAddon extends BTWAddon {
             .buildPlayer();
 
     public static KeyBinding crawl_key;
+    public static KeyBinding roll_key;
 
     public static KeyBinding[] addonKeys;
 
@@ -46,9 +45,11 @@ public class LetMeMoveAddon extends BTWAddon {
 
     public void initKeybind(){
         crawl_key = new KeyBinding(StatCollector.translateToLocal("Crawl"), Keyboard.KEY_C);
+        roll_key = new KeyBinding(StatCollector.translateToLocal("Roll"), Keyboard.KEY_V);
 
         addonKeys = new KeyBinding[]{
                 crawl_key,
+                roll_key
         };
     }
 
