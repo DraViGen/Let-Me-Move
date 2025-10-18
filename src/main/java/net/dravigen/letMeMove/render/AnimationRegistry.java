@@ -787,8 +787,10 @@ public class AnimationRegistry {
                 0.6f * delta);
     }
 
+    static float prevPitch;
     private static void rollingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
         ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
+        float leaning = customEntity.llm_$getLeaningPitch();
 
         AnimationUtils.resetAnimationRotationPoints(model);
 
@@ -847,5 +849,14 @@ public class AnimationRegistry {
 
         AnimationUtils.smoothRotateAll(model.bipedLeftLeg, lLeg,
                 0.3f * delta);
+
+        if (Minecraft.getMinecraft().thePlayer == entity && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
+            if (leaning == 0) {
+                prevPitch = entity.cameraPitch;
+            }
+            else if (leaning != 4) {
+                entity.cameraPitch = prevPitch + leaning * 90;
+            }
+        }
     }
 }

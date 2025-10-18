@@ -1,16 +1,13 @@
 package net.dravigen.letMeMove.mixin;
 
+import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.packet.PacketUtils;
-import net.minecraft.src.EntityPlayerMP;
-import net.minecraft.src.NetHandler;
-import net.minecraft.src.NetServerHandler;
-import net.minecraft.src.Packet250CustomPayload;
+import net.dravigen.letMeMove.render.AnimationRegistry;
+import net.minecraft.src.*;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(NetServerHandler.class)
@@ -28,5 +25,12 @@ public abstract class NetServerHandlerMixin extends NetHandler {
     @ModifyConstant(method = "handleFlying", constant = @Constant(doubleValue = 1.65))
     private double preventIllegalStance(double constant) {
         return 2;
+    }
+
+    @Redirect(method = "handleFlying", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerMP;addExhaustionForJump()V"))
+    private void a(EntityPlayerMP instance) {
+        if (!((ICustomMovementEntity)instance).llm_$isAnimation(AnimationRegistry.SWIMMING_ID)) {
+            instance.addExhaustionForJump();
+        }
     }
 }

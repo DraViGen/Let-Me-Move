@@ -118,7 +118,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Unique boolean movedOnce = false;
 
-    @Inject(method = "onLivingUpdate", at = @At("HEAD"))
+    @Inject(method = "moveEntityWithHeading", at = @At("HEAD"), cancellable = true)
     private void handleCustomMove(CallbackInfo ci) {
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
         double prevX = this.posX;
@@ -126,6 +126,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         double prevZ = this.posZ;
 
         AnimationCustom animation = customPlayer.llm_$getAnimation();
+
         if (animation == null) return;
 
         ResourceLocation id = animation.getID();
@@ -135,12 +136,14 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
                 customPlayer.llm_$setAnimation(STANDING_ID);
             }
 
-            if (isFastSwim()) {
+            if (canFastSwimInWater()) {
                 boolean b1 = !isHeadInsideWater(this) && isInsideWater(this);
 
                 this.motionY = b1 && this.motionY > 0 ? 0 : this.motionY;
 
                 if (this.moveForward > 0) {
+                    ci.cancel();
+
                     Vec3 look = this.getLookVec();
                     Vec3 direction = look;
 
@@ -171,19 +174,23 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
                     this.limbSwing += this.limbSwingAmount;
                 }
                 else {
+                    /*
                     super.moveEntity(this.motionX, this.motionY, this.motionZ);
                     this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
 
                     this.motionX *= 0.8f;
                     this.motionY *= 0.8f;
                     this.motionZ *= 0.8f;
+                    this.motionY -= 0.02;*/
+
                     this.limbSwingAmount = 0;
-                    this.motionY -= 0.02;
                 }
             }
         }
         else if (id.equals(DASHING_ID)) {
             if (!movedOnce) {
+                ci.cancel();
+
                 float var1 = this.moveStrafing * 8;
                 float var4 = var1 * var1;
 
@@ -206,6 +213,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
             }
         }
         else if (id.equals(ROLLING_ID)) {
+            ci.cancel();
+
             super.moveEntityWithHeading(this.moveStrafing, 1.5f);
             this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
         }
@@ -215,7 +224,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
     }
 
     @Unique
-    private boolean isFastSwim() {
+    private boolean canFastSwimInWater() {
         return !this.isEating() && !this.capabilities.isFlying && isInsideWater(this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID);
     }
 
@@ -227,13 +236,14 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
         ResourceLocation id = animation.getID();
 
-        if (isFastSwim() || id.equals(SWIMMING_ID) && this.onGround) {
+        if (canFastSwimInWater() || id.equals(SWIMMING_ID) && this.onGround) {
             int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
 
             if (var7 > 0) {
                 this.addStat(StatList.distanceDoveStat, var7);
                 float modifier = isInsideWater(this) ? 1 : 0.75f;
-                this.addExhaustion(1.75f * modifier * var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
+                float par2 = 1.75f * modifier * var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
+                this.addExhaustion(par2);
             }
 
             ci.cancel();
@@ -243,7 +253,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
             if (var7 > 0) {
                 this.addStat(StatList.distanceWalkedStat, var7);
-                this.addExhaustion(2f * (float)var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
+                float par2 = 2f * (float) var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
+                this.addExhaustion(par2);
 
             }
 
@@ -254,22 +265,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
             if (var7 > 0) {
                 this.addStat(StatList.distanceWalkedStat, var7);
-                this.addExhaustion(1.25f * (float)var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
-
+                float par2 = 1.25f * (float) var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
+                this.addExhaustion(par2);
             }
 
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "moveEntityWithHeading", at = @At("HEAD"), cancellable = true)
-    private void disableMove(float par1, float par2, CallbackInfo ci) {
-        ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
-        if (customPlayer.llm_$getAnimation() == null) return;
-
-        ResourceLocation id = customPlayer.llm_$getAnimationID();
-
-        if (isFastSwim() || id.equals(DASHING_ID) && !movedOnce || id.equals(ROLLING_ID)) {
             ci.cancel();
         }
     }
