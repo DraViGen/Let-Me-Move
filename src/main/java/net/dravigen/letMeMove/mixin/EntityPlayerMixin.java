@@ -19,19 +19,32 @@ import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 @Mixin(EntityPlayer.class)
 public abstract class EntityPlayerMixin extends EntityLivingBase {
 
-    @Shadow public PlayerCapabilities capabilities;
-    @Shadow protected boolean sleeping;
+    @Shadow
+    public PlayerCapabilities capabilities;
+    @Shadow
+    protected boolean sleeping;
 
     public EntityPlayerMixin(World par1World) {
         super(par1World);
     }
 
-    @Shadow public abstract float getEyeHeight();
-    @Shadow public abstract void addStat(StatBase par1StatBase, int par2);
-    @Shadow public abstract void addExhaustion(float par1);
-    @Shadow public abstract void addMovementStat(double par1, double par3, double par5);
-    @Shadow public abstract float getMovementSpeedModifierFromEffects();
-    @Shadow public abstract boolean canSwim();
+    @Shadow
+    public abstract float getEyeHeight();
+
+    @Shadow
+    public abstract void addStat(StatBase par1StatBase, int par2);
+
+    @Shadow
+    public abstract void addExhaustion(float par1);
+
+    @Shadow
+    public abstract void addMovementStat(double par1, double par3, double par5);
+
+    @Shadow
+    public abstract float getMovementSpeedModifierFromEffects();
+
+    @Shadow
+    public abstract boolean canSwim();
 
     @Inject(method = "onUpdate", at = @At("HEAD"))
     private void updateAnimation(CallbackInfo ci) {
@@ -117,7 +130,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         this.setSize(0.6f, currentAnimation.height);
     }
 
-    @Unique boolean movedOnce = false;
+    @Unique
+    boolean movedOnce = false;
 
     @Inject(method = "moveEntityWithHeading", at = @At("HEAD"), cancellable = true)
     private void handleCustomMove(CallbackInfo ci) {
@@ -285,7 +299,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 
     @Inject(method = "jump", at = @At("TAIL"))
     private void addHorizontalMotionFromJumpingOnWall(CallbackInfo ci) {
-        if (((ICustomMovementEntity)this).llm_$isAnimation(WALL_SLIDING_ID)) {
+        if (((ICustomMovementEntity) this).llm_$isAnimation(WALL_SLIDING_ID)) {
             GeneralUtils.coords side = GeneralUtils.checkEntityAgainstWall(this);
             this.motionY += 0.15;
             this.motionX += side == GeneralUtils.coords.EAST ? -0.3f : side == GeneralUtils.coords.WEST ? 0.3f : 0;

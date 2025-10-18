@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(NetServerHandler.class)
 public abstract class NetServerHandlerMixin extends NetHandler {
 
-    @Shadow public EntityPlayerMP playerEntity;
+    @Shadow
+    public EntityPlayerMP playerEntity;
 
     @Inject(method = "handleCustomPayload", at = @At("HEAD"))
     private void tu_onCustomPayloadC2S(Packet250CustomPayload packet, CallbackInfo ci) {
@@ -31,7 +32,7 @@ public abstract class NetServerHandlerMixin extends NetHandler {
 
     @Redirect(method = "handleFlying", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerMP;addExhaustionForJump()V"))
     private void a(EntityPlayerMP instance) {
-        if (!((ICustomMovementEntity)instance).llm_$isAnimation(AnimationRegistry.SWIMMING_ID)) {
+        if (!((ICustomMovementEntity) instance).llm_$isAnimation(AnimationRegistry.SWIMMING_ID)) {
             instance.addExhaustionForJump();
         }
     }

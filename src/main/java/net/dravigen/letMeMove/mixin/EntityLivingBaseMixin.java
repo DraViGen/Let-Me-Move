@@ -18,14 +18,23 @@ import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
 @Mixin(EntityLivingBase.class)
 public abstract class EntityLivingBaseMixin extends Entity implements ICustomMovementEntity {
 
-    @Shadow public float moveForward;
-    @Shadow protected abstract float func_110146_f(float par1, float par2);
-    @Shadow public abstract boolean attackEntityFrom(DamageSource par1DamageSource, float par2);
+    @Shadow
+    public float moveForward;
 
-    @Unique private float leaningPitch;
-    @Unique private float lastLeaningPitch;
-    @Unique private ResourceLocation currentAnimation;
-    @Unique private side side;
+    @Shadow
+    protected abstract float func_110146_f(float par1, float par2);
+
+    @Shadow
+    public abstract boolean attackEntityFrom(DamageSource par1DamageSource, float par2);
+
+    @Unique
+    private float leaningPitch;
+    @Unique
+    private float lastLeaningPitch;
+    @Unique
+    private ResourceLocation currentAnimation;
+    @Unique
+    private side side;
 
     public EntityLivingBaseMixin(World par1World) {
         super(par1World);
@@ -160,7 +169,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/src/EntityLivingBase;onGround:Z"))
     private boolean allowJumpWhileWallSliding(EntityLivingBase instance) {
-        if (((ICustomMovementEntity)instance).llm_$isAnimation(WALL_SLIDING_ID)) {
+        if (((ICustomMovementEntity) instance).llm_$isAnimation(WALL_SLIDING_ID)) {
             return true;
         }
 
@@ -168,8 +177,8 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
     }
 
     @ModifyArg(method = "entityLivingBaseFall", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;attackEntityFrom(Lnet/minecraft/src/DamageSource;F)Z"), index = 1)
-    private float lessFallDamageIfRolling(float damage){
-        if ((EntityLivingBase)(Object)this instanceof EntityPlayer) {
+    private float lessFallDamageIfRolling(float damage) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer) {
             int t = this.llm_$getAnimation().timeRendered;
 
             if (this.llm_$isAnimation(ROLLING_ID) && t >= 10 && t <= 20) {
@@ -182,7 +191,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;func_110146_f(FF)F"))
     private float disableHeadTurn(EntityLivingBase instance, float par1, float par2) {
-        if (((ICustomMovementEntity)instance).llm_$isAnimation(WALL_SLIDING_ID)) {
+        if (((ICustomMovementEntity) instance).llm_$isAnimation(WALL_SLIDING_ID)) {
             return par2;
         }
 

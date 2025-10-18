@@ -43,7 +43,7 @@ public class LetMeMoveAddon extends BTWAddon {
         AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
     }
 
-    public void initKeybind(){
+    public void initKeybind() {
         crawl_key = new KeyBinding(StatCollector.translateToLocal("Crawl"), Keyboard.KEY_C);
         roll_key = new KeyBinding(StatCollector.translateToLocal("Roll"), Keyboard.KEY_V);
 

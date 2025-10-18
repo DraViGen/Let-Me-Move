@@ -15,16 +15,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin {
 
-    @Shadow private Minecraft mc;
-    @Shadow private float thirdPersonDistance;
-    @Shadow private float thirdPersonDistanceTemp;
-    @Shadow private float prevDebugCamYaw;
-    @Shadow private float debugCamYaw;
-    @Shadow private float prevDebugCamPitch;
-    @Shadow private float debugCamPitch;
+    @Shadow
+    private Minecraft mc;
+    @Shadow
+    private float thirdPersonDistance;
+    @Shadow
+    private float thirdPersonDistanceTemp;
+    @Shadow
+    private float prevDebugCamYaw;
+    @Shadow
+    private float debugCamYaw;
+    @Shadow
+    private float prevDebugCamPitch;
+    @Shadow
+    private float debugCamPitch;
 
 
-    @Redirect(method = "orientCamera", at = @At(value = "FIELD", target = "Lnet/minecraft/src/GameSettings;thirdPersonView:I", opcode = Opcodes.GETFIELD))
+    @Redirect(method = "orientCamera", at = @At(value = "FIELD", target = "Lnet/minecraft/src/GameSettings;thirdPersonView:I", ordinal = 0, opcode = Opcodes.GETFIELD))
     private int betterThirdPerson(GameSettings instance, float par1) {
         if (instance.thirdPersonView > 0) {
             EntityLivingBase var2 = this.mc.renderViewEntity;
@@ -86,6 +93,7 @@ public abstract class EntityRendererMixin {
                 GL11.glRotatef(var13 - var2.rotationPitch, 1.0f, 0.0f, 0.0f);
             }
         }
+
         return 0;
     }
 

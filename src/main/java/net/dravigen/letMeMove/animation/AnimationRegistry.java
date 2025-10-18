@@ -249,7 +249,7 @@ public class AnimationRegistry {
     private static void registerRolling() {
         AnimationCustom rolling = createAnimation(
                 ROLLING_ID,
-                1.8f, 1, true, 20, 25,0f);
+                1.8f, 1, true, 20, 25, 0f);
 
         rolling.registerAnimation(
                 (player, axisAlignedBB) ->

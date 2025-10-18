@@ -2,6 +2,7 @@ package net.dravigen.letMeMove.packet;
 
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
+
 import java.io.*;
 
 public class PacketUtils {
@@ -15,8 +16,7 @@ public class PacketUtils {
         try {
             dos.writeUTF(ID.getResourceDomain());
             dos.writeUTF(ID.getResourcePath());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -32,8 +32,7 @@ public class PacketUtils {
         try {
             dos.writeUTF(ID.getResourceDomain());
             dos.writeUTF(ID.getResourcePath());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -62,8 +61,7 @@ public class PacketUtils {
 
         try {
             dos.writeFloat(exhaustion);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

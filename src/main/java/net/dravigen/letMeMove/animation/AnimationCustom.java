@@ -7,11 +7,11 @@ import net.minecraft.src.*;
 
 public class AnimationCustom {
 
+    public final float speedModifier;
+    public final boolean needYOffsetUpdate;
+    public final int maxCooldown;
     private final ResourceLocation animationIdentifier;
     public float height;
-    public float speedModifier;
-    public boolean needYOffsetUpdate;
-    public int maxCooldown;
     public int cooldown = 0;
     public float yOffset;
     public int duration;

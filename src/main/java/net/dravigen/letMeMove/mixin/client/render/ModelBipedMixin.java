@@ -17,15 +17,24 @@ import static net.dravigen.letMeMove.utils.GeneralUtils.checkEntityAgainstWall;
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {
 
-    @Unique float prevXRotation = 0;
-    @Unique float prevYRotation = 0;
-    @Unique float prevZRotation = 0;
-    @Unique float prevOffset = 0;
-    @Unique long transitionTime = 0;
-    @Unique ResourceLocation prevAnimation;
-    @Unique long prevTime;
-    @Unique boolean prevForward;
-    @Unique float delta = 0;
+    @Unique
+    float prevXRotation = 0;
+    @Unique
+    float prevYRotation = 0;
+    @Unique
+    float prevZRotation = 0;
+    @Unique
+    float prevOffset = 0;
+    @Unique
+    long transitionTime = 0;
+    @Unique
+    ResourceLocation prevAnimation;
+    @Unique
+    long prevTime;
+    @Unique
+    boolean prevForward;
+    @Unique
+    float delta = 0;
 
     @Inject(method = "render", at = @At("HEAD"))
     private void rotateBody(Entity entity, float f, float g, float h, float i, float j, float u, CallbackInfo ci) {

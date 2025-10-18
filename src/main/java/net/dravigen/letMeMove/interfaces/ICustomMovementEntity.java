@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.src.ResourceLocation;
 
 public interface ICustomMovementEntity {
-    enum side{
+    enum side {
         LEFT, RIGHT
     }
 

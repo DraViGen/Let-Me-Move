@@ -11,7 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(NetClientHandler.class)
 public abstract class NetClientHandlerMixin extends NetHandler {
 
-    @Shadow private Minecraft mc;
+    @Shadow
+    private Minecraft mc;
 
     @Inject(method = "handleCustomPayload", at = @At("HEAD"))
     private void tu_onCustomPayloadC2S(Packet250CustomPayload packet, CallbackInfo ci) {

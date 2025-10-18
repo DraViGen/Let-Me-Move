@@ -104,7 +104,7 @@ public class GeneralUtils {
 
         return entity.worldObj.isBlockFullCube(MathHelper.floor_double(x + entity.width / 2 + 0.1), y, MathHelper.floor_double(z)) ? coords.EAST :
                 entity.worldObj.isBlockFullCube(MathHelper.floor_double(x - entity.width / 2 - 0.1), y, MathHelper.floor_double(z)) ? coords.WEST :
-                entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z + entity.width / 2 + 0.1)) ? coords.SOUTH :
-                entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z - entity.width / 2 - 0.1)) ? coords.NORTH : null;
+                        entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z + entity.width / 2 + 0.1)) ? coords.SOUTH :
+                                entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z - entity.width / 2 - 0.1)) ? coords.NORTH : null;
     }
 }

@@ -13,10 +13,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
 
-    @Shadow public WorldClient theWorld;
-    @Shadow public EntityClientPlayerMP thePlayer;
-    @Unique long prevTime;
-    @Shadow private boolean isGamePaused;
+    @Shadow
+    public WorldClient theWorld;
+    @Shadow
+    public EntityClientPlayerMP thePlayer;
+    @Unique
+    long prevTime;
+    @Shadow
+    private boolean isGamePaused;
 
     @Inject(method = "runGameLoop", at = @At("HEAD"))
     private void updateRender(CallbackInfo ci) {
