@@ -1,4 +1,4 @@
-package net.dravigen.letMeMove.render;
+package net.dravigen.letMeMove.animation;
 
 import net.dravigen.letMeMove.interfaces.functional.IAnimationCondition;
 import net.dravigen.letMeMove.interfaces.functional.IAnimationLeaning;

@@ -1,4 +1,4 @@
-package net.dravigen.letMeMove.mixin;
+package net.dravigen.letMeMove.mixin.server;
 
 import net.dravigen.letMeMove.LetMeMoveAddon;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;

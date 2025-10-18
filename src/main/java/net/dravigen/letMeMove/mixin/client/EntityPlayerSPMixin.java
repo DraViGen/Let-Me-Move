@@ -1,6 +1,6 @@
-package net.dravigen.letMeMove.mixin;
+package net.dravigen.letMeMove.mixin.client;
 
-import net.dravigen.letMeMove.render.AnimationRegistry;
+import net.dravigen.letMeMove.animation.AnimationRegistry;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 import org.objectweb.asm.Opcodes;

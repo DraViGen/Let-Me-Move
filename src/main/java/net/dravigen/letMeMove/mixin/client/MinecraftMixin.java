@@ -1,4 +1,4 @@
-package net.dravigen.letMeMove.mixin;
+package net.dravigen.letMeMove.mixin.client;
 
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.utils.GeneralUtils;

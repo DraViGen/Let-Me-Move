@@ -1,4 +1,4 @@
-package net.dravigen.letMeMove.mixin;
+package net.dravigen.letMeMove.mixin.client;
 
 import net.dravigen.letMeMove.LetMeMoveAddon;
 import net.minecraft.src.GameSettings;

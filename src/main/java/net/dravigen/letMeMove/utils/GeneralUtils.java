@@ -3,6 +3,10 @@ package net.dravigen.letMeMove.utils;
 import net.minecraft.src.*;
 
 public class GeneralUtils {
+    public enum coords {
+        NORTH, EAST, SOUTH, WEST
+    }
+
     public static float lerp(float delta, float start, float end) {
         return start + delta * (end - start);
     }
@@ -91,5 +95,16 @@ public class GeneralUtils {
         }
 
         return newValue;
+    }
+
+    public static coords checkPlayerAgainstWall(EntityPlayer player) {
+        double x = player.posX;
+        int y = MathHelper.floor_double(player.posY);
+        double z = player.posZ;
+
+        return player.worldObj.isBlockFullCube(MathHelper.floor_double(x + 1), y, MathHelper.floor_double(z)) ? coords.EAST :
+                player.worldObj.isBlockFullCube(MathHelper.floor_double(x - 1), y, MathHelper.floor_double(z)) ? coords.WEST :
+                player.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z + 1)) ? coords.SOUTH :
+                player.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z - 1)) ? coords.NORTH : null;
     }
 }

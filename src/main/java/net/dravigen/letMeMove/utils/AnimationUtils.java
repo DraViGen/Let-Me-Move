@@ -1,6 +1,6 @@
 package net.dravigen.letMeMove.utils;
 
-import net.dravigen.letMeMove.render.AnimationCustom;
+import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.minecraft.src.*;
 
 import java.util.HashMap;

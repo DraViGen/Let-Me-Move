@@ -4,11 +4,11 @@ import btw.AddonHandler;
 import btw.BTWAddon;
 import btw.world.util.data.DataEntry;
 import btw.world.util.data.DataProvider;
-import net.dravigen.letMeMove.render.AnimationRegistry;
+import net.dravigen.letMeMove.animation.AnimationRegistry;
 import net.minecraft.src.*;
 import org.lwjgl.input.Keyboard;
 
-import static net.dravigen.letMeMove.render.AnimationRegistry.STANDING_ID;
+import static net.dravigen.letMeMove.animation.AnimationRegistry.STANDING_ID;
 
 public class LetMeMoveAddon extends BTWAddon {
 

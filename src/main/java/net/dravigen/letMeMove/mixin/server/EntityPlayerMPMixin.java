@@ -1,4 +1,4 @@
-package net.dravigen.letMeMove.mixin;
+package net.dravigen.letMeMove.mixin.server;
 
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.EntityPlayerMP;

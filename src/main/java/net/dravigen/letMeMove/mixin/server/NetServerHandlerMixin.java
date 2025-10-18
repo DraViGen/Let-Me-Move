@@ -1,10 +1,9 @@
-package net.dravigen.letMeMove.mixin;
+package net.dravigen.letMeMove.mixin.server;
 
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.packet.PacketUtils;
-import net.dravigen.letMeMove.render.AnimationRegistry;
+import net.dravigen.letMeMove.animation.AnimationRegistry;
 import net.minecraft.src.*;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;

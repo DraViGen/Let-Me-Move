@@ -2,7 +2,7 @@ package net.dravigen.letMeMove.mixin;
 
 import net.dravigen.letMeMove.LetMeMoveAddon;
 import net.dravigen.letMeMove.packet.PacketUtils;
-import net.dravigen.letMeMove.render.AnimationCustom;
+import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.utils.AnimationUtils;
 import net.dravigen.letMeMove.utils.GeneralUtils;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static net.dravigen.letMeMove.render.AnimationRegistry.*;
+import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
 
 @Mixin(EntityLivingBase.class)
 public abstract class EntityLivingBaseMixin extends Entity implements ICustomMovementEntity {

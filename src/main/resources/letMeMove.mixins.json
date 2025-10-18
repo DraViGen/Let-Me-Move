@@ -6,19 +6,19 @@
   "mixins": [
     "EntityLivingBaseMixin",
     "EntityPlayerMixin",
-    "EntityPlayerMPMixin",
-    "GameSettingsMixin",
-    "NetServerHandlerMixin",
-    "ServerConfigurationManagerMixin",
-    "render.EntityRendererMixin",
-    "render.RenderPlayerMixin"
+    "server.EntityPlayerMPMixin",
+    "client.GameSettingsMixin",
+    "server.NetServerHandlerMixin",
+    "server.ServerConfigurationManagerMixin",
+    "client.render.EntityRendererMixin",
+    "client.render.RenderPlayerMixin"
   ],
   "client": [
-    "EntityPlayerSPMixin",
-    "MinecraftMixin",
-    "MovementInputFromOptionsMixin",
-    "NetClientHandlerMixin",
-    "render.ModelBipedMixin"
+    "client.EntityPlayerSPMixin",
+    "client.MinecraftMixin",
+    "client.MovementInputFromOptionsMixin",
+    "client.NetClientHandlerMixin",
+    "client.render.ModelBipedMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,4 +1,4 @@
-package net.dravigen.letMeMove.mixin;
+package net.dravigen.letMeMove.mixin.client;
 
 import net.minecraft.src.MovementInput;
 import net.minecraft.src.MovementInputFromOptions;

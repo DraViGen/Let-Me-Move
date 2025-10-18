@@ -1,7 +1,7 @@
-package net.dravigen.letMeMove.mixin.render;
+package net.dravigen.letMeMove.mixin.client.render;
 
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
-import net.dravigen.letMeMove.render.AnimationCustom;
+import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static net.dravigen.letMeMove.render.AnimationRegistry.*;
+import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
 
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {

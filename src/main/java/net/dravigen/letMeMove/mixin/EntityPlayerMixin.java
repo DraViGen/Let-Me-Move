@@ -1,6 +1,6 @@
 package net.dravigen.letMeMove.mixin;
 
-import net.dravigen.letMeMove.render.AnimationCustom;
+import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.utils.AnimationUtils;
 import net.dravigen.letMeMove.utils.GeneralUtils;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static net.dravigen.letMeMove.render.AnimationRegistry.*;
+import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 @Mixin(EntityPlayer.class)
@@ -39,7 +39,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
         ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
         EntityPlayer player = (EntityPlayer) (Object) this;
 
-        if (this.worldObj.isRemote) {
+        if (this.worldObj.isRemote && Minecraft.getMinecraft().currentScreen == null) {
             for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
                 animation.updateAnimationTime(customPlayer.llm_$getAnimationID());
             }

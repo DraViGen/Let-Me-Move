@@ -1,4 +1,4 @@
-package net.dravigen.letMeMove.mixin.render;
+package net.dravigen.letMeMove.mixin.client.render;
 
 import net.minecraft.src.ModelRenderer;
 import net.minecraft.src.RenderPlayer;

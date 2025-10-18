@@ -1,6 +1,6 @@
 package net.dravigen.letMeMove.interfaces;
 
-import net.dravigen.letMeMove.render.AnimationCustom;
+import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.src.ResourceLocation;
