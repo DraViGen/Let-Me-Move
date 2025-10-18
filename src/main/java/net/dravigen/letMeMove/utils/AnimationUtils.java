@@ -66,6 +66,104 @@ public class AnimationUtils {
         model.bipedLeftLeg.rotationPointZ = 0.1f;
     }
 
+    public static void offsetAllRotationPoints(ModelBiped model, int x, int y, int z) {
+        model.bipedBody.rotationPointX += x;
+        model.bipedBody.rotationPointY += y;
+        model.bipedBody.rotationPointZ += z;
+
+        model.bipedHead.rotationPointX += x;
+        model.bipedHead.rotationPointY += y;
+        model.bipedHead.rotationPointZ += z;
+
+        model.bipedHeadwear.rotationPointX += x;
+        model.bipedHeadwear.rotationPointY += y;
+        model.bipedHeadwear.rotationPointZ += z;
+
+        model.bipedRightArm.rotationPointX += x;
+        model.bipedRightArm.rotationPointY += y;
+        model.bipedRightArm.rotationPointZ += z;
+
+        model.bipedLeftArm.rotationPointX += x;
+        model.bipedLeftArm.rotationPointY += y;
+        model.bipedLeftArm.rotationPointZ += z;
+
+        model.bipedRightLeg.rotationPointX += x;
+        model.bipedRightLeg.rotationPointY += y;
+        model.bipedRightLeg.rotationPointZ += z;
+
+        model.bipedLeftLeg.rotationPointX += x;
+        model.bipedLeftLeg.rotationPointY += y;
+        model.bipedLeftLeg.rotationPointZ += z;
+    }
+
+    public static void centerAllRotationPoints(ModelBiped model) {
+        model.bipedBody.rotationPointX = 0.0F;
+        model.bipedBody.rotationPointY = 0.0F;
+        model.bipedBody.rotationPointZ = 0.0F;
+
+        model.bipedHead.rotationPointX = 0.0F;
+        model.bipedHead.rotationPointY = 0.0F;
+        model.bipedHead.rotationPointZ = 0.0F;
+
+        model.bipedHeadwear.rotationPointX = 0.0F;
+        model.bipedHeadwear.rotationPointY = 0.0F;
+        model.bipedHeadwear.rotationPointZ = 0.0F;
+
+        model.bipedRightArm.rotationPointX = 0.0F;
+        model.bipedRightArm.rotationPointY = 0.0F;
+        model.bipedRightArm.rotationPointZ = 0.0F;
+
+        model.bipedLeftArm.rotationPointX = 0.0F;
+        model.bipedLeftArm.rotationPointY = 0.0F;
+        model.bipedLeftArm.rotationPointZ = 0.0F;
+
+        model.bipedRightLeg.rotationPointX = 0.0F;
+        model.bipedRightLeg.rotationPointY = 0.0F;
+        model.bipedRightLeg.rotationPointZ = 0.0F;
+
+        model.bipedLeftLeg.rotationPointX = 0.0F;
+        model.bipedLeftLeg.rotationPointY = 0.0F;
+        model.bipedLeftLeg.rotationPointZ = 0.0F;
+    }
+
+    public static void setAllRotationPoint(ModelRenderer part, float rotX, float rotY, float rotZ) {
+        setRotationPoint(part, type.X, rotX);
+        setRotationPoint(part, type.Y, rotY);
+        setRotationPoint(part, type.Z, rotZ);
+    }
+
+    public static void setRotationPoint(ModelRenderer part, type type, float rot) {
+        if (type == AnimationUtils.type.X) {
+            part.rotationPointX = rot;
+        }
+        else if (type == AnimationUtils.type.Y) {
+            part.rotationPointY = rot;
+        }
+        else if (type == AnimationUtils.type.Z) {
+            part.rotationPointZ = rot;
+        }
+    }
+
+    public static void addAllRotationPoint(ModelRenderer part, float rotX, float rotY, float rotZ) {
+        addRotationPoint(part, type.X, rotX);
+        addRotationPoint(part, type.Y, rotY);
+        addRotationPoint(part, type.Z, rotZ);
+    }
+
+
+    public static void addRotationPoint(ModelRenderer part, type type, float rot) {
+        if (type == AnimationUtils.type.X) {
+            part.rotationPointX += rot;
+        }
+        else if (type == AnimationUtils.type.Y) {
+            part.rotationPointY += rot;
+        }
+        else if (type == AnimationUtils.type.Z) {
+            part.rotationPointZ += rot;
+        }
+    }
+
+
     public static void smoothRotateAll(ModelRenderer part, float rotX, float rotY, float rotZ) {
         smoothRotate(part, type.X, rotX, 0.1f);
         smoothRotate(part, type.Y, rotY, 0.1f);

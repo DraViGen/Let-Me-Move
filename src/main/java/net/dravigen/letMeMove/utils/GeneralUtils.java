@@ -97,14 +97,14 @@ public class GeneralUtils {
         return newValue;
     }
 
-    public static coords checkPlayerAgainstWall(EntityPlayer player) {
-        double x = player.posX;
-        int y = MathHelper.floor_double(player.posY);
-        double z = player.posZ;
+    public static coords checkEntityAgainstWall(Entity entity) {
+        double x = entity.posX;
+        int y = MathHelper.floor_double(entity.posY);
+        double z = entity.posZ;
 
-        return player.worldObj.isBlockFullCube(MathHelper.floor_double(x + 1), y, MathHelper.floor_double(z)) ? coords.EAST :
-                player.worldObj.isBlockFullCube(MathHelper.floor_double(x - 1), y, MathHelper.floor_double(z)) ? coords.WEST :
-                player.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z + 1)) ? coords.SOUTH :
-                player.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z - 1)) ? coords.NORTH : null;
+        return entity.worldObj.isBlockFullCube(MathHelper.floor_double(x + entity.width / 2 + 0.1), y, MathHelper.floor_double(z)) ? coords.EAST :
+                entity.worldObj.isBlockFullCube(MathHelper.floor_double(x - entity.width / 2 - 0.1), y, MathHelper.floor_double(z)) ? coords.WEST :
+                entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z + entity.width / 2 + 0.1)) ? coords.SOUTH :
+                entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z - entity.width / 2 - 0.1)) ? coords.NORTH : null;
     }
 }

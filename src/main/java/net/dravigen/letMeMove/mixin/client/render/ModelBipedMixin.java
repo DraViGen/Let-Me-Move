@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
+import static net.dravigen.letMeMove.utils.GeneralUtils.checkEntityAgainstWall;
 
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {
@@ -85,6 +86,10 @@ public abstract class ModelBipedMixin extends ModelBase {
         GL11.glRotatef(prevXRotation, 1, 0, 0);
 
         if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) GL11.glTranslatef(0, -prevOffset, 0);
+        if (customEntity.llm_$isAnimation(WALL_SLIDING_ID)) {
+            GeneralUtils.coords side = checkEntityAgainstWall(player);
+            player.renderYawOffset = side == GeneralUtils.coords.EAST ? 45 : side == GeneralUtils.coords.SOUTH ? 135 : side == GeneralUtils.coords.WEST ? 225 : 315;
+        }
     }
 
     @Inject(method = "setRotationAngles", at = @At("HEAD"), cancellable = true)

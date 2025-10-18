@@ -28,6 +28,10 @@ public class AnimationRegistry {
     static int pressTime = 0;
     static float prevPitch;
 
+    public static float pi(int i, int j) {
+        return pi * i / j;
+    }
+
 
     /**
      * Register the animations here, the higher the animation the higher the priority (will be checked first)
@@ -268,13 +272,10 @@ public class AnimationRegistry {
                         player.fallDistance > 0
                                 && !player.onGround
                                 && !player.inWater
-                                && checkPlayerAgainstWall(player) != null,
+                                && checkEntityAgainstWall(player) != null
+                                && player.canJump(),
                 (player, axisAlignedBB) ->
-                        player.fallDistance > 0
-                                && !player.onGround
-                                && !player.inWater
-                                && player.isSneaking()
-                                && checkPlayerAgainstWall(player) != null,
+                        player.isSneaking(),
                 AnimationRegistry::wallSlidingAnimation,
                 AnimationRegistry::commonLeaningUpdate
         );
@@ -361,8 +362,12 @@ public class AnimationRegistry {
         smoothRotateAll(model.bipedBody, 0, 0, 0,
                 0.6f * delta);
 
-        model.bipedHead.rotateAngleY = i * (pi / 180.0f);
-        model.bipedHead.rotateAngleX = j * (pi / 180.0f);
+        smoothRotateAll(model.bipedHead,
+                j * (pi / 180.0f),
+                i * (pi / 180.0f),
+                0,
+                0.75f * delta);
+
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
@@ -894,33 +899,39 @@ public class AnimationRegistry {
     }
 
     private static void wallSlidingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j, float u, float delta) {
-        ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
-
-        coords side = checkPlayerAgainstWall((EntityPlayer) entity);
-        float leaning = customEntity.llm_$getLeaningPitch();
-
         resetAnimationRotationPoints(model);
 
-        smoothRotateAll(model.bipedBody, 0, 0, 0,
-                0.6f * delta);
+        smoothRotateAll(model.bipedHead,
+                0,
+                0,
+                0,
+                0.75f * delta);
 
-        model.bipedHead.rotateAngleY = i * (pi / 180.0f);
-        model.bipedHead.rotateAngleX = j * (pi / 180.0f);
         model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
         model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 
-        entity.renderYawOffset = side == coords.EAST ? 0 : side == coords.SOUTH ? 90 : side == coords.WEST ? 180 : 270;
+        offsetAllRotationPoints(model, -4, 0, 0);
 
-        smoothRotateAll(model.bipedRightArm, 0, 0, 0,
+        smoothRotateAll(model.bipedBody, pi(1, 8), 0, 0,
+                0.6f * delta);
+
+        addAllRotationPoint(model.bipedRightArm, 1, 0, 0);
+        addAllRotationPoint(model.bipedLeftArm, 1, 0, 0);
+
+        smoothRotateAll(model.bipedRightArm, pi(1, 16), 0, pi(1, 6),
                 0.3f * delta);
 
-        smoothRotateAll(model.bipedLeftArm, 0, 0, -0,
+        smoothRotateAll(model.bipedLeftArm, 0, 0, -pi(4, 5),
                 0.3f * delta);
 
-        smoothRotateAll(model.bipedRightLeg, 0, 0, 0,
+        addAllRotationPoint(model.bipedRightLeg, 0, -2, 4);
+        addAllRotationPoint(model.bipedLeftLeg, 0, -2, 4);
+
+        smoothRotateAll(model.bipedRightLeg, pi(1, 7), 0, -pi(1, 10),
                 0.3f * delta);
 
-        smoothRotateAll(model.bipedLeftLeg, 0, 0, -0,
+        smoothRotateAll(model.bipedLeftLeg, 0, 0, -pi(1, 5),
                 0.3f * delta);
+
     }
 }

@@ -19,11 +19,14 @@ public abstract class NetServerHandlerMixin extends NetHandler {
         if (packet.channel.equals(PacketUtils.ANIMATION_SYNC_CHANNEL)) {
             PacketUtils.handleAnimationSync(packet, this.playerEntity);
         }
+        else if (packet.channel.equals(PacketUtils.HUNGER_EXHAUSTION_CHANNEL)) {
+            PacketUtils.handleExhaustionFromClient(packet, this.playerEntity);
+        }
     }
 
-    @ModifyConstant(method = "handleFlying", constant = @Constant(doubleValue = 1.65))
-    private double preventIllegalStance(double constant) {
-        return 2;
+    @Redirect(method = "handleFlying", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerMP;isPlayerSleeping()Z", ordinal = 1))
+    private boolean preventIllegalStance(EntityPlayerMP instance) {
+        return true;
     }
 
     @Redirect(method = "handleFlying", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerMP;addExhaustionForJump()V"))

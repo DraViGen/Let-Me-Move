@@ -19,6 +19,8 @@ import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
 public abstract class EntityLivingBaseMixin extends Entity implements ICustomMovementEntity {
 
     @Shadow public float moveForward;
+    @Shadow protected abstract float func_110146_f(float par1, float par2);
+    @Shadow public abstract boolean attackEntityFrom(DamageSource par1DamageSource, float par2);
 
     @Unique private float leaningPitch;
     @Unique private float lastLeaningPitch;
@@ -42,7 +44,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Override
     public ResourceLocation llm_$getAnimationID() {
-        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer) {
             return this.currentAnimation;
         }
         else return null;
@@ -50,7 +52,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Override
     public boolean llm_$isAnimation(ResourceLocation animationID) {
-        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer) {
             if (this.currentAnimation == null) return false;
 
             return this.currentAnimation.equals(animationID);
@@ -60,7 +62,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
     @Override
     public AnimationCustom llm_$getAnimation() {
-        if ((EntityLivingBase) (Object) this instanceof EntityPlayer player) {
+        if ((EntityLivingBase) (Object) this instanceof EntityPlayer) {
             if (this.currentAnimation == null) this.currentAnimation = STANDING_ID;
 
             return AnimationUtils.getAnimationFromID(this.currentAnimation);
@@ -103,6 +105,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
         this.side = side;
     }
 
+
     @Inject(method = "getSpeedModifier", at = @At("RETURN"), cancellable = true)
     private void applyAnimationSpeedModifier(CallbackInfoReturnable<Float> cir) {
         if (this.llm_$getAnimation() == null) return;
@@ -111,7 +114,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
     }
 
     @ModifyArg(method = "moveEntityWithHeading", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;moveFlying(FFF)V", ordinal = 2), index = 2)
-    private float flySpeedModifier(float par1) {
+    private float customFallSpeed(float par1) {
         if (this.llm_$getAnimation() == null) return par1;
 
         if ((EntityLivingBase) (Object) this instanceof EntityPlayer player && !player.capabilities.isFlying) {
@@ -137,9 +140,31 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 
                 return this.llm_$getAnimation().speedModifier;
             }
+            else if (this.llm_$isAnimation(WALL_SLIDING_ID)) {
+                this.motionY *= 0.85;
+
+                if (fallDistance > 4) {
+                    this.fallDistance *= 0.85f;
+                }
+
+                if (fallDistance > 6) {
+                    if (this.attackEntityFrom(DamageSource.generic, (float) (2 * -this.motionY))) {
+                        this.hurtResistantTime -= 8;
+                    }
+                }
+            }
         }
 
         return par1;
+    }
+
+    @Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/src/EntityLivingBase;onGround:Z"))
+    private boolean allowJumpWhileWallSliding(EntityLivingBase instance) {
+        if (((ICustomMovementEntity)instance).llm_$isAnimation(WALL_SLIDING_ID)) {
+            return true;
+        }
+
+        return instance.onGround;
     }
 
     @ModifyArg(method = "entityLivingBaseFall", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;attackEntityFrom(Lnet/minecraft/src/DamageSource;F)Z"), index = 1)
@@ -153,5 +178,14 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
         }
 
         return damage;
+    }
+
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;func_110146_f(FF)F"))
+    private float disableHeadTurn(EntityLivingBase instance, float par1, float par2) {
+        if (((ICustomMovementEntity)instance).llm_$isAnimation(WALL_SLIDING_ID)) {
+            return par2;
+        }
+
+        return this.func_110146_f(par1, par2);
     }
 }

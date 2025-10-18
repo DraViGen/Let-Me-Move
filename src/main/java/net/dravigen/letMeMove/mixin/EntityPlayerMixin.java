@@ -2,6 +2,7 @@ package net.dravigen.letMeMove.mixin;
 
 import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
+import net.dravigen.letMeMove.packet.PacketUtils;
 import net.dravigen.letMeMove.utils.AnimationUtils;
 import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
@@ -270,6 +271,26 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
             }
 
             ci.cancel();
+        }
+        else if (id.equals(WALL_SLIDING_ID)) {
+            int var7 = Math.round(MathHelper.sqrt_double(par3 * par3) * 100.0f);
+
+            if (var7 > 0) {
+                this.addStat(StatList.distanceFallenStat, var7);
+                this.addExhaustion(1f * var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
+            }
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "jump", at = @At("TAIL"))
+    private void addHorizontalMotionFromJumpingOnWall(CallbackInfo ci) {
+        if (((ICustomMovementEntity)this).llm_$isAnimation(WALL_SLIDING_ID)) {
+            GeneralUtils.coords side = GeneralUtils.checkEntityAgainstWall(this);
+            this.motionY += 0.15;
+            this.motionX += side == GeneralUtils.coords.EAST ? -0.3f : side == GeneralUtils.coords.WEST ? 0.3f : 0;
+            this.motionZ += side == GeneralUtils.coords.SOUTH ? -0.3f : side == GeneralUtils.coords.NORTH ? 0.3f : 0;
+            PacketUtils.sendExhaustionToServer(1.33f * 0.75f);
         }
     }
 }
