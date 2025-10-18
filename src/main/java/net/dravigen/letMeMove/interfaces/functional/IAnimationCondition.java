@@ -5,5 +5,5 @@ import net.minecraft.src.EntityPlayer;
 
 @FunctionalInterface
 public interface IAnimationCondition {
-    boolean isConditionsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB);
+	boolean isConditionsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB);
 }

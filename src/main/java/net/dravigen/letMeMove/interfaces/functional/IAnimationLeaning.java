@@ -4,5 +4,5 @@ import net.minecraft.src.EntityLivingBase;
 
 @FunctionalInterface
 public interface IAnimationLeaning {
-    void updateLeaningPitch(EntityLivingBase entity);
+	void updateLeaningPitch(EntityLivingBase entity);
 }
