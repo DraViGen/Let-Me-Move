@@ -71,9 +71,13 @@ public class AnimationRegistry {
 	private static void registerExample() {
 		AnimationCustom example = createAnimation(EXAMPLE_ID, 1.8f, 1, false);
 		
-		example.registerAnimation((player, axisAlignedBB) -> player.inWater && player.onGround,
-				(player, axisAlignedBB) -> player.isSneaking() && player.inWater && player.onGround,
-				AnimationRegistry::exampleAnimation, AnimationRegistry::commonLeaningUpdate);
+		example.registerAnimation(
+				(player, axisAlignedBB) -> 
+						player.inWater && player.onGround,
+				(player, axisAlignedBB) -> 
+						player.isSneaking() && player.inWater && player.onGround,
+				AnimationRegistry::exampleAnimation, 
+				AnimationRegistry::commonLeaningUpdate);
 	}
 	
 	/**
@@ -82,15 +86,23 @@ public class AnimationRegistry {
 	private static void registerStanding() {
 		AnimationCustom standing = createAnimation(STANDING_ID, 1.8f, 1, false);
 		
-		standing.registerAnimation((player, axisAlignedBB) -> false, (player, axisAlignedBB) -> false,
-				AnimationRegistry::commonAnimation, AnimationRegistry::commonLeaningUpdate);
+		standing.registerAnimation(
+				(player, axisAlignedBB) -> false, 
+				(player, axisAlignedBB) -> false,
+				AnimationRegistry::commonAnimation, 
+				AnimationRegistry::commonLeaningUpdate);
 	}
 	
 	private static void registerCrouching() {
 		AnimationCustom crouching = createAnimation(CROUCHING_ID, 1.4f, 0.3f, false);
 		
-		crouching.registerAnimation((player, axisAlignedBB) -> player.onGround || player.fallDistance < 2,
-				(player, axisAlignedBB) -> player.isSneaking(), AnimationRegistry::commonAnimation,
+		crouching.registerAnimation(
+				(player, axisAlignedBB) -> 
+						player.onGround 
+								|| player.fallDistance < 2,
+				(player, axisAlignedBB) -> 
+						player.isSneaking(), 
+				AnimationRegistry::commonAnimation,
 				AnimationRegistry::commonLeaningUpdate);
 	}
 	
@@ -98,7 +110,9 @@ public class AnimationRegistry {
 		AnimationCustom swimming = createAnimation(SWIMMING_ID, 0.8f, 0.15f, true);
 		
 		swimming.registerAnimation(
-				(player, axisAlignedBB) -> !player.capabilities.isFlying && (player.onGround || isInsideWater(player)),
+				(player, axisAlignedBB) -> 
+						!player.capabilities.isFlying 
+								&& (player.onGround || isInsideWater(player)),
 				(player, axisAlignedBB) -> {
 					boolean conditionA = crawl_key.pressed && (player.onGround || isInsideWater(player));
 					
@@ -107,14 +121,21 @@ public class AnimationRegistry {
 							player)) && player.isUsingSpecialKey() && player.moveForward > 0 && !player.capabilities.isFlying && !player.doesStatusPreventSprinting();
 					
 					return conditionA || conditionB;
-				}, AnimationRegistry::swimmingAnimation, AnimationRegistry::swimmingLeaningUpdate);
+				}, 
+				AnimationRegistry::swimmingAnimation, 
+				AnimationRegistry::swimmingLeaningUpdate);
 	}
 	
 	private static void registerDiving() {
 		AnimationCustom diving = createAnimation(DIVING_ID, 0.8f, 0.015f, true);
 		
-		diving.registerAnimation((player, axisAlignedBB) -> !player.onGround && !isInsideWater(player),
-				(player, axisAlignedBB) -> crawl_key.pressed, AnimationRegistry::divingAnimation,
+		diving.registerAnimation(
+				(player, axisAlignedBB) -> 
+						!player.onGround 
+								&& !isInsideWater(player),
+				(player, axisAlignedBB) -> 
+						crawl_key.pressed, 
+				AnimationRegistry::divingAnimation,
 				AnimationRegistry::divingLeaningUpdate);
 	}
 	
@@ -122,8 +143,13 @@ public class AnimationRegistry {
 		AnimationCustom highFalling = createAnimation(HIGH_FALLING_ID, 1.8f, 0.005f, true);
 		
 		highFalling.registerAnimation(
-				(player, axisAlignedBB) -> player.fallDistance >= hFalling_height && !player.isSneaking() && !player.capabilities.isFlying,
-				(player, axisAlignedBB) -> !crawl_key.pressed, AnimationRegistry::highFallingAnimation,
+				(player, axisAlignedBB) -> 
+						player.fallDistance >= hFalling_height 
+								&& !player.isSneaking() 
+								&& !player.capabilities.isFlying,
+				(player, axisAlignedBB) -> 
+						!crawl_key.pressed, 
+				AnimationRegistry::highFallingAnimation,
 				AnimationRegistry::highFallingLeaningUpdate);
 	}
 	
@@ -131,17 +157,28 @@ public class AnimationRegistry {
 		AnimationCustom skyDiving = createAnimation(SKYDIVING_ID, 1f, 0.2f, true);
 		
 		skyDiving.registerAnimation(
-				(player, axisAlignedBB) -> player.fallDistance >= 10 && !player.capabilities.isFlying,
-				(player, axisAlignedBB) -> !crawl_key.pressed && player.isSneaking(),
-				AnimationRegistry::skyDivingAnimation, AnimationRegistry::skyDivingLeaningUpdate);
+				(player, axisAlignedBB) -> 
+						player.fallDistance >= 10 
+								&& !player.capabilities.isFlying,
+				(player, axisAlignedBB) -> 
+						!crawl_key.pressed 
+								&& player.isSneaking(),
+				AnimationRegistry::skyDivingAnimation, 
+				AnimationRegistry::skyDivingLeaningUpdate);
 	}
 	
 	private static void registerLowFalling() {
 		AnimationCustom lowFalling = createAnimation(LOW_FALLING_ID, 1.8f, 0.02f, false);
 		
 		lowFalling.registerAnimation(
-				(player, axisAlignedBB) -> player.fallDistance >= lFalling_height && player.fallDistance < hFalling_height && !player.isSneaking() && !player.capabilities.isFlying,
-				(player, axisAlignedBB) -> !crawl_key.pressed, AnimationRegistry::lowFallingAnimation,
+				(player, axisAlignedBB) -> 
+						player.fallDistance >= lFalling_height 
+								&& player.fallDistance < hFalling_height 
+								&& !player.isSneaking() 
+								&& !player.capabilities.isFlying,
+				(player, axisAlignedBB) -> 
+						!crawl_key.pressed, 
+				AnimationRegistry::lowFallingAnimation,
 				AnimationRegistry::lowFallingLeaningUpdate);
 	}
 	
@@ -149,7 +186,10 @@ public class AnimationRegistry {
 		AnimationCustom dashing = createAnimation(DASHING_ID, 1.8f, 1, false, 20, 5);
 		
 		dashing.registerAnimation(
-				(player, axisAlignedBB) -> player.moveForward == 0 && player.onGround && !player.doesStatusPreventSprinting(),
+				(player, axisAlignedBB) -> 
+						player.moveForward == 0 
+								&& player.onGround 
+								&& !player.doesStatusPreventSprinting(),
 				(player, axisAlignedBB) -> {
 					if (player.isUsingSpecialKey() || player.moveStrafing != 0) {
 						if (pressTime < 5 && player.isUsingSpecialKey() && player.moveStrafing != 0) {
@@ -164,14 +204,21 @@ public class AnimationRegistry {
 					}
 					
 					return false;
-				}, AnimationRegistry::dashingAnimation, AnimationRegistry::commonLeaningUpdate);
+				}, 
+				AnimationRegistry::dashingAnimation, 
+				AnimationRegistry::commonLeaningUpdate);
 	}
 	
 	private static void registerRolling() {
 		AnimationCustom rolling = createAnimation(ROLLING_ID, 1.8f, 1, true, 20, 25, 0f);
 		
-		rolling.registerAnimation((player, axisAlignedBB) -> !player.doesStatusPreventSprinting() && !player.inWater,
-				(player, axisAlignedBB) -> roll_key.pressed, AnimationRegistry::rollingAnimation,
+		rolling.registerAnimation(
+				(player, axisAlignedBB) -> 
+						!player.doesStatusPreventSprinting() 
+								&& !player.inWater,
+				(player, axisAlignedBB) -> 
+						roll_key.pressed, 
+				AnimationRegistry::rollingAnimation,
 				AnimationRegistry::rollingLeaningUpdate);
 	}
 	
@@ -179,9 +226,16 @@ public class AnimationRegistry {
 		AnimationCustom wallSliding = createAnimation(WALL_SLIDING_ID, 1.8f, 1, false);
 		
 		wallSliding.registerAnimation(
-				(player, axisAlignedBB) -> player.fallDistance > 0 && !player.onGround && !player.inWater && checkEntityAgainstWall(
-						player) != null && player.canJump(), (player, axisAlignedBB) -> player.isSneaking(),
-				AnimationRegistry::wallSlidingAnimation, AnimationRegistry::commonLeaningUpdate);
+				(player, axisAlignedBB) -> 
+						player.fallDistance > 0 
+								&& !player.onGround 
+								&& !player.inWater 
+								&& checkEntityAgainstWall(player) != null 
+								&& player.canJump(), 
+				(player, axisAlignedBB) -> 
+						player.isSneaking(),
+				AnimationRegistry::wallSlidingAnimation, 
+				AnimationRegistry::commonLeaningUpdate);
 	}
 	
 	
