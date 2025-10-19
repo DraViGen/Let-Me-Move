@@ -13,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.*;
+
 import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
@@ -25,6 +27,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	protected boolean sleeping;
 	@Unique
 	boolean movedOnce = false;
+	@Unique
+	private coords prevSide;
 	
 	public EntityPlayerMixin(World par1World) {
 		super(par1World);
@@ -47,6 +51,12 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	
 	@Shadow
 	public abstract float getMovementSpeedModifierFromEffects();
+	
+	@Unique
+	private final List<AnimationCustom> animToCheckIfFail = Arrays.asList(
+			AnimationUtils.getAnimationFromID(SWIMMING_ID),
+			AnimationUtils.getAnimationFromID(CROUCHING_ID)
+	);
 	
 	@Inject(method = "onUpdate", at = @At("HEAD"))
 	private void updateAnimation(CallbackInfo ci) {
@@ -101,7 +111,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 					else {
 						dHeight = 0;
 						
-						for (AnimationCustom testAnimation : AnimationUtils.getAnimationsMap().values()) {
+						for (AnimationCustom testAnimation : animToCheckIfFail) {
 							bounds = this.boundingBox.copy();
 							
 							float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
@@ -175,7 +185,6 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 					this.motionZ = direction.zCoord * speed;
 					
 					super.moveEntity(this.motionX, direction.yCoord * speed + this.motionY, this.motionZ);
-					this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
 					
 					this.motionY *= 0.5f;
 					
@@ -192,15 +201,6 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 					this.limbSwing += this.limbSwingAmount;
 				}
 				else {
-                    /*
-                    super.moveEntity(this.motionX, this.motionY, this.motionZ);
-                    this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
-
-                    this.motionX *= 0.8f;
-                    this.motionY *= 0.8f;
-                    this.motionZ *= 0.8f;
-                    this.motionY -= 0.02;*/
-					
 					this.limbSwingAmount = 0;
 				}
 			}
@@ -225,7 +225,6 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 				}
 				
 				super.moveEntity(this.motionX, this.motionY, this.motionZ);
-				this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
 				
 				movedOnce = true;
 			}
@@ -234,11 +233,44 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			ci.cancel();
 			
 			super.moveEntityWithHeading(this.moveStrafing, 1.5f);
-			this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
+		}
+		else if (id.equals(WALL_PULLING_ID)) {
+			ci.cancel();
+			
+			coords side = checkEntityAgainstWall(this);
+			
+			if (side != null) {
+				prevSide = side;
+			}
+			
+			double x = 0;
+			double z = 0;
+			
+			if (this.moveForward > 0) {
+				if (side == null && !movedOnce) {
+					x = prevSide == coords.EAST ? 0.5 : prevSide == coords.WEST ? -0.5 : x;
+					z = prevSide == coords.SOUTH ? 0.5 : prevSide == coords.NORTH ? -0.5 : z;
+					
+					animation.timeRendered = animation.duration;
+					
+					movedOnce = true;
+				}
+				
+				this.moveEntity(x, 1.75d / animation.duration, z);
+			}
+			else {
+				x = prevSide == coords.SOUTH ? this.moveStrafing : prevSide == coords.NORTH ? -this.moveStrafing : x;
+				z = prevSide == coords.EAST ? -this.moveStrafing : prevSide == coords.WEST ? this.moveStrafing : z;
+				
+				this.moveEntity(x / 16, 0, z / 16);
+			}
 		}
 		else {
 			movedOnce = false;
+			return;
 		}
+		
+		this.addMovementStat(this.posX - prevX, this.posY - prevY, this.posZ - prevZ);
 	}
 	
 	@Unique

@@ -190,7 +190,9 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 	
 	@Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityLivingBase;func_110146_f(FF)F"))
 	private float disableHeadTurn(EntityLivingBase instance, float par1, float par2) {
-		if (((ICustomMovementEntity) instance).llm_$isAnimation(WALL_SLIDING_ID)) {
+		ResourceLocation animation = ((ICustomMovementEntity) instance).llm_$getAnimationID();
+		
+		if (animation != null && (animation.equals(WALL_SLIDING_ID) || animation.equals(WALL_PULLING_ID))) {
 			return par2;
 		}
 		

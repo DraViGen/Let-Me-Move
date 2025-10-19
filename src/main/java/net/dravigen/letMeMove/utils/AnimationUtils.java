@@ -3,40 +3,60 @@ package net.dravigen.letMeMove.utils;
 import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.minecraft.src.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AnimationUtils {
+	private static int priority = 0;
+	
 	private static final Map<ResourceLocation, AnimationCustom> animationsMap = new HashMap<>();
 	
 	public static Map<ResourceLocation, AnimationCustom> getAnimationsMap() {
-		return animationsMap;
-	}
+		return animationsMap.entrySet()
+				.stream()
+				.sorted(Comparator.comparingInt(animation -> animation.getValue().priority))
+				.collect(Collectors.toMap(
+						Map.Entry::getKey,
+						Map.Entry::getValue,
+						(oldValue, newValue) -> oldValue,
+						LinkedHashMap::new
+				));}
 	
 	public static AnimationCustom getAnimationFromID(ResourceLocation ID) {
 		return animationsMap.get(ID);
 	}
 	
+	public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier) {
+		return createAnimation(identifier, height, moveModifier, false, 0, 0, true, 0);
+	}
+	
 	public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier,
 			boolean needYOffsetUpdate) {
-		return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, 0, 0, 0);
+		return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, 0, 0, true, 0);
 	}
 	
 	public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier,
 			boolean needYOffsetUpdate, int maxCooldown) {
-		return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown, 0, 0);
+		return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown, 0, true, 0);
 	}
 	
 	public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier,
 			boolean needYOffsetUpdate, int maxCooldown, int duration) {
-		return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown, duration, 0);
+		return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown, duration, true, 0);
 	}
 	
 	public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier,
-			boolean needYOffsetUpdate, int maxCooldown, int duration, float yOffset) {
+			boolean needYOffsetUpdate, int maxCooldown, int duration, boolean shouldAutoUpdate) {
+		return createAnimation(identifier, height, moveModifier, needYOffsetUpdate, maxCooldown, duration, shouldAutoUpdate, 0);
+	}
+		
+		public static AnimationCustom createAnimation(ResourceLocation identifier, float height, float moveModifier,
+			boolean needYOffsetUpdate, int maxCooldown, int duration, boolean shouldAutoUpdate, float yOffset) {
 		AnimationCustom animation = new AnimationCustom(identifier, height, moveModifier, needYOffsetUpdate,
-				maxCooldown, duration, yOffset);
+				maxCooldown, duration, shouldAutoUpdate, yOffset, priority);
 		animationsMap.put(identifier, animation);
+		
+		priority++;
 		
 		return animation;
 	}
@@ -71,7 +91,7 @@ public class AnimationUtils {
 		model.bipedLeftLeg.rotationPointZ = 0.1f;
 	}
 	
-	public static void offsetAllRotationPoints(ModelBiped model, int x, int y, int z) {
+	public static void offsetAllRotationPoints(ModelBiped model, float x, float y, float z) {
 		model.bipedBody.rotationPointX += x;
 		model.bipedBody.rotationPointY += y;
 		model.bipedBody.rotationPointZ += z;

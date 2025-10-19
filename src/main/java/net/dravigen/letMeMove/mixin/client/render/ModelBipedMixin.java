@@ -99,9 +99,20 @@ public abstract class ModelBipedMixin extends ModelBase {
 		GL11.glRotatef(prevXRotation, 1, 0, 0);
 		
 		if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) GL11.glTranslatef(0, -prevOffset, 0);
+		
 		if (customEntity.llm_$isAnimation(WALL_SLIDING_ID)) {
 			GeneralUtils.coords side = checkEntityAgainstWall(player);
-			player.renderYawOffset = side == GeneralUtils.coords.EAST ? 45 : side == GeneralUtils.coords.SOUTH ? 135 : side == GeneralUtils.coords.WEST ? 225 : 315;
+			
+			if (side != null) {
+				player.renderYawOffset = side == GeneralUtils.coords.EAST ? 45 : side == GeneralUtils.coords.SOUTH ? 135 : side == GeneralUtils.coords.WEST ? 225 : 315;
+			}
+		}
+		else if (customEntity.llm_$isAnimation(WALL_PULLING_ID)) {
+			GeneralUtils.coords side = checkEntityAgainstWall(player);
+			
+			if (side != null) {
+				player.renderYawOffset = side == GeneralUtils.coords.EAST ? 270 : side == GeneralUtils.coords.SOUTH ? 0 : side == GeneralUtils.coords.WEST ? 90 : 180;
+			}
 		}
 	}
 	

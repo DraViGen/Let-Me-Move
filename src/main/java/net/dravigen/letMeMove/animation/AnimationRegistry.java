@@ -27,6 +27,7 @@ public class AnimationRegistry {
 	private static final float pi = (float) Math.PI;
 	static int pressTime = 0;
 	static float prevPitch;
+	static float yBlockAboveWall;
 	
 	public static float pi(int i, int j) {
 		return pi * i / j;
@@ -38,8 +39,6 @@ public class AnimationRegistry {
 	 */
 	public static void registerAllAnimation() {
 		registerStanding();
-		
-		registerCrouching();
 		
 		registerSwimming();
 		
@@ -55,7 +54,11 @@ public class AnimationRegistry {
 		
 		registerLowFalling();
 		
+		registerWallPulling();
+		
 		registerWallSliding();
+		
+		registerCrouching();
 	}
 	
 	
@@ -71,38 +74,26 @@ public class AnimationRegistry {
 	private static void registerExample() {
 		AnimationCustom example = createAnimation(EXAMPLE_ID, 1.8f, 1, false);
 		
-		example.registerAnimation(
-				(player, axisAlignedBB) -> 
-						player.inWater && player.onGround,
-				(player, axisAlignedBB) -> 
-						player.isSneaking() && player.inWater && player.onGround,
-				AnimationRegistry::exampleAnimation, 
-				AnimationRegistry::commonLeaningUpdate);
+		example.registerAnimation((player, axisAlignedBB) -> player.inWater && player.onGround,
+				(player, axisAlignedBB) -> player.isSneaking() && player.inWater && player.onGround,
+				AnimationRegistry::exampleAnimation, AnimationRegistry::commonLeaningUpdate);
 	}
 	
 	/**
 	 * Animation registry methods
 	 */
 	private static void registerStanding() {
-		AnimationCustom standing = createAnimation(STANDING_ID, 1.8f, 1, false);
+		AnimationCustom standing = createAnimation(STANDING_ID, 1.8f, 1);
 		
-		standing.registerAnimation(
-				(player, axisAlignedBB) -> false, 
-				(player, axisAlignedBB) -> false,
-				AnimationRegistry::commonAnimation, 
-				AnimationRegistry::commonLeaningUpdate);
+		standing.registerAnimation((player, axisAlignedBB) -> false, (player, axisAlignedBB) -> false,
+				AnimationRegistry::commonAnimation, AnimationRegistry::commonLeaningUpdate);
 	}
 	
 	private static void registerCrouching() {
-		AnimationCustom crouching = createAnimation(CROUCHING_ID, 1.4f, 0.3f, false);
+		AnimationCustom crouching = createAnimation(CROUCHING_ID, 1.4f, 0.3f);
 		
-		crouching.registerAnimation(
-				(player, axisAlignedBB) -> 
-						player.onGround 
-								|| player.fallDistance < 2,
-				(player, axisAlignedBB) -> 
-						player.isSneaking(), 
-				AnimationRegistry::commonAnimation,
+		crouching.registerAnimation((player, axisAlignedBB) -> player.onGround || player.fallDistance < 2,
+				(player, axisAlignedBB) -> player.isSneaking(), AnimationRegistry::commonAnimation,
 				AnimationRegistry::commonLeaningUpdate);
 	}
 	
@@ -110,9 +101,7 @@ public class AnimationRegistry {
 		AnimationCustom swimming = createAnimation(SWIMMING_ID, 0.8f, 0.15f, true);
 		
 		swimming.registerAnimation(
-				(player, axisAlignedBB) -> 
-						!player.capabilities.isFlying 
-								&& (player.onGround || isInsideWater(player)),
+				(player, axisAlignedBB) -> !player.capabilities.isFlying && (player.onGround || isInsideWater(player)),
 				(player, axisAlignedBB) -> {
 					boolean conditionA = crawl_key.pressed && (player.onGround || isInsideWater(player));
 					
@@ -121,21 +110,14 @@ public class AnimationRegistry {
 							player)) && player.isUsingSpecialKey() && player.moveForward > 0 && !player.capabilities.isFlying && !player.doesStatusPreventSprinting();
 					
 					return conditionA || conditionB;
-				}, 
-				AnimationRegistry::swimmingAnimation, 
-				AnimationRegistry::swimmingLeaningUpdate);
+				}, AnimationRegistry::swimmingAnimation, AnimationRegistry::swimmingLeaningUpdate);
 	}
 	
 	private static void registerDiving() {
 		AnimationCustom diving = createAnimation(DIVING_ID, 0.8f, 0.015f, true);
 		
-		diving.registerAnimation(
-				(player, axisAlignedBB) -> 
-						!player.onGround 
-								&& !isInsideWater(player),
-				(player, axisAlignedBB) -> 
-						crawl_key.pressed, 
-				AnimationRegistry::divingAnimation,
+		diving.registerAnimation((player, axisAlignedBB) -> !player.onGround && !isInsideWater(player),
+				(player, axisAlignedBB) -> crawl_key.pressed, AnimationRegistry::divingAnimation,
 				AnimationRegistry::divingLeaningUpdate);
 	}
 	
@@ -143,13 +125,8 @@ public class AnimationRegistry {
 		AnimationCustom highFalling = createAnimation(HIGH_FALLING_ID, 1.8f, 0.005f, true);
 		
 		highFalling.registerAnimation(
-				(player, axisAlignedBB) -> 
-						player.fallDistance >= hFalling_height 
-								&& !player.isSneaking() 
-								&& !player.capabilities.isFlying,
-				(player, axisAlignedBB) -> 
-						!crawl_key.pressed, 
-				AnimationRegistry::highFallingAnimation,
+				(player, axisAlignedBB) -> player.fallDistance >= hFalling_height && !player.isSneaking() && !player.capabilities.isFlying,
+				(player, axisAlignedBB) -> !crawl_key.pressed, AnimationRegistry::highFallingAnimation,
 				AnimationRegistry::highFallingLeaningUpdate);
 	}
 	
@@ -157,28 +134,17 @@ public class AnimationRegistry {
 		AnimationCustom skyDiving = createAnimation(SKYDIVING_ID, 1f, 0.2f, true);
 		
 		skyDiving.registerAnimation(
-				(player, axisAlignedBB) -> 
-						player.fallDistance >= 10 
-								&& !player.capabilities.isFlying,
-				(player, axisAlignedBB) -> 
-						!crawl_key.pressed 
-								&& player.isSneaking(),
-				AnimationRegistry::skyDivingAnimation, 
-				AnimationRegistry::skyDivingLeaningUpdate);
+				(player, axisAlignedBB) -> player.fallDistance >= 10 && !player.capabilities.isFlying,
+				(player, axisAlignedBB) -> !crawl_key.pressed && player.isSneaking(),
+				AnimationRegistry::skyDivingAnimation, AnimationRegistry::skyDivingLeaningUpdate);
 	}
 	
 	private static void registerLowFalling() {
 		AnimationCustom lowFalling = createAnimation(LOW_FALLING_ID, 1.8f, 0.02f, false);
 		
 		lowFalling.registerAnimation(
-				(player, axisAlignedBB) -> 
-						player.fallDistance >= lFalling_height 
-								&& player.fallDistance < hFalling_height 
-								&& !player.isSneaking() 
-								&& !player.capabilities.isFlying,
-				(player, axisAlignedBB) -> 
-						!crawl_key.pressed, 
-				AnimationRegistry::lowFallingAnimation,
+				(player, axisAlignedBB) -> player.fallDistance >= lFalling_height && player.fallDistance < hFalling_height && !player.isSneaking() && !player.capabilities.isFlying,
+				(player, axisAlignedBB) -> !crawl_key.pressed, AnimationRegistry::lowFallingAnimation,
 				AnimationRegistry::lowFallingLeaningUpdate);
 	}
 	
@@ -186,10 +152,7 @@ public class AnimationRegistry {
 		AnimationCustom dashing = createAnimation(DASHING_ID, 1.8f, 1, false, 20, 5);
 		
 		dashing.registerAnimation(
-				(player, axisAlignedBB) -> 
-						player.moveForward == 0 
-								&& player.onGround 
-								&& !player.doesStatusPreventSprinting(),
+				(player, axisAlignedBB) -> player.moveForward == 0 && player.onGround && !player.doesStatusPreventSprinting(),
 				(player, axisAlignedBB) -> {
 					if (player.isUsingSpecialKey() || player.moveStrafing != 0) {
 						if (pressTime < 5 && player.isUsingSpecialKey() && player.moveStrafing != 0) {
@@ -204,37 +167,43 @@ public class AnimationRegistry {
 					}
 					
 					return false;
-				}, 
-				AnimationRegistry::dashingAnimation, 
-				AnimationRegistry::commonLeaningUpdate);
+				}, AnimationRegistry::dashingAnimation, AnimationRegistry::commonLeaningUpdate);
 	}
 	
 	private static void registerRolling() {
-		AnimationCustom rolling = createAnimation(ROLLING_ID, 1.8f, 1, true, 20, 25, 0f);
+		AnimationCustom rolling = createAnimation(ROLLING_ID, 1.8f, 1, true, 20, 25, true);
 		
 		rolling.registerAnimation(
-				(player, axisAlignedBB) -> 
-						!player.doesStatusPreventSprinting() 
-								&& !player.inWater,
-				(player, axisAlignedBB) -> 
-						roll_key.pressed, 
-				AnimationRegistry::rollingAnimation,
+				(player, axisAlignedBB) -> !player.doesStatusPreventSprinting() && !player.inWater && !checkIfEntityFacingWall(
+						player), (player, axisAlignedBB) -> roll_key.pressed, AnimationRegistry::rollingAnimation,
 				AnimationRegistry::rollingLeaningUpdate);
 	}
 	
 	private static void registerWallSliding() {
-		AnimationCustom wallSliding = createAnimation(WALL_SLIDING_ID, 1.8f, 1, false);
+		AnimationCustom wallSliding = createAnimation(
+				WALL_SLIDING_ID, 1.8f, 1, false);
 		
 		wallSliding.registerAnimation(
-				(player, axisAlignedBB) -> 
-						player.fallDistance > 0 
-								&& !player.onGround 
-								&& !player.inWater 
-								&& checkEntityAgainstWall(player) != null 
-								&& player.canJump(), 
-				(player, axisAlignedBB) -> 
-						player.isSneaking(),
-				AnimationRegistry::wallSlidingAnimation, 
+				(player, axisAlignedBB) ->
+						player.fallDistance > 0 && !player.onGround && !player.inWater && checkEntityAgainstWall(
+						player, 1.5) != null && player.canJump(), (player, axisAlignedBB) -> player.isSneaking(),
+				AnimationRegistry::wallSlidingAnimation, AnimationRegistry::commonLeaningUpdate);
+	}
+	
+	private static void registerWallPulling() {
+		AnimationCustom wallPulling = createAnimation(
+				WALL_PULLING_ID, 1.8f, 1, false, 10, 40, false);
+		
+		wallPulling.registerAnimation(
+				(player, axisAlignedBB) ->
+						(player.onGround || player.fallDistance < 2)
+								&& !player.inWater && player.canJump()
+								&& (yBlockAboveWall = checkIfOpenSpaceAboveWall(player)) != -1
+								&& checkIfEntityFacingWall(player),
+				(player, axisAlignedBB) ->
+						player.isSneaking()
+								&& player.moveForward > 0,
+				AnimationRegistry::wallPullingAnimation,
 				AnimationRegistry::commonLeaningUpdate);
 	}
 	
@@ -312,7 +281,6 @@ public class AnimationRegistry {
 	private static void exampleAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i,
 			float j, float u, float delta) {
 		ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
-		
 		float leaning = customEntity.llm_$getLeaningPitch();
 		
 		resetAnimationRotationPoints(model);
@@ -805,5 +773,72 @@ public class AnimationRegistry {
 		
 		smoothRotateAll(model.bipedLeftLeg, 0, 0, -pi(1, 5), 0.3f * delta);
 		
+	}
+	
+	private static void wallPullingAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h,
+			float i, float j, float u, float delta) {
+		ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
+		AnimationCustom animation = customEntity.llm_$getAnimation();
+		
+		if (!entity.isSneaking() || entity.moveForward < 0 || (entity.moveForward == 0 && entity.moveStrafing != 0 && (checkIfOpenSpaceAboveWall(entity) == -1
+				|| !checkIfEntityFacingWall(entity)))) {
+			animation.timeRendered = animation.duration;
+			return;
+		}
+		
+		resetAnimationRotationPoints(model);
+		
+		float[] body = new float[]{0, 0, 0};
+		float[] rArm = new float[]{0, 0, 0};
+		float[] lArm = new float[]{0, 0, 0};
+		float[] rLeg = new float[]{0, 0, 0};
+		float[] lLeg = new float[]{0, 0, 0};
+		
+		animation.timeRendered = MathHelper.floor_double((2 - ((yBlockAboveWall + 0.05) - entity.boundingBox.minY)) * animation.duration / 2);
+		
+		int t = animation.timeRendered;
+		
+		offsetAllRotationPoints(model, 0, 0, -2);
+		
+		rArm[0] = -pi(6, 8) + pi(6, 8) * t / 40;
+		lArm[0] = -pi(6, 8) + pi(6, 8) * t / 40;
+		
+		if (t > 20) {
+			animation.height = 1.4f;
+			
+			body[0] = 0.5F;
+			
+			rArm[0] += 0.4F;
+			model.bipedRightArm.rotationPointY = 5.2F;
+			
+			lArm[0] += 0.4F;
+			model.bipedLeftArm.rotationPointY = 5.2F;
+			
+			model.bipedRightLeg.rotationPointY = 12.2F;
+			model.bipedRightLeg.rotationPointZ += 4.0F;
+			
+			model.bipedLeftLeg.rotationPointY = 12.2F;
+			model.bipedLeftLeg.rotationPointZ += 4.0F;
+			
+			model.bipedHead.rotationPointY = 4.2F;
+			model.bipedHeadwear.rotationPointY = 4.2f;
+			
+			model.bipedBody.rotationPointY = 3.2F;
+		}
+		
+		smoothRotateAll(model.bipedBody, body, 1);
+		
+		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 0.75f * delta);
+		
+		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
+		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
+		
+		smoothRotateAll(model.bipedRightArm, rArm, 0.3f * delta);
+		
+		smoothRotateAll(model.bipedLeftArm, lArm, 0.3f * delta);
+		
+		smoothRotateAll(model.bipedRightLeg, rLeg, 0.3f * delta);
+		
+		smoothRotateAll(model.bipedLeftLeg, lLeg, 0.3f * delta);
 	}
 }

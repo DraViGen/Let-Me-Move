@@ -10,26 +10,30 @@ public class AnimationCustom {
 	public final float speedModifier;
 	public final boolean needYOffsetUpdate;
 	public final int maxCooldown;
+	public final int duration;
+	public final boolean shouldAutoUpdate;
 	private final ResourceLocation animationIdentifier;
 	public float height;
 	public int cooldown = 0;
 	public float yOffset;
-	public int duration;
 	public int timeRendered;
+	public int priority;
 	private IAnimationRender animationRender;
 	private IAnimationCondition activationConditions;
 	private IAnimationCondition generalConditions;
 	private IAnimationLeaning leaningUpdate;
 	
 	public AnimationCustom(ResourceLocation animationIdentifier, float height, float speedModifier,
-			boolean needYOffsetUpdate, int maxCooldown, int duration, float yOffset) {
+			boolean needYOffsetUpdate, int maxCooldown, int duration, boolean shouldAutoUpdate, float yOffset, int priority) {
 		this.animationIdentifier = animationIdentifier;
 		this.height = height;
 		this.speedModifier = speedModifier;
 		this.needYOffsetUpdate = needYOffsetUpdate;
 		this.maxCooldown = maxCooldown;
 		this.duration = duration;
+		this.shouldAutoUpdate = shouldAutoUpdate;
 		this.yOffset = yOffset;
+		this.priority = priority;
 	}
 	
 	public ResourceLocation getID() {
@@ -84,7 +88,9 @@ public class AnimationCustom {
 		if (currentAnimaiton.equals(this.animationIdentifier)) {
 			if (this.cooldown == 0) {
 				if (this.timeRendered < this.duration) {
-					this.timeRendered++;
+					if (this.shouldAutoUpdate) {
+						this.timeRendered++;
+					}
 				}
 				else {
 					this.startCooldown();
