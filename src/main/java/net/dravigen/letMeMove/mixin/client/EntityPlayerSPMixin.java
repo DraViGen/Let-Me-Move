@@ -1,6 +1,6 @@
 package net.dravigen.letMeMove.mixin.client;
 
-import net.dravigen.letMeMove.animation.AnimationRegistry;
+import net.dravigen.letMeMove.animation.AnimRegistry;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 import org.objectweb.asm.Opcodes;
@@ -16,8 +16,7 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 	
 	@Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isSneaking()Z"))
 	private boolean disableSprintOnCrawl(EntityPlayerSP instance) {
-		if (instance.isSneaking() || ((ICustomMovementEntity) instance).llm_$isAnimation(
-				AnimationRegistry.SWIMMING_ID)) {
+		if (instance.isSneaking() || ((ICustomMovementEntity) instance).llm_$isAnimation(AnimRegistry.SWIMMING.getID())) {
 			instance.setSprinting(false);
 			
 			return true;
@@ -28,7 +27,7 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 	
 	@Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/src/MovementInput;sneak:Z", ordinal = 0, opcode = Opcodes.GETFIELD))
 	private boolean disableVanillaSneakLowerCamera(MovementInput instance) {
-		return ((ICustomMovementEntity) this).llm_$isAnimation(AnimationRegistry.CROUCHING_ID);
+		return ((ICustomMovementEntity) this).llm_$isAnimation(AnimRegistry.CROUCHING.getID());
 	}
 	
 	@ModifyArg(method = "pushOutOfBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isBlockTranslucent(III)Z", ordinal = 1), index = 1)

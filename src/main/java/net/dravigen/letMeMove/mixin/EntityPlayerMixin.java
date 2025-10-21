@@ -1,6 +1,6 @@
 package net.dravigen.letMeMove.mixin;
 
-import net.dravigen.letMeMove.animation.AnimationCustom;
+import net.dravigen.letMeMove.animation.BaseAnimation;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.packet.PacketUtils;
 import net.dravigen.letMeMove.utils.AnimationUtils;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
 
-import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
+import static net.dravigen.letMeMove.animation.AnimRegistry.*;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 @Mixin(EntityPlayer.class)
@@ -53,9 +53,9 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	public abstract float getMovementSpeedModifierFromEffects();
 	
 	@Unique
-	private final List<AnimationCustom> animToCheckIfFail = Arrays.asList(
-			AnimationUtils.getAnimationFromID(SWIMMING_ID),
-			AnimationUtils.getAnimationFromID(CROUCHING_ID)
+	private final List<BaseAnimation> animToCheckIfFail = Arrays.asList(
+			AnimationUtils.getAnimationFromID(SWIMMING.getID()),
+			AnimationUtils.getAnimationFromID(CROUCHING.getID())
 	);
 	
 	@Inject(method = "onUpdate", at = @At("HEAD"))
@@ -66,7 +66,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 		EntityPlayer player = (EntityPlayer) (Object) this;
 		
 		if (this.worldObj.isRemote && Minecraft.getMinecraft().currentScreen == null) {
-			for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
+			for (BaseAnimation animation : AnimationUtils.getAnimationsMap().values()) {
 				animation.updateAnimationTime(customPlayer.llm_$getAnimationID());
 			}
 			
@@ -80,24 +80,24 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			ResourceLocation newID = new ResourceLocation("");
 			
 			if (customPlayer.llm_$getAnimation().timeRendered == customPlayer.llm_$getAnimation().duration) {
-				for (AnimationCustom animation : AnimationUtils.getAnimationsMap().values()) {
+				for (BaseAnimation animation : AnimationUtils.getAnimationsMap().values()) {
 					if (!animation.isGeneralConditonsMet(player, this.boundingBox)) continue;
 					
-					if (animation.isActivationConditonsMet(player, this.boundingBox)) {
+					if (animation.shouldActivateAnimation(player, this.boundingBox)) {
 						newID = animation.getID();
 						
 						break;
 					}
 				}
 				
-				newID = newID.equals(new ResourceLocation("")) ? STANDING_ID : newID;
+				newID = newID.equals(new ResourceLocation("")) ? STANDING.getID() : newID;
 				
 				AxisAlignedBB bounds = this.boundingBox.copy();
 				
 				boolean noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this, bounds).isEmpty();
 				
 				if (!newID.equals(customPlayer.llm_$getAnimationID())) {
-					AnimationCustom newAnimation = AnimationUtils.getAnimationFromID(newID);
+					BaseAnimation newAnimation = AnimationUtils.getAnimationFromID(newID);
 					float dHeight = newAnimation.height - customPlayer.llm_$getAnimation().height;
 					
 					if (dHeight > 0) {
@@ -111,7 +111,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 					else {
 						dHeight = 0;
 						
-						for (AnimationCustom testAnimation : animToCheckIfFail) {
+						for (BaseAnimation testAnimation : animToCheckIfFail) {
 							bounds = this.boundingBox.copy();
 							
 							float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
@@ -128,19 +128,19 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 							}
 						}
 						
-						if (!newID.equals(STANDING_ID) && !newID.equals(customPlayer.llm_$getAnimationID())) {
+						if (!newID.equals(STANDING.getID()) && !newID.equals(customPlayer.llm_$getAnimationID())) {
 							customPlayer.llm_$setAnimation(newID);
 						}
 					}
 				}
 				else if (!this.worldObj.getCollidingBlockBounds(
 						this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
-					customPlayer.llm_$setAnimation(SWIMMING_ID);
+					customPlayer.llm_$setAnimation(SWIMMING.getID());
 				}
 			}
 		}
 		
-		AnimationCustom currentAnimation = customPlayer.llm_$getAnimation();
+		BaseAnimation currentAnimation = customPlayer.llm_$getAnimation();
 		
 		this.setSize(0.6f, currentAnimation.height);
 	}
@@ -152,15 +152,15 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 		double prevY = this.posY;
 		double prevZ = this.posZ;
 		
-		AnimationCustom animation = customPlayer.llm_$getAnimation();
+		BaseAnimation animation = customPlayer.llm_$getAnimation();
 		
 		if (animation == null) return;
 		
 		ResourceLocation id = animation.getID();
 		
-		if (id.equals(SWIMMING_ID)) {
+		if (id.equals(SWIMMING.getID())) {
 			if (!this.canSwim()) {
-				customPlayer.llm_$setAnimation(STANDING_ID);
+				customPlayer.llm_$setAnimation(STANDING.getID());
 			}
 			
 			if (canFastSwimInWater()) {
@@ -205,7 +205,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 				}
 			}
 		}
-		else if (id.equals(DASHING_ID)) {
+		else if (id.equals(DASHING.getID())) {
 			if (!movedOnce) {
 				ci.cancel();
 				
@@ -229,15 +229,19 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 				movedOnce = true;
 			}
 		}
-		else if (id.equals(ROLLING_ID)) {
+		else if (id.equals(ROLLING.getID())) {
 			ci.cancel();
 			
 			super.moveEntityWithHeading(this.moveStrafing, 1.5f);
 		}
-		else if (id.equals(WALL_PULLING_ID)) {
+		else if (id.equals(PULLING_UP.getID())) {
 			ci.cancel();
 			
-			coords side = checkEntityAgainstWall(this);
+			coords side;
+			
+			if ((side = checkEntityAgainstWall(this, 1)) == null) {
+				side = checkEntityAgainstWall(this, 0);
+			}
 			
 			if (side != null) {
 				prevSide = side;
@@ -246,7 +250,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			double x = 0;
 			double z = 0;
 			
-			if (this.moveForward > 0) {
+			if (this.moveForward != 0) {
 				if (side == null && !movedOnce) {
 					x = prevSide == coords.EAST ? 0.5 : prevSide == coords.WEST ? -0.5 : x;
 					z = prevSide == coords.SOUTH ? 0.5 : prevSide == coords.NORTH ? -0.5 : z;
@@ -256,17 +260,20 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 					movedOnce = true;
 				}
 				
-				this.moveEntity(x, 1.75d / animation.duration, z);
+				float var1 = this.moveForward < 0 ? -1 : 1;
+				
+				this.moveEntity(x, var1 * 1.75d / animation.duration, z);
 			}
 			else {
 				x = prevSide == coords.SOUTH ? this.moveStrafing : prevSide == coords.NORTH ? -this.moveStrafing : x;
 				z = prevSide == coords.EAST ? -this.moveStrafing : prevSide == coords.WEST ? this.moveStrafing : z;
 				
-				this.moveEntity(x / 16, 0, z / 16);
+				this.moveEntity(x / 24, 0, z / 24);
 			}
 		}
 		else {
 			movedOnce = false;
+			
 			return;
 		}
 		
@@ -276,18 +283,18 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	@Unique
 	private boolean canFastSwimInWater() {
 		return !this.isEating() && !this.capabilities.isFlying && isInsideWater(
-				this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING_ID);
+				this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING.getID());
 	}
 	
 	@Inject(method = "addMovementStat", at = @At(value = "HEAD"), cancellable = true)
 	private void customExhaustion(double par1, double par3, double par5, CallbackInfo ci) {
-		AnimationCustom animation = ((ICustomMovementEntity) this).llm_$getAnimation();
+		BaseAnimation animation = ((ICustomMovementEntity) this).llm_$getAnimation();
 		
 		if (animation == null) return;
 		
 		ResourceLocation id = animation.getID();
 		
-		if (canFastSwimInWater() || id.equals(SWIMMING_ID) && this.onGround) {
+		if (canFastSwimInWater() || id.equals(SWIMMING.getID()) && this.onGround) {
 			int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par3 * par3 + par5 * par5) * 100.0f);
 			
 			if (var7 > 0) {
@@ -299,7 +306,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			ci.cancel();
 		}
-		else if (id.equals(DASHING_ID)) {
+		else if (id.equals(DASHING.getID())) {
 			int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par5 * par5) * 100.0f);
 			
 			if (var7 > 0) {
@@ -311,7 +318,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			ci.cancel();
 		}
-		else if (id.equals(ROLLING_ID)) {
+		else if (id.equals(ROLLING.getID())) {
 			int var7 = Math.round(MathHelper.sqrt_double(par1 * par1 + par5 * par5) * 100.0f);
 			
 			if (var7 > 0) {
@@ -322,7 +329,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			ci.cancel();
 		}
-		else if (id.equals(WALL_SLIDING_ID)) {
+		else if (id.equals(WALL_SLIDING.getID())) {
 			int var7 = Math.round(MathHelper.sqrt_double(par3 * par3) * 100.0f);
 			
 			if (var7 > 0) {
@@ -336,7 +343,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	
 	@Inject(method = "jump", at = @At("TAIL"))
 	private void addHorizontalMotionFromJumpingOnWall(CallbackInfo ci) {
-		if (((ICustomMovementEntity) this).llm_$isAnimation(WALL_SLIDING_ID)) {
+		if (((ICustomMovementEntity) this).llm_$isAnimation(WALL_SLIDING.getID())) {
 			GeneralUtils.coords side = GeneralUtils.checkEntityAgainstWall(this);
 			this.motionY += 0.15;
 			this.motionX += side == GeneralUtils.coords.EAST ? -0.3f : side == GeneralUtils.coords.WEST ? 0.3f : 0;

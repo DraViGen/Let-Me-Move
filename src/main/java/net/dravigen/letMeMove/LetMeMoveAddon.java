@@ -4,17 +4,15 @@ import btw.AddonHandler;
 import btw.BTWAddon;
 import btw.world.util.data.DataEntry;
 import btw.world.util.data.DataProvider;
-import net.dravigen.letMeMove.animation.AnimationRegistry;
+import net.dravigen.letMeMove.animation.AnimRegistry;
 import net.minecraft.src.*;
 import org.lwjgl.input.Keyboard;
-
-import static net.dravigen.letMeMove.animation.AnimationRegistry.STANDING_ID;
 
 public class LetMeMoveAddon extends BTWAddon {
 	
 	private static final String CURRENT_ANIMATION_NAME = "CurrentAnimation";
 	public static final DataEntry.PlayerDataEntry<String> CURRENT_ANIMATION = DataProvider.getBuilder(
-			String.class).name(CURRENT_ANIMATION_NAME).defaultSupplier(() -> String.valueOf(STANDING_ID)).readNBT(
+			String.class).name(CURRENT_ANIMATION_NAME).defaultSupplier(() -> String.valueOf(AnimRegistry.STANDING.getID())).readNBT(
 			NBTTagCompound::getString).writeNBT(NBTTagCompound::setString).player().syncPlayer().buildPlayer();
 	
 	public static KeyBinding crawl_key;
@@ -46,7 +44,7 @@ public class LetMeMoveAddon extends BTWAddon {
 	@Override
 	public void initialize() {
 		initKeybind();
-		AnimationRegistry.registerAllAnimation();
+		AnimRegistry.registerAllAnimation();
 		AddonHandler.logMessage(this.getName() + " Version " + this.getVersionString() + " Initializing...");
 	}
 }

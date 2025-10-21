@@ -1,6 +1,6 @@
 package net.dravigen.letMeMove.interfaces;
 
-import net.dravigen.letMeMove.animation.AnimationCustom;
+import net.dravigen.letMeMove.animation.BaseAnimation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.src.ResourceLocation;
@@ -13,11 +13,11 @@ public interface ICustomMovementEntity {
 	
 	ResourceLocation llm_$getAnimationID();
 	
-	AnimationCustom llm_$getAnimation();
+	BaseAnimation llm_$getAnimation();
 	
 	void llm_$setAnimation(ResourceLocation animation);
 	
-	boolean llm_$isAnimation(ResourceLocation animationID);
+	boolean llm_$isAnimation(ResourceLocation id);
 	
 	side llm_$getSide();
 	

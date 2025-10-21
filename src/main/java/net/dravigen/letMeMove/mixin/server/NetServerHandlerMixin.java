@@ -1,8 +1,8 @@
 package net.dravigen.letMeMove.mixin.server;
 
+import net.dravigen.letMeMove.animation.AnimRegistry;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.packet.PacketUtils;
-import net.dravigen.letMeMove.animation.AnimationRegistry;
 import net.minecraft.src.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,7 +32,7 @@ public abstract class NetServerHandlerMixin extends NetHandler {
 	
 	@Redirect(method = "handleFlying", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerMP;addExhaustionForJump()V"))
 	private void a(EntityPlayerMP instance) {
-		if (!((ICustomMovementEntity) instance).llm_$isAnimation(AnimationRegistry.SWIMMING_ID)) {
+		if (!((ICustomMovementEntity) instance).llm_$isAnimation(AnimRegistry.SWIMMING.getID())) {
 			instance.addExhaustionForJump();
 		}
 	}

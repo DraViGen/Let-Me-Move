@@ -1,7 +1,7 @@
 package net.dravigen.letMeMove.mixin.client.render;
 
+import net.dravigen.letMeMove.animation.BaseAnimation;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
-import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
+import static net.dravigen.letMeMove.animation.AnimRegistry.*;
 import static net.dravigen.letMeMove.utils.GeneralUtils.checkEntityAgainstWall;
 
 @Mixin(ModelBiped.class)
@@ -41,14 +41,13 @@ public abstract class ModelBipedMixin extends ModelBase {
 		if (!(entity instanceof EntityPlayer player)) return;
 		
 		ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
-		AnimationCustom animation = customEntity.llm_$getAnimation();
+		BaseAnimation animation = customEntity.llm_$getAnimation();
 		
 		if (animation == null) return;
 		
 		float leaningPitch = customEntity.llm_$getLeaningPitch();
 		
-		if (prevAnimation != animation.getID() || (animation.getID().equals(
-				SKYDIVING_ID) && player.moveForward > 0 != prevForward)) {
+		if (prevAnimation != animation.getID() || (animation.getID().equals(SKY_DIVING.getID()) && player.moveForward > 0 != prevForward)) {
 			prevAnimation = animation.getID();
 			transitionTime = 1000;
 		}
@@ -62,7 +61,7 @@ public abstract class ModelBipedMixin extends ModelBase {
 		delta = tr ? delta * 0.8f : delta;
 		
 		if (animation.needYOffsetUpdate) {
-			if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) {
+			if (customEntity.llm_$isAnimation(HIGH_FALLING.getID())) {
 				prevOffset = GeneralUtils.incrementUntilGoal(prevOffset, 0.5f, 0.4f * delta);
 				prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, (12f * leaningPitch) % 360,
 						0.3f * delta);
@@ -98,16 +97,16 @@ public abstract class ModelBipedMixin extends ModelBase {
 		GL11.glRotatef(prevZRotation, 0, 0, 1);
 		GL11.glRotatef(prevXRotation, 1, 0, 0);
 		
-		if (customEntity.llm_$isAnimation(HIGH_FALLING_ID)) GL11.glTranslatef(0, -prevOffset, 0);
+		if (customEntity.llm_$isAnimation(HIGH_FALLING.getID())) GL11.glTranslatef(0, -prevOffset, 0);
 		
-		if (customEntity.llm_$isAnimation(WALL_SLIDING_ID)) {
+		if (customEntity.llm_$isAnimation(WALL_SLIDING.getID())) {
 			GeneralUtils.coords side = checkEntityAgainstWall(player);
 			
 			if (side != null) {
 				player.renderYawOffset = side == GeneralUtils.coords.EAST ? 45 : side == GeneralUtils.coords.SOUTH ? 135 : side == GeneralUtils.coords.WEST ? 225 : 315;
 			}
 		}
-		else if (customEntity.llm_$isAnimation(WALL_PULLING_ID)) {
+		else if (customEntity.llm_$isAnimation(PULLING_UP.getID())) {
 			GeneralUtils.coords side = checkEntityAgainstWall(player);
 			
 			if (side != null) {

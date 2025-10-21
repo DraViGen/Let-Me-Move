@@ -1,6 +1,6 @@
 package net.dravigen.letMeMove.mixin.client.render;
 
-import net.dravigen.letMeMove.animation.AnimationRegistry;
+import net.dravigen.letMeMove.animation.AnimRegistry;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 import org.lwjgl.opengl.GL11;
@@ -103,7 +103,7 @@ public abstract class EntityRendererMixin {
 	
 	@Inject(method = "setupViewBobbing", at = @At("HEAD"), cancellable = true)
 	private void disableBobbingWhileFastSwim(float par1, CallbackInfo ci) {
-		if (((ICustomMovementEntity) this.mc.thePlayer).llm_$isAnimation(AnimationRegistry.SWIMMING_ID)) {
+		if (((ICustomMovementEntity) this.mc.thePlayer).llm_$isAnimation(AnimRegistry.SWIMMING.getID())) {
 			ci.cancel();
 		}
 	}

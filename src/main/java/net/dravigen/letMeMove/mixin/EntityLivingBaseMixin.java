@@ -1,8 +1,8 @@
 package net.dravigen.letMeMove.mixin;
 
 import net.dravigen.letMeMove.LetMeMoveAddon;
+import net.dravigen.letMeMove.animation.BaseAnimation;
 import net.dravigen.letMeMove.packet.PacketUtils;
-import net.dravigen.letMeMove.animation.AnimationCustom;
 import net.dravigen.letMeMove.interfaces.ICustomMovementEntity;
 import net.dravigen.letMeMove.utils.AnimationUtils;
 import net.dravigen.letMeMove.utils.GeneralUtils;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static net.dravigen.letMeMove.animation.AnimationRegistry.*;
+import static net.dravigen.letMeMove.animation.AnimRegistry.*;
 
 @Mixin(EntityLivingBase.class)
 public abstract class EntityLivingBaseMixin extends Entity implements ICustomMovementEntity {
@@ -59,9 +59,9 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 	}
 	
 	@Override
-	public AnimationCustom llm_$getAnimation() {
+	public BaseAnimation llm_$getAnimation() {
 		if ((EntityLivingBase) (Object) this instanceof EntityPlayer) {
-			if (this.currentAnimation == null) this.currentAnimation = STANDING_ID;
+			if (this.currentAnimation == null) this.currentAnimation = STANDING.getID();
 			
 			return AnimationUtils.getAnimationFromID(this.currentAnimation);
 		}
@@ -89,11 +89,11 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 	}
 	
 	@Override
-	public boolean llm_$isAnimation(ResourceLocation animationID) {
+	public boolean llm_$isAnimation(ResourceLocation id) {
 		if ((EntityLivingBase) (Object) this instanceof EntityPlayer) {
 			if (this.currentAnimation == null) return false;
 			
-			return this.currentAnimation.equals(animationID);
+			return this.currentAnimation.equals(id);
 		}
 		else return false;
 	}
@@ -126,7 +126,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 		if (this.llm_$getAnimation() == null) return par1;
 		
 		if ((EntityLivingBase) (Object) this instanceof EntityPlayer player && !player.capabilities.isFlying) {
-			if (this.llm_$isAnimation(SKYDIVING_ID)) {
+			if (this.llm_$isAnimation(SKY_DIVING.getID())) {
 				if (this.moveForward == 0) {
 					this.motionY *= 0.96;
 				}
@@ -136,19 +136,19 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 				
 				return this.llm_$getAnimation().speedModifier;
 			}
-			else if (this.llm_$isAnimation(HIGH_FALLING_ID)) {
+			else if (this.llm_$isAnimation(HIGH_FALLING.getID())) {
 				this.motionY *= 0.98;
 				
 				return this.llm_$getAnimation().speedModifier;
 			}
-			else if (this.llm_$isAnimation(DIVING_ID)) {
+			else if (this.llm_$isAnimation(DIVING.getID())) {
 				if (this.motionY < 0) {
 					this.motionY *= 1.02;
 				}
 				
 				return this.llm_$getAnimation().speedModifier;
 			}
-			else if (this.llm_$isAnimation(WALL_SLIDING_ID)) {
+			else if (this.llm_$isAnimation(WALL_SLIDING.getID())) {
 				this.motionY *= 0.85;
 				
 				if (fallDistance > 4) {
@@ -168,7 +168,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 	
 	@Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/src/EntityLivingBase;onGround:Z"))
 	private boolean allowJumpWhileWallSliding(EntityLivingBase instance) {
-		if (((ICustomMovementEntity) instance).llm_$isAnimation(WALL_SLIDING_ID)) {
+		if (((ICustomMovementEntity) instance).llm_$isAnimation(WALL_SLIDING.getID())) {
 			return true;
 		}
 		
@@ -180,7 +180,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 		if ((EntityLivingBase) (Object) this instanceof EntityPlayer) {
 			int t = this.llm_$getAnimation().timeRendered;
 			
-			if (this.llm_$isAnimation(ROLLING_ID) && t >= 10 && t <= 20) {
+			if (this.llm_$isAnimation(ROLLING.getID()) && t >= 10 && t <= 20) {
 				return damage * 0.85f;
 			}
 		}
@@ -192,7 +192,7 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 	private float disableHeadTurn(EntityLivingBase instance, float par1, float par2) {
 		ResourceLocation animation = ((ICustomMovementEntity) instance).llm_$getAnimationID();
 		
-		if (animation != null && (animation.equals(WALL_SLIDING_ID) || animation.equals(WALL_PULLING_ID))) {
+		if (animation != null && (animation.equals(WALL_SLIDING.getID()) || animation.equals(PULLING_UP.getID()))) {
 			return par2;
 		}
 		

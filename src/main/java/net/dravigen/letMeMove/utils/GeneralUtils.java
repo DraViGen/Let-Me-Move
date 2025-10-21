@@ -2,7 +2,19 @@ package net.dravigen.letMeMove.utils;
 
 import net.minecraft.src.*;
 
+import java.util.List;
+
 public class GeneralUtils {
+	public static final float pi = (float) Math.PI;
+	
+	public static float pi(int i, int j) {
+		return pi * i / j;
+	}
+	
+	public static float sin(float i) {
+		return (float) Math.sin(i);
+	}
+	
 	public static float lerp(float delta, float start, float end) {
 		return start + delta * (end - start);
 	}
@@ -96,33 +108,7 @@ public class GeneralUtils {
 	}
 	
 	public static coords checkEntityAgainstWall(Entity entity) {
-		double x = entity.posX;
-		int y = MathHelper.floor_double(entity.boundingBox.minY);
-		double z = entity.posZ;
-		
-		boolean wallEast = entity.worldObj.isBlockFullCube(MathHelper.floor_double(x + entity.width / 2 + 0.1), y, MathHelper.floor_double(z));
-		boolean wallWest = entity.worldObj.isBlockFullCube(MathHelper.floor_double(x - entity.width / 2 - 0.1), y, MathHelper.floor_double(z));
-		boolean wallSouth = entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z + entity.width / 2 + 0.1));
-		boolean wallNorth = entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z - entity.width / 2 - 0.1));
-		
-		int facing = getFacing(entity);
-		
-		switch (facing) {
-			case 0 : if (wallNorth) return coords.NORTH;
-			case 1 : if (wallEast) return coords.EAST;
-			case 2 : if (wallSouth) return coords.SOUTH;
-			case 3 : if (wallWest) return coords.WEST;
-		}
-		
-		return wallEast ?
-				coords.EAST
-				: wallWest ?
-				coords.WEST
-				: wallSouth ?
-				coords.SOUTH
-				: wallNorth ?
-				coords.NORTH
-				: null;
+		return checkEntityAgainstWall(entity, 1);
 	}
 	
 	public static coords checkEntityAgainstWall(Entity entity, double yOff) {
@@ -155,7 +141,7 @@ public class GeneralUtils {
 				: null;
 	}
 	
-	public static int checkIfOpenSpaceAboveWall(Entity entity) {
+	public static float checkIfOpenSpaceAboveWall(Entity entity) {
 		coords side = checkEntityAgainstWall(entity);
 		
 		if (side == null) return -1;
@@ -173,8 +159,38 @@ public class GeneralUtils {
 		else return -1;
 	}
 	
+	public static float checkIfOpenSpaceAboveWall(Entity entity, double yOff) {
+		coords side = checkEntityAgainstWall(entity);
+		
+		if (side == null) return -1;
+		
+		int x = MathHelper.floor_double(entity.posX + (side == coords.EAST ? 1 : side == coords.WEST ? -1 : 0));
+		int y = MathHelper.floor_double(entity.boundingBox.minY + yOff + 1);
+		int z = MathHelper.floor_double(entity.posZ + (side == coords.SOUTH ? 1 : side == coords.NORTH ? -1 : 0));
+		
+		World world = entity.worldObj;
+		
+		if(!world.getBlockMaterial(x, y, z).blocksMovement()
+				&& world.isBlockFullCube(x, y - 1, z)) {
+			return y;
+		}
+		else return -1;
+	}
+	
 	public static boolean checkIfEntityFacingWall(Entity entity) {
 		coords wall = checkEntityAgainstWall(entity);
+		int facing = getFacing(entity);
+		
+		if (wall == null) return false;
+		
+		return wall == coords.NORTH && facing == 0
+				|| wall == coords.EAST && facing == 1
+				|| wall == coords.SOUTH && facing == 2
+				|| wall == coords.WEST && facing == 3;
+	}
+	
+	public static boolean checkIfEntityFacingWall(Entity entity, double yOff) {
+		coords wall = checkEntityAgainstWall(entity, yOff);
 		int facing = getFacing(entity);
 		
 		if (wall == null) return false;
