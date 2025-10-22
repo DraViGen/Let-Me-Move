@@ -11,9 +11,14 @@ import org.lwjgl.input.Keyboard;
 public class LetMeMoveAddon extends BTWAddon {
 	
 	private static final String CURRENT_ANIMATION_NAME = "CurrentAnimation";
-	public static final DataEntry.PlayerDataEntry<String> CURRENT_ANIMATION = DataProvider.getBuilder(
-			String.class).name(CURRENT_ANIMATION_NAME).defaultSupplier(() -> String.valueOf(AnimRegistry.STANDING.getID())).readNBT(
-			NBTTagCompound::getString).writeNBT(NBTTagCompound::setString).player().syncPlayer().buildPlayer();
+	public static final DataEntry.PlayerDataEntry<String> CURRENT_ANIMATION = DataProvider.getBuilder(String.class)
+			.name(CURRENT_ANIMATION_NAME)
+			.defaultSupplier(() -> String.valueOf(AnimRegistry.STANDING.getID()))
+			.readNBT(NBTTagCompound::getString)
+			.writeNBT(NBTTagCompound::setString)
+			.player()
+			.syncPlayer()
+			.buildPlayer();
 	
 	public static KeyBinding crawl_key;
 	public static KeyBinding roll_key;

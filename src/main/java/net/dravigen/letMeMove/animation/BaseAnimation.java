@@ -16,8 +16,8 @@ public abstract class BaseAnimation {
 	public int timeRendered;
 	public int priority;
 	
-	public BaseAnimation(ResourceLocation id, float height, float speedModifier,
-			boolean needYOffsetUpdate, int maxCooldown, int duration, boolean shouldAutoUpdate, float yOffset) {
+	public BaseAnimation(ResourceLocation id, float height, float speedModifier, boolean needYOffsetUpdate,
+			int maxCooldown, int duration, boolean shouldAutoUpdate, float yOffset) {
 		this.id = id;
 		this.height = height;
 		this.speedModifier = speedModifier;
@@ -29,8 +29,8 @@ public abstract class BaseAnimation {
 		this.priority = 0;
 	}
 	
-	public BaseAnimation(ResourceLocation id, float height, float speedModifier,
-			boolean needYOffsetUpdate, int maxCooldown, int duration, boolean shouldAutoUpdate) {
+	public BaseAnimation(ResourceLocation id, float height, float speedModifier, boolean needYOffsetUpdate,
+			int maxCooldown, int duration, boolean shouldAutoUpdate) {
 		this.id = id;
 		this.height = height;
 		this.speedModifier = speedModifier;
@@ -42,8 +42,8 @@ public abstract class BaseAnimation {
 		this.priority = 0;
 	}
 	
-	public BaseAnimation(ResourceLocation id, float height, float speedModifier,
-			boolean needYOffsetUpdate, int maxCooldown, int duration) {
+	public BaseAnimation(ResourceLocation id, float height, float speedModifier, boolean needYOffsetUpdate,
+			int maxCooldown, int duration) {
 		this.id = id;
 		this.height = height;
 		this.speedModifier = speedModifier;
@@ -55,8 +55,8 @@ public abstract class BaseAnimation {
 		this.priority = 0;
 	}
 	
-	public BaseAnimation(ResourceLocation id, float height, float speedModifier,
-			boolean needYOffsetUpdate, int maxCooldown) {
+	public BaseAnimation(ResourceLocation id, float height, float speedModifier, boolean needYOffsetUpdate,
+			int maxCooldown) {
 		this.id = id;
 		this.height = height;
 		this.speedModifier = speedModifier;
@@ -68,8 +68,7 @@ public abstract class BaseAnimation {
 		this.priority = 0;
 	}
 	
-	public BaseAnimation(ResourceLocation id, float height, float speedModifier,
-			boolean needYOffsetUpdate) {
+	public BaseAnimation(ResourceLocation id, float height, float speedModifier, boolean needYOffsetUpdate) {
 		this.id = id;
 		this.height = height;
 		this.speedModifier = speedModifier;
@@ -133,13 +132,13 @@ public abstract class BaseAnimation {
 		}
 		else return false;
 	}
-	
+
 	public abstract boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB);
 	
 	public abstract boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB);
 	
-	public abstract void renderAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j,
-			float u, float delta);
+	public abstract void renderAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i,
+			float j, float u, float delta);
 	
 	public abstract void updateLeaning(EntityLivingBase entity);
 }
