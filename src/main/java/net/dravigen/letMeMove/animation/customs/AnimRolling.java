@@ -73,7 +73,7 @@ public class AnimRolling extends BaseAnimation {
 			head[1] = i * (pi / 180.0f);
 		}
 		
-		smoothRotateAll(model.bipedHead, head, 0.4f * delta);
+		smoothRotateAll(model.bipedHead, head, 1);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
@@ -86,7 +86,8 @@ public class AnimRolling extends BaseAnimation {
 		
 		smoothRotateAll(model.bipedLeftLeg, lLeg, 0.3f * delta);
 		
-		if (Minecraft.getMinecraft().thePlayer == entity && Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
+		if (Minecraft.getMinecraft().thePlayer == entity &&
+				Minecraft.getMinecraft().gameSettings.thirdPersonView == 0) {
 			if (leaning == 0) {
 				prevPitch = entity.cameraPitch;
 			}

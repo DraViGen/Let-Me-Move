@@ -21,6 +21,9 @@ import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 @Mixin(EntityPlayer.class)
 public abstract class EntityPlayerMixin extends EntityLivingBase {
 	
+	@Unique
+	private final List<BaseAnimation> animToCheckIfFail = Arrays.asList(AnimationUtils.getAnimationFromID(SWIMMING.getID()),
+																		AnimationUtils.getAnimationFromID(CROUCHING.getID()));
 	@Shadow
 	public PlayerCapabilities capabilities;
 	@Shadow
@@ -51,12 +54,6 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	
 	@Shadow
 	public abstract float getMovementSpeedModifierFromEffects();
-	
-	@Unique
-	private final List<BaseAnimation> animToCheckIfFail = Arrays.asList(
-			AnimationUtils.getAnimationFromID(SWIMMING.getID()),
-			AnimationUtils.getAnimationFromID(CROUCHING.getID())
-	);
 	
 	@Inject(method = "onUpdate", at = @At("HEAD"))
 	private void updateAnimation(CallbackInfo ci) {
@@ -102,7 +99,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 					
 					if (dHeight > 0) {
 						noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this,
-								bounds.addCoord(0, dHeight, 0)).isEmpty();
+																					   bounds.addCoord(0, dHeight, 0))
+								.isEmpty();
 					}
 					
 					if (noCollisionWithBlock) {
@@ -119,7 +117,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 							if (testAnimation.isGeneralConditonsMet(player, bounds) && dNewHeight > dHeight) {
 								
 								noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this,
-										bounds.addCoord(0, dNewHeight, 0)).isEmpty();
+																							   bounds.addCoord(0,
+																											   dNewHeight,
+																											   0))
+										.isEmpty();
 								
 								if (noCollisionWithBlock) {
 									dHeight = dNewHeight;
@@ -133,8 +134,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 						}
 					}
 				}
-				else if (!this.worldObj.getCollidingBlockBounds(
-						this.boundingBox).isEmpty() && !GeneralUtils.isEntityFeetInsideBlock(this)) {
+				else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() &&
+						!GeneralUtils.isEntityFeetInsideBlock(this)) {
 					customPlayer.llm_$setAnimation(SWIMMING.getID());
 				}
 			}
@@ -174,8 +175,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 					Vec3 look = this.getLookVec();
 					Vec3 direction = look;
 					
-					if ((isInsideWater(
-							this) && look.yCoord < 0 && look.yCoord > -0.2) || b1 && look.yCoord > 0 && look.yCoord < 0.45) {
+					if ((isInsideWater(this) && look.yCoord < 0 && look.yCoord > -0.2) ||
+							b1 && look.yCoord > 0 && look.yCoord < 0.45) {
 						direction = Vec3.createVectorHelper(look.xCoord, 0, look.zCoord);
 					}
 					
@@ -212,6 +213,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 				float var1 = this.moveStrafing * 8;
 				float var4 = var1 * var1;
 				
+				this.motionY *= 0.8f;
+				
 				if (var4 >= 1.0E-4f) {
 					if ((var4 = MathHelper.sqrt_float(var4)) < 1.0f) {
 						var4 = 1.0f;
@@ -237,11 +240,12 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 		else if (id.equals(PULLING_UP.getID())) {
 			ci.cancel();
 			
-			coords side;
+			coords side = getWallSide(this, 0, this.height);
 			
-			if ((side = checkEntityAgainstWall(this, 1)) == null) {
-				side = checkEntityAgainstWall(this, 0);
-			}
+			/*
+			if ((side = getWallSide(this, )) == null) {
+				side = getWallSide(this, 0);
+			}*/
 			
 			if (side != null) {
 				prevSide = side;
@@ -249,6 +253,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			double x = 0;
 			double z = 0;
+			
+			this.motionY *= 0.8f;
 			
 			if (this.moveForward != 0) {
 				if (side == null && !movedOnce) {
@@ -282,8 +288,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	
 	@Unique
 	private boolean canFastSwimInWater() {
-		return !this.isEating() && !this.capabilities.isFlying && isInsideWater(
-				this) && ((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING.getID());
+		return !this.isEating() &&
+				!this.capabilities.isFlying &&
+				isInsideWater(this) &&
+				((ICustomMovementEntity) this).llm_$isAnimation(SWIMMING.getID());
 	}
 	
 	@Inject(method = "addMovementStat", at = @At(value = "HEAD"), cancellable = true)
@@ -300,7 +308,11 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			if (var7 > 0) {
 				this.addStat(StatList.distanceDoveStat, var7);
 				float modifier = isInsideWater(this) ? 1 : 0.75f;
-				float par2 = 1.75f * modifier * var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
+				float par2 = 1.75f *
+						modifier *
+						var7 *
+						0.001f *
+						this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
 				this.addExhaustion(par2);
 			}
 			
@@ -311,7 +323,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			if (var7 > 0) {
 				this.addStat(StatList.distanceWalkedStat, var7);
-				float par2 = 2f * (float) var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
+				float par2 = 2f *
+						(float) var7 *
+						0.001f *
+						this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
 				this.addExhaustion(par2);
 				
 			}
@@ -323,7 +338,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			if (var7 > 0) {
 				this.addStat(StatList.distanceWalkedStat, var7);
-				float par2 = 1.25f * (float) var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
+				float par2 = 1.25f *
+						(float) var7 *
+						0.001f *
+						this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier();
 				this.addExhaustion(par2);
 			}
 			
@@ -334,9 +352,16 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			if (var7 > 0) {
 				this.addStat(StatList.distanceFallenStat, var7);
-				this.addExhaustion(
-						1f * var7 * 0.001f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
+				this.addExhaustion(1f *
+										   var7 *
+										   0.001f *
+										   this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
 			}
+			ci.cancel();
+		}
+		else if (id.equals(PULLING_UP.getID())) {
+			this.addExhaustion(1.33f / 80f * this.worldObj.getDifficulty().getHungerIntensiveActionCostMultiplier());
+			
 			ci.cancel();
 		}
 	}
@@ -344,7 +369,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	@Inject(method = "jump", at = @At("TAIL"))
 	private void addHorizontalMotionFromJumpingOnWall(CallbackInfo ci) {
 		if (((ICustomMovementEntity) this).llm_$isAnimation(WALL_SLIDING.getID())) {
-			GeneralUtils.coords side = GeneralUtils.checkEntityAgainstWall(this);
+			GeneralUtils.coords side = GeneralUtils.getWallSide(this, 0, this.height);
 			this.motionY += 0.15;
 			this.motionX += side == GeneralUtils.coords.EAST ? -0.3f : side == GeneralUtils.coords.WEST ? 0.3f : 0;
 			this.motionZ += side == GeneralUtils.coords.SOUTH ? -0.3f : side == GeneralUtils.coords.NORTH ? 0.3f : 0;

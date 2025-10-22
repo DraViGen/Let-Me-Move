@@ -7,15 +7,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class AnimationUtils {
+	private static final Map<ResourceLocation, BaseAnimation> animationsMap = new HashMap<>();
 	private static int priority = 0;
 	
-	private static final Map<ResourceLocation, BaseAnimation> animationsMap = new HashMap<>();
-	
 	public static Map<ResourceLocation, BaseAnimation> getAnimationsMap() {
-		return animationsMap.entrySet().stream().sorted(
-				Comparator.comparingInt(animation -> animation.getValue().priority)).collect(
-				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue,
-						LinkedHashMap::new));
+		return animationsMap.entrySet()
+				.stream()
+				.sorted(Comparator.comparingInt(animation -> animation.getValue().priority))
+				.collect(Collectors.toMap(Map.Entry::getKey,
+										  Map.Entry::getValue,
+										  (oldValue, newValue) -> oldValue,
+										  LinkedHashMap::new));
 	}
 	
 	public static BaseAnimation getAnimationFromID(ResourceLocation ID) {

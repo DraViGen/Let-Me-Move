@@ -25,8 +25,9 @@ public class GeneralUtils {
 		bb.offset(0, 0.2, 0);
 		int minY = MathHelper.floor_double(bb.minY + 0.2);
 		
-		return world.getBlockMaterial(MathHelper.floor_double(entity.posX), minY,
-				MathHelper.floor_double(entity.posZ)) == Material.water;
+		return world.getBlockMaterial(MathHelper.floor_double(entity.posX),
+									  minY,
+									  MathHelper.floor_double(entity.posZ)) == Material.water;
 	}
 	
 	public static boolean isHeadInsideWater(Entity entity) {
@@ -34,8 +35,9 @@ public class GeneralUtils {
 		AxisAlignedBB bb = entity.boundingBox.copy();
 		int eye = MathHelper.floor_double(bb.maxY - 0.3);
 		
-		return world.getBlockMaterial(MathHelper.floor_double(entity.posX), eye,
-				MathHelper.floor_double(entity.posZ)) == Material.water;
+		return world.getBlockMaterial(MathHelper.floor_double(entity.posX),
+									  eye,
+									  MathHelper.floor_double(entity.posZ)) == Material.water;
 	}
 	
 	public static boolean isEntityFeetInsideBlock(Entity entity) {
@@ -107,107 +109,128 @@ public class GeneralUtils {
 		return newValue;
 	}
 	
-	public static coords checkEntityAgainstWall(Entity entity) {
-		return checkEntityAgainstWall(entity, 1);
-	}
-	
-	public static coords checkEntityAgainstWall(Entity entity, double yOff) {
+	public static coords getWallSide(Entity entity, double yOff, double height) {
 		double x = entity.posX;
-		int y = MathHelper.floor_double(entity.boundingBox.minY + yOff);
+		double y = entity.boundingBox.minY + yOff;
 		double z = entity.posZ;
 		
-		boolean wallEast = entity.worldObj.isBlockFullCube(MathHelper.floor_double(x + entity.width / 2 + 0.1), y, MathHelper.floor_double(z));
-		boolean wallWest = entity.worldObj.isBlockFullCube(MathHelper.floor_double(x - entity.width / 2 - 0.1), y, MathHelper.floor_double(z));
-		boolean wallSouth = entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z + entity.width / 2 + 0.1));
-		boolean wallNorth = entity.worldObj.isBlockFullCube(MathHelper.floor_double(x), y, MathHelper.floor_double(z - entity.width / 2 - 0.1));
+		World world = entity.worldObj;
+		
+		boolean wallEast = !world.getCollidingBoundingBoxes(entity,
+															new AxisAlignedBB(x + entity.width / 2 + 0.1,
+																			  y,
+																			  z - 0.25,
+																			  x + entity.width / 2 + 0.25,
+																			  y + height,
+																			  z + 0.25)).isEmpty();
+		boolean wallWest = !world.getCollidingBoundingBoxes(entity,
+															new AxisAlignedBB(x - entity.width / 2 - 0.1,
+																			  y,
+																			  z - 0.25,
+																			  x - entity.width / 2 - 0.25,
+																			  y + height,
+																			  z + 0.25)).isEmpty();
+		boolean wallSouth = !world.getCollidingBoundingBoxes(entity,
+															 new AxisAlignedBB(x - 0.25,
+																			   y,
+																			   z + entity.width / 2 + 0.1,
+																			   x + 0.25,
+																			   y + height,
+																			   z + entity.width / 2 + 0.25)).isEmpty();
+		boolean wallNorth = !world.getCollidingBoundingBoxes(entity,
+															 new AxisAlignedBB(x - 0.25,
+																			   y,
+																			   z - entity.width / 2 - 0.1,
+																			   x + 0.25,
+																			   y + height,
+																			   z + entity.width / 2 - 0.25)).isEmpty();
 		
 		int facing = getFacing(entity);
 		
 		switch (facing) {
-			case 0 : if (wallNorth) return coords.NORTH;
-			case 1 : if (wallEast) return coords.EAST;
-			case 2 : if (wallSouth) return coords.SOUTH;
-			case 3 : if (wallWest) return coords.WEST;
+			case 0:
+				if (wallNorth) return coords.NORTH;
+			case 1:
+				if (wallEast) return coords.EAST;
+			case 2:
+				if (wallSouth) return coords.SOUTH;
+			case 3:
+				if (wallWest) return coords.WEST;
 		}
 		
-		return wallEast ?
-				coords.EAST
-				: wallWest ?
-				coords.WEST
-				: wallSouth ?
-				coords.SOUTH
-				: wallNorth ?
-				coords.NORTH
-				: null;
+		return wallEast
+			   ? coords.EAST
+			   : wallWest ? coords.WEST : wallSouth ? coords.SOUTH : wallNorth ? coords.NORTH : null;
 	}
 	
-	public static float checkIfOpenSpaceAboveWall(Entity entity) {
-		coords side = checkEntityAgainstWall(entity);
+	public static double getWallTopYIfEmptySpace(Entity entity) {
+		coords side = getWallSide(entity, 0, entity.height);
 		
 		if (side == null) return -1;
 		
-		int x = MathHelper.floor_double(entity.posX + (side == coords.EAST ? 1 : side == coords.WEST ? -1 : 0));
-		int y = MathHelper.floor_double(entity.boundingBox.minY + 2);
-		int z = MathHelper.floor_double(entity.posZ + (side == coords.SOUTH ? 1 : side == coords.NORTH ? -1 : 0));
+		double x = entity.posX + (side == coords.EAST ? 1 : side == coords.WEST ? -1 : 0);
+		double z = entity.posZ + (side == coords.SOUTH ? 1 : side == coords.NORTH ? -1 : 0);
 		
-		World world = entity.worldObj;
+		List<AxisAlignedBB> wall = getBlockBoundCenteredList(entity, x, entity.boundingBox.minY, z, entity.height);
 		
-		if(!world.getBlockMaterial(x, y, z).blocksMovement()
-				&& world.isBlockFullCube(x, y - 1, z)) {
-			return y;
+		if (!wall.isEmpty()) {
+			AxisAlignedBB top = wall.get(wall.size() - 1);
+			
+			if (getBlockBoundCentered(entity.worldObj, entity, x, top.maxY, z, 1.4) == null) {
+				
+				return top.maxY;
+			}
 		}
-		else return -1;
-	}
-	
-	public static float checkIfOpenSpaceAboveWall(Entity entity, double yOff) {
-		coords side = checkEntityAgainstWall(entity);
 		
-		if (side == null) return -1;
-		
-		int x = MathHelper.floor_double(entity.posX + (side == coords.EAST ? 1 : side == coords.WEST ? -1 : 0));
-		int y = MathHelper.floor_double(entity.boundingBox.minY + yOff + 1);
-		int z = MathHelper.floor_double(entity.posZ + (side == coords.SOUTH ? 1 : side == coords.NORTH ? -1 : 0));
-		
-		World world = entity.worldObj;
-		
-		if(!world.getBlockMaterial(x, y, z).blocksMovement()
-				&& world.isBlockFullCube(x, y - 1, z)) {
-			return y;
-		}
-		else return -1;
+		return -1;
 	}
 	
 	public static boolean checkIfEntityFacingWall(Entity entity) {
-		coords wall = checkEntityAgainstWall(entity);
+		coords wall = getWallSide(entity, 0, entity.height);
 		int facing = getFacing(entity);
 		
 		if (wall == null) return false;
 		
-		return wall == coords.NORTH && facing == 0
-				|| wall == coords.EAST && facing == 1
-				|| wall == coords.SOUTH && facing == 2
-				|| wall == coords.WEST && facing == 3;
-	}
-	
-	public static boolean checkIfEntityFacingWall(Entity entity, double yOff) {
-		coords wall = checkEntityAgainstWall(entity, yOff);
-		int facing = getFacing(entity);
-		
-		if (wall == null) return false;
-		
-		return wall == coords.NORTH && facing == 0
-				|| wall == coords.EAST && facing == 1
-				|| wall == coords.SOUTH && facing == 2
-				|| wall == coords.WEST && facing == 3;
+		return wall == coords.NORTH && facing == 0 ||
+				wall == coords.EAST && facing == 1 ||
+				wall == coords.SOUTH && facing == 2 ||
+				wall == coords.WEST && facing == 3;
 	}
 	
 	private static int getFacing(Entity entity) {
-		float yaw = (entity.getRotationYawHead() + 180) % 360 ;
+		float yaw = (entity.getRotationYawHead() + 180) % 360;
 		
 		yaw = yaw < 0 ? 360 + yaw : yaw;
 		
-		int roundedYaw = Math.round(yaw / 90) % 4;
-		return roundedYaw;
+		return Math.round(yaw / 90) % 4;
+	}
+	
+	private static AxisAlignedBB getBlockBoundCentered(World world, Entity entity, double x, double y, double z,
+			double height) {
+		List boundingBoxes = world.getCollidingBoundingBoxes(entity,
+															 new AxisAlignedBB(x - 0.25,
+																			   y,
+																			   z - 0.25,
+																			   x + 0.25,
+																			   y + height,
+																			   z + 0.25));
+		
+		if (boundingBoxes.isEmpty()) return null;
+		
+		return (AxisAlignedBB) boundingBoxes.get(boundingBoxes.size() - 1);
+	}
+	
+	private static List<AxisAlignedBB> getBlockBoundCenteredList(Entity entity, double x, double y, double z,
+			double height) {
+		List<AxisAlignedBB> boundingBoxes = entity.worldObj.getCollidingBoundingBoxes(entity,
+																					  new AxisAlignedBB(x - 0.25,
+																										y,
+																										z - 0.25,
+																										x + 0.25,
+																										y + height,
+																										z + 0.25));
+		
+		return boundingBoxes;
 	}
 	
 	public enum coords {

@@ -8,8 +8,8 @@ import static net.dravigen.letMeMove.utils.AnimationUtils.smoothRotateAll;
 import static net.dravigen.letMeMove.utils.GeneralUtils.pi;
 
 public class AnimDashing extends AnimCommon {
-	private static int pressTime = 0;
 	public static final ResourceLocation id = new ResourceLocation("LMM", "dashing");
+	private static int pressTime = 0;
 	
 	public AnimDashing() {
 		super(id, 1.8f, 1, false, 20, 5, true, 0);
@@ -47,7 +47,7 @@ public class AnimDashing extends AnimCommon {
 		
 		smoothRotateAll(model.bipedBody, 0, 0, 0, 0.8f * delta);
 		
-		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 0.4f * delta);
+		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 1);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;

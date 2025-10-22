@@ -25,9 +25,12 @@ public class AnimSwimming extends BaseAnimation {
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		boolean conditionA = crawl_key.pressed && (player.onGround || isInsideWater(player));
 		
-		boolean conditionB = (isInsideWater(
-				player) && player.getLookVec().yCoord < 0.45 || isHeadInsideWater(
-				player)) && player.isUsingSpecialKey() && player.moveForward > 0 && !player.capabilities.isFlying && !player.doesStatusPreventSprinting();
+		boolean conditionB = (isInsideWater(player) && player.getLookVec().yCoord < 0.45 ||
+				isHeadInsideWater(player)) &&
+				player.isUsingSpecialKey() &&
+				player.moveForward > 0 &&
+				!player.capabilities.isFlying &&
+				!player.doesStatusPreventSprinting();
 		
 		return conditionA || conditionB;
 	}
@@ -51,8 +54,13 @@ public class AnimSwimming extends BaseAnimation {
 		float[] rLeg = new float[3];
 		float[] lLeg = new float[3];
 		
-		smoothRotateAll(model.bipedHead, leaningPitch > 0.0F ? lerpAngle(leaningPitch, model.bipedHead.rotateAngleX,
-				-pi / 4) : j * (pi / 180.0f), i * (pi / 180.0f), 0, 0.4f * delta);
+		smoothRotateAll(model.bipedHead,
+						leaningPitch > 0.0F
+						? lerpAngle(leaningPitch, model.bipedHead.rotateAngleX, -pi / 4)
+						: j * (pi / 180.0f),
+						i * (pi / 180.0f),
+						0,
+						1);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;

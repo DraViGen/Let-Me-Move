@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.dravigen.letMeMove.animation.AnimRegistry.*;
-import static net.dravigen.letMeMove.utils.GeneralUtils.checkEntityAgainstWall;
 
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {
@@ -47,7 +46,8 @@ public abstract class ModelBipedMixin extends ModelBase {
 		
 		float leaningPitch = customEntity.llm_$getLeaningPitch();
 		
-		if (prevAnimation != animation.getID() || (animation.getID().equals(SKY_DIVING.getID()) && player.moveForward > 0 != prevForward)) {
+		if (prevAnimation != animation.getID() ||
+				(animation.getID().equals(SKY_DIVING.getID()) && player.moveForward > 0 != prevForward)) {
 			prevAnimation = animation.getID();
 			transitionTime = 1000;
 		}
@@ -63,12 +63,15 @@ public abstract class ModelBipedMixin extends ModelBase {
 		if (animation.needYOffsetUpdate) {
 			if (customEntity.llm_$isAnimation(HIGH_FALLING.getID())) {
 				prevOffset = GeneralUtils.incrementUntilGoal(prevOffset, 0.5f, 0.4f * delta);
-				prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation, (12f * leaningPitch) % 360,
-						0.3f * delta);
-				prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation, (22.5f * leaningPitch) % 360,
-						0.3f * delta);
-				prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation, (45f * leaningPitch) % 360,
-						0.3f * delta);
+				prevYRotation = GeneralUtils.incrementAngleUntilGoal(prevYRotation,
+																	 (12f * leaningPitch) % 360,
+																	 0.3f * delta);
+				prevZRotation = GeneralUtils.incrementAngleUntilGoal(prevZRotation,
+																	 (22.5f * leaningPitch) % 360,
+																	 0.3f * delta);
+				prevXRotation = GeneralUtils.incrementAngleUntilGoal(prevXRotation,
+																	 (45f * leaningPitch) % 360,
+																	 0.3f * delta);
 			}
 			else {
 				prevOffset = animation.yOffset != 0 ? animation.yOffset : 1.98f - (entity.yOffset + 0.18f);
@@ -100,17 +103,25 @@ public abstract class ModelBipedMixin extends ModelBase {
 		if (customEntity.llm_$isAnimation(HIGH_FALLING.getID())) GL11.glTranslatef(0, -prevOffset, 0);
 		
 		if (customEntity.llm_$isAnimation(WALL_SLIDING.getID())) {
-			GeneralUtils.coords side = checkEntityAgainstWall(player);
+			GeneralUtils.coords side = GeneralUtils.getWallSide(player, 0, entity.height);
 			
 			if (side != null) {
-				player.renderYawOffset = side == GeneralUtils.coords.EAST ? 45 : side == GeneralUtils.coords.SOUTH ? 135 : side == GeneralUtils.coords.WEST ? 225 : 315;
+				player.renderYawOffset = side == GeneralUtils.coords.EAST
+										 ? 45
+										 : side == GeneralUtils.coords.SOUTH
+										   ? 135
+										   : side == GeneralUtils.coords.WEST ? 225 : 315;
 			}
 		}
 		else if (customEntity.llm_$isAnimation(PULLING_UP.getID())) {
-			GeneralUtils.coords side = checkEntityAgainstWall(player);
+			GeneralUtils.coords side = GeneralUtils.getWallSide(player, 0, entity.height);
 			
 			if (side != null) {
-				player.renderYawOffset = side == GeneralUtils.coords.EAST ? 270 : side == GeneralUtils.coords.SOUTH ? 0 : side == GeneralUtils.coords.WEST ? 90 : 180;
+				player.renderYawOffset = side == GeneralUtils.coords.EAST
+										 ? 270
+										 : side == GeneralUtils.coords.SOUTH
+										   ? 0
+										   : side == GeneralUtils.coords.WEST ? 90 : 180;
 			}
 		}
 	}
@@ -124,8 +135,8 @@ public abstract class ModelBipedMixin extends ModelBase {
 		if (livingEntity instanceof EntityPlayer player) {
 			ci.cancel();
 			
-			customEntity.llm_$getAnimation().renderAnimation((ModelBiped) (Object) this, player, f, g, h, i, j, u,
-					delta);
+			customEntity.llm_$getAnimation()
+					.renderAnimation((ModelBiped) (Object) this, player, f, g, h, i, j, u, delta);
 		}
 	}
 }

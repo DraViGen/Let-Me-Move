@@ -9,10 +9,9 @@ import static net.dravigen.letMeMove.utils.AnimationUtils.smoothRotateAll;
 import static net.dravigen.letMeMove.utils.GeneralUtils.pi;
 
 public abstract class AnimCommon extends BaseAnimation {
-	public AnimCommon(ResourceLocation id, float height, float speedModifier,
-			boolean needYOffsetUpdate, int maxCooldown, int duration, boolean shouldAutoUpdate, float yOffset) {
-		super(id, height, speedModifier, needYOffsetUpdate, maxCooldown, duration, shouldAutoUpdate,
-				yOffset);
+	public AnimCommon(ResourceLocation id, float height, float speedModifier, boolean needYOffsetUpdate,
+			int maxCooldown, int duration, boolean shouldAutoUpdate, float yOffset) {
+		super(id, height, speedModifier, needYOffsetUpdate, maxCooldown, duration, shouldAutoUpdate, yOffset);
 	}
 	
 	public AnimCommon(ResourceLocation id, float height, float speedModifier) {
@@ -36,7 +35,7 @@ public abstract class AnimCommon extends BaseAnimation {
 		
 		resetAnimationRotationPoints(model);
 		
-		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 0.75f * delta);
+		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 1);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
@@ -59,9 +58,13 @@ public abstract class AnimCommon extends BaseAnimation {
 		body[1] = 0;
 		body[2] = 0;
 		
-		rArm[0] = model.aimedBow ? (-pi / 2) + model.bipedHead.rotateAngleX : model.heldItemRight != 0 ? rArm[0] * 0.5f - 0.31415927f * (float) model.heldItemRight : rArm[0];
+		rArm[0] = model.aimedBow
+				  ? (-pi / 2) + model.bipedHead.rotateAngleX
+				  : model.heldItemRight != 0 ? rArm[0] * 0.5f - 0.31415927f * (float) model.heldItemRight : rArm[0];
 		
-		lArm[0] = model.aimedBow ? (-pi / 2) + model.bipedHead.rotateAngleX : model.heldItemLeft != 0 ? lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft : lArm[0];
+		lArm[0] = model.aimedBow
+				  ? (-pi / 2) + model.bipedHead.rotateAngleX
+				  : model.heldItemLeft != 0 ? lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft : lArm[0];
 		
 		if (!(model.onGround <= 0.0F)) {
 			float onGround = model.onGround;
@@ -117,14 +120,21 @@ public abstract class AnimCommon extends BaseAnimation {
 		
 		smoothRotateAll(model.bipedLeftArm, lArm[0], lArm[1], lArm[2], 0.4f * delta, 0.3f * delta, 0.3f * delta);
 		
-		smoothRotateAll(model.bipedRightLeg, model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F) * 1.4F * g / k,
-				model.isRiding ? (pi / 10) : 0, model.isRiding ? 0.07853982F : 0, 0.4f * delta, 0.3f * delta,
-				0.3f * delta);
+		smoothRotateAll(model.bipedRightLeg,
+						model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F) * 1.4F * g / k,
+						model.isRiding ? (pi / 10) : 0,
+						model.isRiding ? 0.07853982F : 0,
+						0.4f * delta,
+						0.3f * delta,
+						0.3f * delta);
 		
 		smoothRotateAll(model.bipedLeftLeg,
-				model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F + pi) * 1.4F * g / k,
-				model.isRiding ? (pi / 10) : 0, model.isRiding ? 0.07853982F : 0, 0.4f * delta, 0.3f * delta,
-				0.3f * delta);
+						model.isRiding ? -1.4137167F : MathHelper.cos(f * 0.6662F + pi) * 1.4F * g / k,
+						model.isRiding ? (pi / 10) : 0,
+						model.isRiding ? 0.07853982F : 0,
+						0.4f * delta,
+						0.3f * delta,
+						0.3f * delta);
 		
 		smoothRotateAll(model.bipedBody, body[0], body[1], body[2], 0.6f * delta);
 		

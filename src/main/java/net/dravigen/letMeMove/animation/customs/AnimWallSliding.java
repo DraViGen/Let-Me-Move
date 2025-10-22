@@ -1,14 +1,14 @@
 package net.dravigen.letMeMove.animation.customs;
 
+import net.dravigen.letMeMove.utils.GeneralUtils;
 import net.minecraft.src.*;
 
 import static net.dravigen.letMeMove.utils.AnimationUtils.*;
 import static net.dravigen.letMeMove.utils.AnimationUtils.addAllRotationPoint;
 import static net.dravigen.letMeMove.utils.AnimationUtils.smoothRotateAll;
-import static net.dravigen.letMeMove.utils.GeneralUtils.checkEntityAgainstWall;
 import static net.dravigen.letMeMove.utils.GeneralUtils.pi;
 
-public class AnimWallSliding extends AnimCommon{
+public class AnimWallSliding extends AnimCommon {
 	public static final ResourceLocation id = new ResourceLocation("LMM", "wallSliding");
 	
 	public AnimWallSliding() {
@@ -17,7 +17,11 @@ public class AnimWallSliding extends AnimCommon{
 	
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return player.fallDistance > 0 && !player.onGround && !player.inWater && checkEntityAgainstWall(player, 1.1) != null && player.canJump();
+		return player.fallDistance > 1.5 &&
+				!player.onGround &&
+				!player.inWater &&
+				GeneralUtils.getWallSide(player, 1, player.height - 1) != null &&
+				player.canJump();
 	}
 	
 	@Override
@@ -37,7 +41,7 @@ public class AnimWallSliding extends AnimCommon{
 		
 		offsetAllRotationPoints(model, -4, 0, 0);
 		
-		smoothRotateAll(model.bipedBody, pi(1, 8), 0, 0, 0.6f * delta);
+		smoothRotateAll(model.bipedBody, pi(1, 8), 0, 0, 1);
 		
 		addAllRotationPoint(model.bipedRightArm, 1, 0, 0);
 		addAllRotationPoint(model.bipedLeftArm, 1, 0, 0);

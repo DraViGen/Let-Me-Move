@@ -56,10 +56,10 @@ public abstract class EntityRendererMixin {
 					var13 += 180.0f;
 				}
 				
-				double var14 = (double) (-MathHelper.sin(var28 / 180.0f * (float) Math.PI) * MathHelper.cos(
-						var13 / 180.0f * (float) Math.PI)) * var27;
-				double var16 = (double) (MathHelper.cos(var28 / 180.0f * (float) Math.PI) * MathHelper.cos(
-						var13 / 180.0f * (float) Math.PI)) * var27;
+				double var14 = (double) (-MathHelper.sin(var28 / 180.0f * (float) Math.PI) *
+						MathHelper.cos(var13 / 180.0f * (float) Math.PI)) * var27;
+				double var16 = (double) (MathHelper.cos(var28 / 180.0f * (float) Math.PI) *
+						MathHelper.cos(var13 / 180.0f * (float) Math.PI)) * var27;
 				double var18 = (double) (-MathHelper.sin(var13 / 180.0f * (float) Math.PI)) * var27;
 				
 				for (int var20 = 0; var20 < 8; ++var20) {
@@ -68,15 +68,26 @@ public abstract class EntityRendererMixin {
 					float var22 = (var20 >> 1 & 1) * 2 - 1;
 					float var23 = (var20 >> 2 & 1) * 2 - 1;
 					
-					MovingObjectPosition var24 = this.mc.theWorld.clip(
-							this.mc.theWorld.getWorldVec3Pool().getVecFromPool(var4 + (double) (var21 *= 0.1f),
-									var6 + (double) (var22 *= 0.1f), var8 + (double) (var23 *= 0.1f)),
-							this.mc.theWorld.getWorldVec3Pool().getVecFromPool(
-									var4 - var14 + (double) var21 + (double) var23, var6 - var18 + (double) var22,
-									var8 - var16 + (double) var23));
+					MovingObjectPosition var24 = this.mc.theWorld.clip(this.mc.theWorld.getWorldVec3Pool()
+																			   .getVecFromPool(var4 +
+																									   (double) (var21 *= 0.1f),
+																							   var6 +
+																									   (double) (var22 *= 0.1f),
+																							   var8 +
+																									   (double) (var23 *= 0.1f)),
+																	   this.mc.theWorld.getWorldVec3Pool()
+																			   .getVecFromPool(var4 - var14 +
+																									   (double) var21 +
+																									   (double) var23,
+																							   var6 - var18 +
+																									   (double) var22,
+																							   var8 - var16 +
+																									   (double) var23));
 					
-					if (var24 == null || !((var25 = var24.hitVec.distanceTo(
-							this.mc.theWorld.getWorldVec3Pool().getVecFromPool(var4, var6, var8))) < var27)) continue;
+					if (var24 == null ||
+							!((var25 = var24.hitVec.distanceTo(this.mc.theWorld.getWorldVec3Pool()
+																	   .getVecFromPool(var4, var6, var8))) < var27))
+						continue;
 					
 					var27 = var25;
 				}

@@ -37,19 +37,30 @@ public class AnimDiving extends BaseAnimation {
 		
 		smoothRotateAll(model.bipedBody, 0, 0, 0, 0.5f * delta);
 		
-		smoothRotateAll(model.bipedHead, leaningPitch > 0.0F ? lerpAngle(leaningPitch, model.bipedHead.rotateAngleX,
-				-pi / 4) : j * (pi / 180.0f), i * (pi / 180.0f), 0, 0.4f * delta);
+		smoothRotateAll(model.bipedHead,
+						leaningPitch > 0.0F
+						? lerpAngle(leaningPitch, model.bipedHead.rotateAngleX, -pi / 4)
+						: j * (pi / 180.0f),
+						i * (pi / 180.0f),
+						0,
+						1);
 		
 		if (leaningPitch > 0.0F) {
-			smoothRotateAll(model.bipedRightArm, lerp(leaningPitch, model.bipedRightArm.rotateAngleX, 0.0F),
-					lerp(leaningPitch, model.bipedRightArm.rotateAngleY, pi),
-					lerp(leaningPitch, model.bipedRightArm.rotateAngleZ,
-							pi - 1.8707964F * method_2807(0) / method_2807(14.0F)), 0.15f * delta);
+			smoothRotateAll(model.bipedRightArm,
+							lerp(leaningPitch, model.bipedRightArm.rotateAngleX, 0.0F),
+							lerp(leaningPitch, model.bipedRightArm.rotateAngleY, pi),
+							lerp(leaningPitch,
+								 model.bipedRightArm.rotateAngleZ,
+								 pi - 1.8707964F * method_2807(0) / method_2807(14.0F)),
+							0.15f * delta);
 			
-			smoothRotateAll(model.bipedLeftArm, lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, 0.0F),
-					lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, pi),
-					lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleZ,
-							pi + 1.8707964F * method_2807(0) / method_2807(14.0F)), 0.15f * delta);
+			smoothRotateAll(model.bipedLeftArm,
+							lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleX, 0.0F),
+							lerpAngle(leaningPitch, model.bipedLeftArm.rotateAngleY, pi),
+							lerpAngle(leaningPitch,
+									  model.bipedLeftArm.rotateAngleZ,
+									  pi + 1.8707964F * method_2807(0) / method_2807(14.0F)),
+							0.15f * delta);
 			
 			float n = customMoveEntity.llm_$getLeaningPitch();
 			

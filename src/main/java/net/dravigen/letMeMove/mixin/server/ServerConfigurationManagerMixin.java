@@ -24,6 +24,6 @@ public abstract class ServerConfigurationManagerMixin {
 	@Inject(method = "playerLoggedOut", at = @At("TAIL"))
 	private void savePlayerAnimation(EntityPlayerMP player, CallbackInfo ci) {
 		player.setData(LetMeMoveAddon.CURRENT_ANIMATION,
-				String.valueOf(((ICustomMovementEntity) player).llm_$getAnimationID()));
+					   String.valueOf(((ICustomMovementEntity) player).llm_$getAnimationID()));
 	}
 }

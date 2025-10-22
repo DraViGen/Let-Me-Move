@@ -10,8 +10,8 @@ import static net.dravigen.letMeMove.utils.AnimationUtils.smoothRotateAll;
 import static net.dravigen.letMeMove.utils.GeneralUtils.*;
 
 public class AnimHighFalling extends BaseAnimation {
-	public static ResourceLocation id = new ResourceLocation("LMM", "highFalling");
 	public final static int minFallHeight = 24;
+	public static ResourceLocation id = new ResourceLocation("LMM", "highFalling");
 	
 	public AnimHighFalling() {
 		super(id, 1.8f, 0.005f, true);
@@ -37,7 +37,7 @@ public class AnimHighFalling extends BaseAnimation {
 		
 		smoothRotateAll(model.bipedBody, 0, 0, 0, 0.4f * delta);
 		
-		smoothRotateAll(model.bipedHead, 0.25f, i * (pi / 180.0f), 0, 0.4f * delta);
+		smoothRotateAll(model.bipedHead, 0.25f, i * (pi / 180.0f), 0, 1);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;

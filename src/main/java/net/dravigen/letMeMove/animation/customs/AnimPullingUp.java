@@ -11,7 +11,7 @@ import static net.dravigen.letMeMove.utils.GeneralUtils.pi;
 
 public class AnimPullingUp extends AnimCommon {
 	public static final ResourceLocation id = new ResourceLocation("LMM", "wallPulling");
-	private static float yBlockAboveWall;
+	private static double yBlockAboveWall;
 	
 	public AnimPullingUp() {
 		super(id, 1.8f, 1f, false, 20, 40, false, 0);
@@ -19,17 +19,19 @@ public class AnimPullingUp extends AnimCommon {
 	
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return (player.onGround || player.fallDistance < 2) &&
+		double minY = player.boundingBox.minY;
+		
+		return (player.onGround || player.motionY < 0) &&
 				!player.inWater &&
 				player.canJump() &&
-				(yBlockAboveWall = checkIfOpenSpaceAboveWall(player)) != -1 &&
-				checkIfEntityFacingWall(player);
+				checkIfEntityFacingWall(player) &&
+				(yBlockAboveWall = getWallTopYIfEmptySpace(player)) != -1 &&
+				!(yBlockAboveWall - minY < 1.5 && player.onGround);
 	}
 	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return player.isSneaking()
-				&& player.moveForward > 0;
+		return player.isSneaking() && player.moveForward > 0;
 	}
 	
 	@Override
@@ -38,13 +40,12 @@ public class AnimPullingUp extends AnimCommon {
 		ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
 		BaseAnimation animation = customEntity.llm_$getAnimation();
 		
-		if (!entity.isSneaking() ||
-				(entity.moveForward == 0 &&
-						entity.moveStrafing != 0 &&
-						((yBlockAboveWall - entity.boundingBox.minY >= 1 && (checkIfOpenSpaceAboveWall(entity) == -1 || !checkIfEntityFacingWall(entity))) ||
-								(yBlockAboveWall - entity.boundingBox.minY < 1 && (checkIfOpenSpaceAboveWall(entity, 0) == -1 || !checkIfEntityFacingWall(entity, 0))))
-				)) {
+		if (animation.timeRendered < 0 ||
+				!entity.isSneaking() ||
+				getWallSide(entity, 0, entity.height) == null ||
+				getWallTopYIfEmptySpace(entity) == -1) {
 			animation.timeRendered = animation.duration;
+			
 			return;
 		}
 		
@@ -56,7 +57,8 @@ public class AnimPullingUp extends AnimCommon {
 		float[] rLeg = new float[]{0, 0, 0};
 		float[] lLeg = new float[]{0, 0, 0};
 		
-		animation.timeRendered = MathHelper.floor_double((2 - ((yBlockAboveWall + 0.05) - entity.boundingBox.minY)) * animation.duration / 2);
+		animation.timeRendered = MathHelper.floor_double((2 - ((yBlockAboveWall + 0.05) - entity.boundingBox.minY)) *
+																 animation.duration / 2);
 		
 		int t = animation.timeRendered;
 		
@@ -100,7 +102,7 @@ public class AnimPullingUp extends AnimCommon {
 		
 		smoothRotateAll(model.bipedBody, body, 1);
 		
-		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 0.75f * delta);
+		smoothRotateAll(model.bipedHead, t > 20 ? pi(1, 4) : 0, 0, 0, 1);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;

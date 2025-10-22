@@ -19,7 +19,10 @@ public class AnimLowFalling extends BaseAnimation {
 	
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return player.fallDistance >= minFallHeight && player.fallDistance < AnimHighFalling.minFallHeight && !player.isSneaking() && !player.capabilities.isFlying;
+		return player.fallDistance >= minFallHeight &&
+				player.fallDistance < AnimHighFalling.minFallHeight &&
+				!player.isSneaking() &&
+				!player.capabilities.isFlying;
 	}
 	
 	@Override
@@ -37,7 +40,7 @@ public class AnimLowFalling extends BaseAnimation {
 		
 		smoothRotateAll(model.bipedBody, 0, 0, 0, 0.6f * delta);
 		
-		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 0.4f * delta);
+		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 1);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;

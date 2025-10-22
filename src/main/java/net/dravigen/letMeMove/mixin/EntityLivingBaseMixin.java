@@ -28,10 +28,11 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 	private ResourceLocation currentAnimation;
 	@Unique
 	private side side;
+	
 	public EntityLivingBaseMixin(World par1World) {
 		super(par1World);
 	}
-
+	
 	@Shadow
 	protected abstract float func_110146_f(float par1, float par2);
 	
@@ -40,8 +41,9 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 	
 	@Override
 	public float llm_$getLeaningPitch() {
-		return GeneralUtils.lerp(Minecraft.getMinecraft().getTimer().renderPartialTicks, this.lastLeaningPitch,
-				this.leaningPitch);
+		return GeneralUtils.lerp(Minecraft.getMinecraft().getTimer().renderPartialTicks,
+								 this.lastLeaningPitch,
+								 this.leaningPitch);
 	}
 	
 	@Override

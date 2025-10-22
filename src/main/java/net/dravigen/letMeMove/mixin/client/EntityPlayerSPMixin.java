@@ -16,7 +16,8 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 	
 	@Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isSneaking()Z"))
 	private boolean disableSprintOnCrawl(EntityPlayerSP instance) {
-		if (instance.isSneaking() || ((ICustomMovementEntity) instance).llm_$isAnimation(AnimRegistry.SWIMMING.getID())) {
+		if (instance.isSneaking() ||
+				((ICustomMovementEntity) instance).llm_$isAnimation(AnimRegistry.SWIMMING.getID())) {
 			instance.setSprinting(false);
 			
 			return true;

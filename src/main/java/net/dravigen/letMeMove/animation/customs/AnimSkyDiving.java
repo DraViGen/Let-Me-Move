@@ -33,7 +33,7 @@ public class AnimSkyDiving extends BaseAnimation {
 		
 		smoothRotateAll(model.bipedBody, 0, 0, 0, 0.4f * delta);
 		
-		smoothRotateAll(model.bipedHead, -0.5f, i * (pi / 180.0f), 0, 0.4f * delta);
+		smoothRotateAll(model.bipedHead, -0.5f, i * (pi / 180.0f), 0, 1);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
