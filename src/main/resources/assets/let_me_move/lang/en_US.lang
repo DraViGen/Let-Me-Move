@@ -1,0 +1,13 @@
+LMM.animation.standing=Stand
+LMM.animation.crouching=Crouch
+LMM.animation.swimming=Swim
+LMM.animation.diving=Dive
+LMM.animation.rolling=Roll
+LMM.animation.dashing=Dash
+LMM.animation.skyDiving=Sky Dive
+LMM.animation.lowFalling=Fall
+LMM.animation.highFalling=High Fall
+LMM.animation.climbing=Climb
+LMM.animation.pullingUp=Pull Up
+LMM.animation.wallSliding=Wall Slide
+animation.name=works

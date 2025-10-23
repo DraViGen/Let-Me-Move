@@ -1,23 +1,24 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.dravigen.letMeMove.mixin",
+  "package": "net.dravigen.let_me_move.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "EntityLivingBaseMixin",
     "EntityPlayerMixin",
-    "server.EntityPlayerMPMixin",
     "client.GameSettingsMixin",
-    "server.NetServerHandlerMixin",
-    "server.ServerConfigurationManagerMixin",
     "client.render.EntityRendererMixin",
-    "client.render.RenderPlayerMixin"
+    "client.render.RenderPlayerMixin",
+    "server.EntityPlayerMPMixin",
+    "server.NetServerHandlerMixin",
+    "server.ServerConfigurationManagerMixin"
   ],
   "client": [
     "client.EntityPlayerSPMixin",
     "client.MinecraftMixin",
     "client.MovementInputFromOptionsMixin",
     "client.NetClientHandlerMixin",
+    "client.render.GuiIngameMixin",
     "client.render.ModelBipedMixin"
   ],
   "injectors": {

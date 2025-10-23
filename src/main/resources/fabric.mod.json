@@ -3,7 +3,7 @@
   "id": "let_me_move",
   "version": "${version}",
   "name": "Let Me Move !",
-  "description": "A mobility overhaul addon",
+  "description": "A movement overhaul addon",
   "authors": [
     "DraViGen"
   ],
@@ -12,14 +12,14 @@
     "sources": "https://github.com/BTW-Community/Let-Me-Move"
   },
   "license": "CC-BY-4.0",
-  "icon": "assets/letMeMove/icon.png",
+  "icon": "assets/let_me_move/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.dravigen.letMeMove.LetMeMoveMod"
+      "net.dravigen.let_me_move.LetMeMoveMod"
     ],
     "btw:addon": [
-      "net.dravigen.letMeMove.LetMeMoveAddon"
+      "net.dravigen.let_me_move.LetMeMoveAddon"
     ]
   },
   "custom": {
