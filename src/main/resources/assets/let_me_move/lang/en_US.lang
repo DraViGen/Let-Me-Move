@@ -1,4 +1,6 @@
 LMM.animation.standing=Stand
+LMM.animation.jumping=Jumping
+LMM.animation.flying=Flying
 LMM.animation.crouching=Crouch
 LMM.animation.swimming=Swim
 LMM.animation.diving=Dive

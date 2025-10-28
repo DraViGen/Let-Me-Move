@@ -1,5 +1,6 @@
-package net.dravigen.let_me_move.animation.customs;
+package net.dravigen.let_me_move.animation.actions;
 
+import net.dravigen.let_me_move.animation.poses.AnimCommon;
 import net.minecraft.src.*;
 
 import static net.dravigen.let_me_move.utils.AnimationUtils.*;
@@ -168,6 +169,11 @@ public class AnimPullingUp extends AnimCommon {
 			player.moveEntity(x / 24, -0.0125, z / 24);
 		}
 		
+		return true;
+	}
+	
+	@Override
+	public boolean hasCooldown() {
 		return true;
 	}
 }

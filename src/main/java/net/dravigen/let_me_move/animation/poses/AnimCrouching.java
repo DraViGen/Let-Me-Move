@@ -1,4 +1,4 @@
-package net.dravigen.let_me_move.animation.customs;
+package net.dravigen.let_me_move.animation.poses;
 
 import net.minecraft.src.*;
 

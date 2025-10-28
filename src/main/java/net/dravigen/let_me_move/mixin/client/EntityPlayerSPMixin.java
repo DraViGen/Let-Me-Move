@@ -6,8 +6,9 @@ import net.minecraft.src.*;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = EntityPlayerSP.class, remap = false)
+@Mixin(EntityPlayerSP.class)
 public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 	
 	public EntityPlayerSPMixin(World par1World, String par2Str) {
@@ -31,8 +32,13 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 		return ((ICustomMovementEntity) this).llm_$isAnimation(AnimRegistry.CROUCHING.getID());
 	}
 	
-	@ModifyArg(method = "pushOutOfBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isBlockTranslucent(III)Z", ordinal = 1), index = 1)
-	private int customCollision(int par1) {
-		return this.height > 1 ? par1 : par1 - 1;
+	@Redirect(method = "pushOutOfBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isBlockTranslucent(III)Z", ordinal = 0))
+	private boolean customCollisionOne(EntityPlayerSP instance, int par1, int par2, int par3) {
+		return !instance.worldObj.getCollidingBoundingBoxes(instance, instance.boundingBox).isEmpty();
+	}
+	
+	@Redirect(method = "pushOutOfBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isBlockTranslucent(III)Z", ordinal = 1))
+	private boolean disableUselessCheck(EntityPlayerSP instance, int par1, int par2, int par3) {
+		return false;
 	}
 }

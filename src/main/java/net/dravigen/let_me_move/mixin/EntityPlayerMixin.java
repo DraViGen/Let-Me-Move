@@ -62,11 +62,11 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			ResourceLocation newID = new ResourceLocation("");
 			
-			if (customPlayer.llm_$getAnimation().timeRendered == customPlayer.llm_$getAnimation().totalDuration) {
+			if (!customPlayer.llm_$getAnimation().hasCooldown() || customPlayer.llm_$getAnimation().hasCooldown() && customPlayer.llm_$getAnimation().timeRendered == customPlayer.llm_$getAnimation().totalDuration) {
 				for (BaseAnimation animation : AnimationUtils.getAnimationsMap().values()) {
-					if (!animation.isGeneralConditonsMet(player, this.boundingBox)) continue;
+					if (!animation.shouldActivateAnimation(player, this.boundingBox)) continue;
 					
-					if (animation.shouldActivateAnimation(player, this.boundingBox)) {
+					if (animation.isGeneralConditonsMet(player, this.boundingBox)) {
 						newID = animation.getID();
 						
 						break;

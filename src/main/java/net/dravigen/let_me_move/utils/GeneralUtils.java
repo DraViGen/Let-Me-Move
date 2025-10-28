@@ -15,6 +15,10 @@ public class GeneralUtils {
 		return (float) Math.sin(i);
 	}
 	
+	public static float cos(float i) {
+		return (float) Math.cos(i);
+	}
+	
 	public static float lerp(float delta, float start, float end) {
 		return start + delta * (end - start);
 	}

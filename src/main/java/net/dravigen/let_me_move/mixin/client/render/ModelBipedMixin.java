@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.dravigen.let_me_move.animation.AnimRegistry.*;
@@ -147,14 +149,25 @@ public abstract class ModelBipedMixin extends ModelBase {
 		}
 	}
 	
+	@ModifyArg(method = "<init>(FFII)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/ModelRenderer;addBox(FFFIIIF)V", ordinal = 4), index = 1)
+	private float changeBodyPos(float par1) {
+		return -12;
+	}
+	
+	@ModifyArg(method = "<init>(FFII)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/ModelRenderer;setRotationPoint(FFF)V", ordinal = 2), index = 1)
+	private float changeBodyPosRot(float par1) {
+		return par1 + 12;
+	}
+	
 	@Inject(method = "setRotationAngles", at = @At("HEAD"), cancellable = true)
 	public void setAngles(float f, float g, float h, float i, float j, float u, Entity livingEntity, CallbackInfo ci) {
 		ICustomMovementEntity customEntity = (ICustomMovementEntity) livingEntity;
 		
 		if (customEntity.llm_$getAnimation() == null) return;
 		
-		if (livingEntity instanceof EntityPlayer player) {
-			ci.cancel();
+		ci.cancel();
+		
+		if (livingEntity instanceof EntityPlayer player && Minecraft.getMinecraft().currentScreen == null) {
 			customEntity.llm_$getAnimation()
 					.renderAnimation((ModelBiped) (Object) this, player, f, g, h, i, j, u, customEntity.llm_$getDelta());
 		}

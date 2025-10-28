@@ -31,7 +31,8 @@ public class AnimationUtils {
 	
 	public static void resetAnimationRotationPoints(ModelBiped model) {
 		model.bipedBody.rotationPointX = 0f;
-		model.bipedBody.rotationPointY = 0.0F;
+		model.bipedBody.rotationPointY = 12.0F;
+		//model.bipedBody.rotationPointY = 0.0F;
 		model.bipedBody.rotationPointZ = 0.0F;
 		
 		model.bipedHead.rotationPointX = 0.0F;
@@ -58,6 +59,7 @@ public class AnimationUtils {
 		model.bipedLeftLeg.rotationPointY = 12;
 		model.bipedLeftLeg.rotationPointZ = 0.1f;
 	}
+	
 	
 	public static void offsetAllRotationPoints(ModelBiped model, float x, float y, float z) {
 		model.bipedBody.rotationPointX += x;
@@ -143,7 +145,6 @@ public class AnimationUtils {
 		addRotationPoint(part, type.Z, rotZ);
 	}
 	
-	
 	public static void addRotationPoint(ModelRenderer part, type type, float rot) {
 		if (type == AnimationUtils.type.X) {
 			part.rotationPointX += rot;
@@ -201,6 +202,7 @@ public class AnimationUtils {
 			part.rotateAngleZ = GeneralUtils.incrementUntilGoal(part.rotateAngleZ, rot, factor);
 		}
 	}
+	
 	
 	public enum type {
 		X, Y, Z

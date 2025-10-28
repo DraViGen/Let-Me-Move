@@ -1,5 +1,6 @@
-package net.dravigen.let_me_move.animation.customs;
+package net.dravigen.let_me_move.animation.actions;
 
+import net.dravigen.let_me_move.animation.poses.AnimCommon;
 import net.dravigen.let_me_move.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 
