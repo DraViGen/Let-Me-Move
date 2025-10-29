@@ -151,4 +151,6 @@ public abstract class BaseAnimation {
 	public abstract boolean getHungerCost(EntityPlayer player, double distX, double distY, double distZ);
 
 	public abstract boolean getCustomMove(EntityPlayer player);
+	
+	public abstract boolean isOnlyVisual();
 }

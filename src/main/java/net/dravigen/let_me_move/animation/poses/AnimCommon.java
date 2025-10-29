@@ -7,7 +7,7 @@ import net.minecraft.src.*;
 import static net.dravigen.let_me_move.utils.AnimationUtils.*;
 import static net.dravigen.let_me_move.utils.GeneralUtils.*;
 
-public abstract class AnimCommon extends BaseAnimation {
+public class AnimCommon extends BaseAnimation {
 	public AnimCommon(ResourceLocation id, float height, float speedModifier, boolean needYOffsetUpdate,
 			int maxCooldown, int duration, boolean shouldAutoUpdate, float yOffset) {
 		super(id, height, speedModifier, needYOffsetUpdate, maxCooldown, duration, shouldAutoUpdate, yOffset);
@@ -68,7 +68,7 @@ public abstract class AnimCommon extends BaseAnimation {
 		i = i < -180 ? i + 360 : i > 180 ? i - 360 : i;
 		
 		float[] body = new float[]{0, 0, 0};
-		float[] head = new float[]{j * (pi / 180.0f) / 1.25f, i * (pi / 180.0f) / 1.5f, 0};
+		float[] head = new float[]{j * (pi / 180.0f) / 1.25f, i * (pi / 180.0f) / 1.25f, i * (pi / 180.0f) / 6};
 		float[] rArm = new float[]{0, 0, 0};
 		float[] lArm = new float[]{0, 0, 0};
 		float[] rLeg = new float[]{0, 0, 0};
@@ -104,8 +104,8 @@ public abstract class AnimCommon extends BaseAnimation {
 		g = player.inWater ? 0.5f : g;
 		
 		if ((player.moveForward != 0 || player.moveStrafing != 0)) {
-			rArm[0] = cos(f * mul) * 2.0F * g * (bSprint ? 0.6f : 0.35F) / k;
-			lArm[0] = cos(f * mul + pi) * 2.0F * g * (bSprint ? 0.6f : 0.35F) / k;
+			rArm[0] = cos(f * mul) * 2.0F * g * (bSprint ? 0.75f : 0.5F) / k;
+			lArm[0] = cos(f * mul + pi) * 2.0F * g * (bSprint ? 0.75f : 0.5F) / k;
 			
 			body[0] = (cos(f * mul * 2) + 1) * g * (bSprint ? 0.1f : 0) / k + (bSprint ? pi(1, 32) : 0);
 			body[1] = cos(f * mul) * g * (bSprint ? 0.0f : backward ? 0.5f : 0.3F) * (isCrouching ? 0.25f : 1) / k;
@@ -115,10 +115,10 @@ public abstract class AnimCommon extends BaseAnimation {
 				lLeg[1] = -pi(1, 64);
 			}
 			
-			rLeg[0] = Math.max(-2, (cos(f * mul + pi)) * g * (bSprint ? 0.8f : 0.4f) / k);
+			rLeg[0] = Math.max(-2, (cos(f * mul + pi)) * g * (bSprint ? 0.9f : 0.6f) / k);
 			rLeg[2] = pi(1, 100);
 			
-			lLeg[0] = Math.max(-2, (cos(f * mul)) * g * (bSprint ? 0.8f : 0.4f) / k);
+			lLeg[0] = Math.max(-2, (cos(f * mul)) * g * (bSprint ? 0.9f : 0.6f) / k);
 			lLeg[2] = -pi(1, 100);
 			
 			if (player.inWater && !isHeadInsideWater(player)) {
@@ -149,12 +149,12 @@ public abstract class AnimCommon extends BaseAnimation {
 			
 			setAllRotationPoint(model.bipedRightLeg,
 								-cos(body[1]) * 2f,
-								Math.max((sin(f * mul) - 1) * g * (bSprint ? 1.5f : 1.25f) + 12, (bSprint ? 6 : 8)),
+								Math.max((sin(f * mul) - 1) * g * (bSprint ? 1.75f : 1.3f) + 12, (bSprint ? 6 : 8)),
 								-sin(body[1]) * 2f);
 			
 			setAllRotationPoint(model.bipedLeftLeg,
 								cos(body[1]) * 2f,
-								Math.max((sin(f * mul + pi) - 1) * g * (bSprint ? 1.5f : 1.25f) + 12,
+								Math.max((sin(f * mul + pi) - 1) * g * (bSprint ? 1.75f : 1.3f) + 12,
 										 (bSprint ? 6 : 8)),
 								sin(body[1]) * 2f);
 			
@@ -164,7 +164,7 @@ public abstract class AnimCommon extends BaseAnimation {
 			//head[1] += -body[1] / 3;
 			
 			float v = 2f;
-			float v1 = bSprint ? 3 : backward ? 0.2f : 1.75f;
+			float v1 = bSprint ? 3 : backward ? 0.2f : 2f;
 			model.bipedBody.rotationPointY += -Math.min(cos(f * mul * v) * g * v1, 2);
 			model.bipedRightArm.rotationPointY += -Math.min(cos(f * mul * v) * g * v1, 2);
 			model.bipedLeftArm.rotationPointY += -Math.min(cos(f * mul * v) * g * v1, 2);
@@ -175,7 +175,14 @@ public abstract class AnimCommon extends BaseAnimation {
 		else {
 			rArm[1] = rArm[1] + body[1];
 			lArm[1] = lArm[1] + body[1];
-			head[1] += -body[1] / 4;
+			body[1] += head[1] * 0.5f;
+			rArm[1] += body[1] * 0.75f;
+			lArm[1] += body[1] * 0.75f;
+			
+			model.bipedRightArm.rotationPointX = -cos(body[1] * 0.75f) * 5.0F;
+			model.bipedRightArm.rotationPointZ = sin(body[1] * 0.75f) * 5.0F;
+			model.bipedLeftArm.rotationPointX = cos(body[1] * 0.75f) * 5.0F;
+			model.bipedLeftArm.rotationPointZ = -sin(body[1] * 0.75f) * 5.0F;
 			
 			model.bipedHead.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
 			model.bipedBody.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
@@ -210,7 +217,7 @@ public abstract class AnimCommon extends BaseAnimation {
 			onGround = 1.0F - onGround;
 			
 			float v = MathHelper.sin(onGround * pi);
-			float v1 = MathHelper.sin(model.onGround * pi) * -(model.bipedHead.rotateAngleX - 0.7F) * 0.75F;
+			float v1 = MathHelper.sin(model.onGround * pi) * -(head[0] - 0.7F) * 0.75F;
 			
 			rArm[0] = (float) (rArm[0] - (v * 1.2 + v1));
 			rArm[1] = rArm[1] + body[1] * 2.0F;
@@ -246,24 +253,23 @@ public abstract class AnimCommon extends BaseAnimation {
 			float var8 = 0.0f;
 			float var9 = 0.0f;
 			
-			rArm[0] = (-pi / 2) + model.bipedHead.rotateAngleX;
-			rArm[1] = -0.1F + model.bipedHead.rotateAngleY;
-			rArm[2] = 0.1F + model.bipedHead.rotateAngleY + 0.4F;
+			rArm[0] = (-pi / 2) + head[0];
+			rArm[1] = -0.1F + head[1];
+			rArm[2] = 0.1F + head[1] + 0.4F;
 			
-			lArm[0] = (-pi / 2) + model.bipedHead.rotateAngleX;
+			lArm[0] = (-pi / 2) + head[0];
 			
-			model.bipedRightArm.rotateAngleZ = 0.0f;
-			model.bipedLeftArm.rotateAngleZ = 0.0f;
-			model.bipedRightArm.rotateAngleY = -(0.1f - var8 * 0.6f) + model.bipedHead.rotateAngleY;
-			model.bipedLeftArm.rotateAngleY = 0.1f - var8 * 0.6f + model.bipedHead.rotateAngleY + 0.4f;
-			model.bipedRightArm.rotateAngleX = -1.5707964f + model.bipedHead.rotateAngleX;
-			model.bipedLeftArm.rotateAngleX = -1.5707964f + model.bipedHead.rotateAngleX;
-			model.bipedRightArm.rotateAngleX -= var8 * 1.2f - var9 * 0.4f;
-			model.bipedLeftArm.rotateAngleX -= var8 * 1.2f - var9 * 0.4f;
-			model.bipedRightArm.rotateAngleZ += MathHelper.cos(h * 0.09f) * 0.05f + 0.05f;
-			model.bipedLeftArm.rotateAngleZ -= MathHelper.cos(h * 0.09f) * 0.05f + 0.05f;
-			model.bipedRightArm.rotateAngleX += MathHelper.sin(h * 0.067f) * 0.05f;
-			model.bipedLeftArm.rotateAngleX -= MathHelper.sin(h * 0.067f) * 0.05f;
+			rArm = new float[]{-1.5707964f + head[0], -(0.1f - var8 * 0.6f) + head[1], 0};
+			
+			rArm[0] -= var8 * 1.2f - var9 * 0.4f;
+			rArm[2] += MathHelper.cos(h * 0.09f) * 0.05f + 0.05f;
+			rArm[0] += MathHelper.sin(h * 0.067f) * 0.05f;
+			
+			lArm = new float[]{-1.5707964f + head[0], 0.1f - var8 * 0.6f + head[1] + 0.4f, 0};
+			
+			lArm[0] -= var8 * 1.2f - var9 * 0.4f;
+			lArm[2] -= MathHelper.cos(h * 0.09f) * 0.05f + 0.05f;
+			lArm[0] -= MathHelper.sin(h * 0.067f) * 0.05f;
 		}
 		else {
 			rArm[0] = model.heldItemRight != 0 ? rArm[0] * 0.5f - 0.31415927f * (float) model.heldItemRight : rArm[0];
@@ -285,8 +291,6 @@ public abstract class AnimCommon extends BaseAnimation {
 		smoothRotateAll(model.bipedRightLeg, rLeg, 0.5f * delta);
 		
 		smoothRotateAll(model.bipedLeftLeg, lLeg, 0.5f * delta);
-	
-		
 		
 		/*
 		smoothRotateAll(model.bipedHead, j * (pi / 180.0f), i * (pi / 180.0f), 0, 1);
@@ -487,6 +491,11 @@ public abstract class AnimCommon extends BaseAnimation {
 	
 	@Override
 	public boolean getCustomMove(EntityPlayer player) {
+		return false;
+	}
+	
+	@Override
+	public boolean isOnlyVisual() {
 		return false;
 	}
 }

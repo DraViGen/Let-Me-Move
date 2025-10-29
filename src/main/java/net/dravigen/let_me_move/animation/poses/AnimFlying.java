@@ -98,6 +98,11 @@ public class AnimFlying extends AnimCommon{
 		model.bipedRightLeg.rotationPointY += sin(h / 10) * 1.25f;
 		model.bipedLeftLeg.rotationPointY += sin(h / 10) * 1.25f;
 		
+		if (entity.moveForward > 0 || entity.moveStrafing != 0) {
+			model.bipedRightLeg.rotationPointZ -= 3;
+			model.bipedRightLeg.rotationPointY -= 2;
+		}
+		
 		float onGround = model.onGround;
 		
 		moveAround(model, h, head, rArm, lArm, rLeg, lLeg, body);

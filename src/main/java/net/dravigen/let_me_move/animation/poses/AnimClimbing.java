@@ -32,15 +32,46 @@ public class AnimClimbing extends AnimCommon{
 		
 		i = i < -180 ? i + 360 : i > 180 ? i - 360 : i;
 		
-		float[] head = new float[]{j * (pi / 180.0f), MathHelper.clamp_float(i * (pi / 180.0f), -pi / 2f, pi / 2f), 0};
+		float[] head = new float[]{
+				j * (pi / 180.0f),
+				MathHelper.clamp_float(i * (pi / 180.0f) / 1.25f, -pi / 2f, pi / 2f),
+				i * (pi / 180.0f) / 6
+		};
 		float[] body = new float[]{0, 0, 0};
 		float[] rArm = new float[]{0, 0, 0};
 		float[] lArm = new float[]{0, 0, 0};
 		float[] rLeg = new float[]{0, 0, 0};
 		float[] lLeg = new float[]{0, 0, 0};
+	
+		/*
+		To keep
+		rArm[0] = sin((float) entity.posY * 4) * pi(1, 4) - pi(1, 2);
+		lArm[0] = -sin((float) entity.posY * 4) * pi(1, 4) - pi(1, 2);
+		rArm[1] = -cos((float) entity.posY * 4) * pi(1, 8);
+		lArm[1] = -cos((float) entity.posY * 4) * pi(1, 8);
+		*/
 		
-		rArm[0] = sin((float) entity.posY * 4) - pi(1, 2);
-		lArm[0] = -sin((float) entity.posY * 4) - pi(1, 2);
+		rArm[0] = -pi(3, 5);
+		lArm[0] = -pi(3, 5);
+		
+		rArm[0] += cos((float) entity.posY * 4) * pi(1, 4);
+		lArm[0] += cos((float) entity.posY * 4 + pi) * pi(1, 4);
+		
+		rArm[1] += Math.max(0, -sin((float) entity.posY * 4 + pi)) * pi(1, 5);
+		lArm[1] += Math.min(0, -sin((float) entity.posY * 4 + pi)) * pi(1, 5);
+		
+		body[1] += -cos((float) entity.posY * 4) * pi(1, 4) * pi(1, 16);
+		model.bipedHead.rotationPointX -= cos((float) entity.posY * 4) * 0.75f;
+		
+		model.bipedBody.rotationPointY -= 1;
+		
+		model.bipedRightArm.rotationPointY = (cos((float) entity.posY * 4) + 0.75f) * 2;
+		model.bipedLeftArm.rotationPointY = (cos((float) entity.posY * 4 + pi) + 0.75f) * 2;
+		
+		model.bipedRightArm.rotationPointZ = Math.max(-3, (sin((float) entity.posY * 4)) * 1.5f);
+		model.bipedLeftArm.rotationPointZ = Math.max(-3, (sin((float) entity.posY * 4 + pi)) * 1.5f);
+		
+		
 		rLeg[0] = -pi(1, 16);
 		lLeg[0] = -pi(1, 16);
 		
@@ -51,16 +82,14 @@ public class AnimClimbing extends AnimCommon{
 		
 		body[0] = -pi(1, 12);
 		
-		model.bipedRightArm.rotationPointZ = 0;
-		model.bipedLeftArm.rotationPointZ = 0;
 		
 		model.bipedBody.rotationPointZ = sin(body[0]) * 12;
 		
-		model.bipedRightLeg.rotationPointZ = sin(body[0]) * 12 + 1 + (sin((float) (entity.posY * 4)) - 1);
-		model.bipedLeftLeg.rotationPointZ = sin(body[0]) * 12 + 1 + (sin((float) (entity.posY * 4 + pi)) - 1);
+		model.bipedRightLeg.rotationPointZ = sin(body[0]) * 12 + 1 + Math.max((sin((float) (entity.posY * 4 + pi)) - 1), -1.5f);
+		model.bipedLeftLeg.rotationPointZ = sin(body[0]) * 12 + 1 + Math.max((sin((float) (entity.posY * 4)) - 1), -1.5f);
 		
-		model.bipedRightLeg.rotationPointY += -2 + (cos((float) (entity.posY * 4)) - 1) * 2;
-		model.bipedLeftLeg.rotationPointY += -2 + (cos((float) (entity.posY * 4 + pi)) - 1) * 2;
+		model.bipedRightLeg.rotationPointY += -2 + (cos((float) (entity.posY * 4 + pi)) - 1) * 2;
+		model.bipedLeftLeg.rotationPointY += -2 + (cos((float) (entity.posY * 4)) - 1) * 2;
 		
 		moveAround(model, h, head, rArm, lArm, rLeg, lLeg, body);
 		

@@ -1,6 +1,5 @@
 package net.dravigen.let_me_move.animation.poses;
 
-import net.dravigen.let_me_move.animation.actions.AnimLowFalling;
 import net.dravigen.let_me_move.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 
@@ -47,13 +46,13 @@ public class AnimJumping extends AnimCommon {
 		i = i < -180 ? i + 360 : i > 180 ? i - 360 : i;
 		
 		float[] body = new float[]{0, 0, 0};
-		float[] head = new float[]{j * (pi / 180.0f) / 1.25f, i * (pi / 180.0f) / 1.5f, 0};
+		float[] head = new float[]{j * (pi / 180.0f) / 1.25f, i * (pi / 180.0f) / 1.5f, i * (pi / 180.0f) / 6};
 		float[] rArm = new float[]{0, 0, 0};
 		float[] lArm = new float[]{0, 0, 0};
 		float[] rLeg = new float[]{0, 0, 0};
 		float[] lLeg = new float[]{0, 0, 0};
 		float k = 1;
-		
+	
 		boolean isCrouching = player.isSneaking();
 		
 		if (player.moveForward != 0 || player.moveStrafing != 0) {
@@ -79,7 +78,7 @@ public class AnimJumping extends AnimCommon {
 		}
 		else this.prevRenderTime = -1;
 		
-		double motYposRev = 1 - Math.abs(player.motionY);
+		double motYposRev = 1 - Math.max(0, player.motionY);
 		if ((player.moveForward != 0 || player.moveStrafing != 0)) {
 			body[0] = (bSprint ? pi(1, 32) : 0);
 			body[1] = field_1 * pi(1, 16) * g;
@@ -117,6 +116,10 @@ public class AnimJumping extends AnimCommon {
 				lArm[0] = (float) (-field_1 * pi(1, 4) * g * (1 - player.motionY));
 				rLeg[0] = (float) (-field_1 * pi(1, 4) * g * (1 - player.motionY));
 				lLeg[0] = (float) (field_1 * pi(1, 4) * g * (1 - player.motionY));
+				
+				rLeg[2] = (float) Math.abs(field_1 * pi(1, 24) * g * (1 - player.motionY));
+				lLeg[2] = (float) -Math.abs(field_1 * pi(1, 24) * g * (1 - player.motionY));
+				
 			}
 			else {
 				float v = isCrouching ? 0.25f : 1;
@@ -124,8 +127,8 @@ public class AnimJumping extends AnimCommon {
 				rArm[0] = (float) (field_1 * pi(1, 3) * (1 - player.motionY) * v1);
 				lArm[0] = (float) (-field_1 * pi(1, 3) * (1 - player.motionY) * v1);
 				
-				rLeg[0] = pi(1, 16) * g * 2 * Math.max(0, -field_1 * 2) * v + player.moveForward * pi(1, 16);
-				lLeg[0] = pi(1, 16) * g * 2 * Math.max(0, field_1 * 2) * v + player.moveForward * pi(1, 16);
+				rLeg[0] = pi(1, 16) * Math.max(0, field_1 * 2) * v;
+				lLeg[0] = pi(1, 16) * Math.max(0, -field_1 * 2) * v;
 				
 				model.bipedRightLeg.rotationPointY = (float) (12 - Math.max(0, field_1 * 2) * 2 * motYposRev * v1);
 				model.bipedLeftLeg.rotationPointY = (float) (12 - Math.max(0, -field_1 * 2) * 2 * motYposRev * v1);
@@ -233,7 +236,11 @@ public class AnimJumping extends AnimCommon {
 			model.bipedRightArm.rotateAngleX += MathHelper.sin(h * 0.067f) * 0.05f;
 			model.bipedLeftArm.rotateAngleX -= MathHelper.sin(h * 0.067f) * 0.05f;
 		}
-		
+		else {
+			rArm[0] = model.heldItemRight != 0 ? rArm[0] * 0.5f - 0.31415927f * (float) model.heldItemRight : rArm[0];
+			
+			lArm[0] = model.heldItemLeft != 0 ? lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft : lArm[0];
+		}
 		smoothRotateAll(model.bipedBody, body, 0.7f * delta);
 		
 		smoothRotateAll(model.bipedHead, head, 0.5f * delta);
