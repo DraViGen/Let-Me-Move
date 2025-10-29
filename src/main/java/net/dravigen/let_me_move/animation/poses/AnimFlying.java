@@ -32,8 +32,8 @@ public class AnimFlying extends AnimCommon{
 		
 		i = i < -180 ? i + 360 : i > 180 ? i - 360 : i;
 		
-		float[] body = new float[]{0, 0, 0};
 		float[] head = new float[]{j * (pi / 180.0f) / 1.25f, i * (pi / 180.0f) / 1.5f, 0};
+		float[] body = new float[]{0, 0, 0};
 		float[] rArm = new float[]{0, 0, 0};
 		float[] lArm = new float[]{0, 0, 0};
 		float[] rLeg = new float[]{0, 0, 0};
@@ -68,13 +68,13 @@ public class AnimFlying extends AnimCommon{
 			
 			head[0] += -g * pi(1, 8);
 			rArm[2] += pi(1, 16);
-			lArm[2] += -pi(1, 16);
+			lArm[2] -= pi(1, 16);
 			rArm[0] = g * pi(1, 4);
 			lArm[0] = g * pi(1, 4);
 			rLeg[0] = g * pi(1, 4);
 			lLeg[0] = g * pi(1, 4);
 			rLeg[2] += pi(1, 64);
-			lLeg[2] += -pi(1, 64);
+			lLeg[2] -= pi(1, 64);
 			
 		}
 		
@@ -98,41 +98,15 @@ public class AnimFlying extends AnimCommon{
 		model.bipedRightLeg.rotationPointY += sin(h / 10) * 1.25f;
 		model.bipedLeftLeg.rotationPointY += sin(h / 10) * 1.25f;
 		
-		if (entity.moveForward > 0 || entity.moveStrafing != 0) {
+		if (entity.moveForward > 0 || entity.moveStrafing != 0 && !(entity.moveForward < 0)) {
 			model.bipedRightLeg.rotationPointZ -= 3;
 			model.bipedRightLeg.rotationPointY -= 2;
 		}
 		
-		float onGround = model.onGround;
 		
 		moveAround(model, h, head, rArm, lArm, rLeg, lLeg, body);
 		
-		if (!(onGround <= 0.0F)) {
-			body[1] = MathHelper.sin(MathHelper.sqrt_float(onGround) * (pi * 2)) * 0.2F;
-			
-			model.bipedRightArm.rotationPointZ = sin(body[1]) * 5.0F;
-			model.bipedRightArm.rotationPointX = -cos(body[1]) * 5.0F;
-			
-			model.bipedLeftArm.rotationPointZ = -sin(body[1]) * 5.0F;
-			model.bipedLeftArm.rotationPointX = cos(body[1]) * 5.0F;
-			
-			rArm[1] = rArm[1] + body[1];
-			
-			lArm[1] = lArm[1] + body[1];
-			lArm[0] = lArm[0] + body[1];
-			
-			onGround = 1.0F - model.onGround;
-			onGround *= onGround;
-			onGround *= onGround;
-			onGround = 1.0F - onGround;
-			
-			float v = MathHelper.sin(onGround * pi);
-			float v1 = MathHelper.sin(model.onGround * pi) * -(model.bipedHead.rotateAngleX - 0.7F) * 0.75F;
-			
-			rArm[0] = (float) (rArm[0] - (v * 1.2 + v1));
-			rArm[1] = rArm[1] + body[1] * 2.0F;
-			rArm[2] = rArm[2] + MathHelper.sin(model.onGround * pi) * -0.4F;
-		}
+		swingArm(model, body, rArm, lArm, head);
 		
 		smoothRotateAll(model.bipedBody, body, 0.5f * delta);
 		

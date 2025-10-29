@@ -28,8 +28,6 @@ public class AnimRegistry {
 	public static void registerAllAnimation() {
 		registerAnimation(STANDING);
 		
-		registerAnimation(JUMPING);
-		
 		registerAnimation(FLYING);
 		
 		registerAnimation(CLIMBING);
@@ -47,6 +45,8 @@ public class AnimRegistry {
 		registerAnimation(CROUCHING);
 		
 		registerAnimation(DIVING);
+		
+		registerAnimation(JUMPING);
 		
 		registerAnimation(LOW_FALLING);
 		

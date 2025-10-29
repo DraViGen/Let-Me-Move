@@ -1,6 +1,6 @@
 LMM.animation.standing=Stand
-LMM.animation.jumping=Jumping
-LMM.animation.flying=Flying
+LMM.animation.jumping=Jump
+LMM.animation.flying=Fly
 LMM.animation.crouching=Crouch
 LMM.animation.swimming=Swim
 LMM.animation.diving=Dive
@@ -11,5 +11,4 @@ LMM.animation.lowFalling=Fall
 LMM.animation.highFalling=High Fall
 LMM.animation.climbing=Climb
 LMM.animation.pullingUp=Pull Up
-LMM.animation.wallSliding=Wall Slide
-animation.name=works
+LMM.animation.wallSliding=Slide

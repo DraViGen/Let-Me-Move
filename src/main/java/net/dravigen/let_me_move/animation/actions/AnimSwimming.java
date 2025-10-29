@@ -5,8 +5,7 @@ import net.dravigen.let_me_move.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 
 import static net.dravigen.let_me_move.LetMeMoveAddon.crawl_key;
-import static net.dravigen.let_me_move.utils.AnimationUtils.resetAnimationRotationPoints;
-import static net.dravigen.let_me_move.utils.AnimationUtils.smoothRotateAll;
+import static net.dravigen.let_me_move.utils.AnimationUtils.*;
 import static net.dravigen.let_me_move.utils.GeneralUtils.*;
 
 public class AnimSwimming extends AnimCommon {
@@ -23,7 +22,8 @@ public class AnimSwimming extends AnimCommon {
 	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		boolean conditionA = crawl_key.pressed && ((player.onGround && !isInsideWater(player)) || (isInsideWater(player) && player.canSwim()));
+		boolean conditionA = crawl_key.pressed &&
+				((player.onGround && !isInsideWater(player)) || (isInsideWater(player) && player.canSwim()));
 		
 		boolean conditionB = player.canSwim() &&
 				(isInsideWater(player) && player.getLookVec().yCoord < 0.45 || isHeadInsideWater(player)) &&
@@ -42,54 +42,58 @@ public class AnimSwimming extends AnimCommon {
 		
 		resetAnimationRotationPoints(model);
 		
-		smoothRotateAll(model.bipedBody, 0, 0, 0, 0.4f * delta);
+		if (entity.moveForward != 0 || entity.moveStrafing != 0) {
+			entity.renderYawOffset = incrementAngleUntilGoal(entity.renderYawOffset,
+															 entity.rotationYaw -
+																	 90 *
+																			 (entity.moveStrafing -
+																					 entity.moveStrafing / 2 *
+																							 entity.moveForward),
+															 delta * 0.1f);
+		}
 		
 		leaningPitch = entity.inWater ? 1 : leaningPitch;
 		f = entity.inWater ? f : f * 2;
 		g = entity.inWater ? g : g * 2;
 		
-		float[] rArm = new float[3];
-		float[] lArm = new float[3];
-		float[] rLeg = new float[3];
-		float[] lLeg = new float[3];
-		
 		i %= 360;
 		
 		i = i < -180 ? i + 360 : i > 180 ? i - 360 : i;
 		
-		smoothRotateAll(model.bipedHead,
-						leaningPitch > 0.0F
-						? lerpAngle(leaningPitch, model.bipedHead.rotateAngleX, -pi / 4)
-						: j * (pi / 180.0f),
-						i * (pi / 180.0f),
-						0,
-						1);
+		float[] head = new float[]{
+				leaningPitch > 0.0F
+				? lerpAngle(leaningPitch, model.bipedHead.rotateAngleX, -pi / 4)
+				: j * (pi / 180.0f), i * (pi / 180.0f) / 3, 0
+		};
 		
-		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
-		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
+		float[] body = new float[]{0, 0, 0};
+		float[] rArm = new float[]{0, 0, 0};
+		float[] lArm = new float[]{0, 0, 0};
+		float[] rLeg = new float[]{0, 0, 0};
+		float[] lLeg = new float[]{0, 0, 0};
 		
-		float k = 1.0F;
-		
-		rArm[0] = MathHelper.cos(f * 0.6662F + pi) * 2.0F * g * 0.5F / k;
-		rArm[1] = 0.0F;
-		rArm[2] = 0.0F;
-		
-		lArm[0] = MathHelper.cos(f * 0.6662F) * 2.0F * g * 0.5F / k;
-		lArm[1] = 0.0F;
-		lArm[2] = 0.0F;
-		
-		rLeg[0] = entity.inWater ? MathHelper.cos(f * 0.6662F) * 1.4F * g / k : 0;
-		rLeg[1] = 0.0F;
-		rLeg[2] = 0.0F;
-		
-		lLeg[0] = entity.inWater ? MathHelper.cos(f * 0.6662F + pi) * 1.4F * g / k : 0;
-		lLeg[1] = 0.0F;
-		lLeg[2] = 0.0F;
-		
-		rArm[0] = model.heldItemRight != 0 ? rArm[0] * 0.5f - 0.31415927f * (float) model.heldItemRight : rArm[0];
-		lArm[0] = model.heldItemLeft != 0 ? lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft : lArm[0];
-		
-		if (leaningPitch > 0.0F) {
+		if (entity.inWater) {
+			float k = 1.0F;
+			
+			rArm[0] = MathHelper.cos(f * 0.6662F + pi) * 2.0F * g * 0.5F / k;
+			rArm[1] = 0.0F;
+			rArm[2] = 0.0F;
+			
+			lArm[0] = MathHelper.cos(f * 0.6662F) * 2.0F * g * 0.5F / k;
+			lArm[1] = 0.0F;
+			lArm[2] = 0.0F;
+			
+			rLeg[0] = MathHelper.cos(f * 0.6662F) * 1.4F * g / k;
+			rLeg[1] = 0.0F;
+			rLeg[2] = 0.0F;
+			
+			lLeg[0] = MathHelper.cos(f * 0.6662F + pi) * 1.4F * g / k;
+			lLeg[1] = 0.0F;
+			lLeg[2] = 0.0F;
+			
+			rArm[0] = model.heldItemRight != 0 ? rArm[0] * 0.5f - 0.31415927f * (float) model.heldItemRight : rArm[0];
+			lArm[0] = model.heldItemLeft != 0 ? lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft : lArm[0];
+			
 			float l = f % 26.0F;
 			
 			if (l < 14.0F) {
@@ -125,18 +129,65 @@ public class AnimSwimming extends AnimCommon {
 			lLeg[0] = lerp(leaningPitch, lLeg[0], 0.3F * MathHelper.cos(f * 0.33333334F + pi));
 			rLeg[0] = lerp(leaningPitch, rLeg[0], 0.3F * MathHelper.cos(f * 0.33333334F));
 			
+			rArm[0] += model.onGround * 2;
+			rArm[2] += model.onGround * 2;
+		}
+		else {
+			f *= entity.moveForward < 0 && entity.moveStrafing == 0 ? -1 : 1;
+			g *= 8;
+			
+			offsetAllRotationPoints(model, 0, 0, 1);
+			
+			rArm[0] = (cos(f) + 0.5f) * g * pi(1, 32) + pi(1, 12) - pi;
+			lArm[0] = (cos(f + pi) + 0.5f) * g * pi(1, 32) + pi(1, 12) - pi;
+			rLeg[0] = (cos(f + pi) + 1f) * g * pi(1, 64) - pi(1, 24);
+			lLeg[0] = (cos(f) + 1f) * g * pi(1, 64) - pi(1, 24);
+			
+			body[0] = -pi(1, 16);
+			body[1] = sin(f) * g * pi(1, 24);
+			head[1] += -sin(f) * g * pi(1, 64);
+			
+			model.bipedHead.rotationPointX += sin(body[1]) * 4;
+			
+			rArm[2] = pi(1, 32);
+			lArm[2] = -pi(1, 32);
+			rLeg[2] = pi(1, 32);
+			lLeg[2] = -pi(1, 32);
+			
+			model.bipedBody.rotationPointZ += sin(body[0]) * 12;
+			
+			model.bipedRightArm.rotationPointY += cos(f) * g;
+			model.bipedLeftArm.rotationPointY += cos(f + pi) * g;
+			
+			model.bipedRightLeg.rotationPointY += (cos(f + pi) - 0.75f) * g - 2;
+			model.bipedLeftLeg.rotationPointY += (cos(f) - 0.75f) * g - 2;
+			
+			model.bipedRightArm.rotationPointZ += Math.max(0, (sin(f)) * g) - 2;
+			model.bipedLeftArm.rotationPointZ += Math.max(0, (sin(f + pi)) * g) - 2;
+			
+			model.bipedRightLeg.rotationPointZ += Math.max(0, (sin(f + pi)) * g) - 4;
+			model.bipedLeftLeg.rotationPointZ += Math.max(0, (sin(f)) * g) - 4;
+			
 		}
 		
-		rArm[0] += model.onGround * 2;
-		rArm[2] += model.onGround * 2;
+		breath(model, h, head, rArm, lArm, rLeg, lLeg, body);
 		
-		smoothRotateAll(model.bipedRightArm, rArm[0], rArm[1], rArm[2], 0.3f * delta);
+		swingArm(model, body, rArm, lArm, head);
 		
-		smoothRotateAll(model.bipedLeftArm, lArm[0], lArm[1], lArm[2], 0.3f * delta);
+		smoothRotateAll(model.bipedHead, head, 1);
 		
-		smoothRotateAll(model.bipedRightLeg, rLeg[0], rLeg[1], rLeg[2], 0.3f * delta);
+		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
+		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 		
-		smoothRotateAll(model.bipedLeftLeg, lLeg[0], lLeg[1], lLeg[2], 0.3f * delta);
+		smoothRotateAll(model.bipedBody, body, 0.4f * delta);
+		
+		smoothRotateAll(model.bipedRightArm, rArm, 0.3f * delta);
+		
+		smoothRotateAll(model.bipedLeftArm, lArm, 0.3f * delta);
+		
+		smoothRotateAll(model.bipedRightLeg, rLeg, 0.3f * delta);
+		
+		smoothRotateAll(model.bipedLeftLeg, lLeg, 0.3f * delta);
 		
 		if (entity instanceof EntityPlayer) {
 			if (entity.getCurrentItemOrArmor(2) == null) {
