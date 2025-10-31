@@ -19,4 +19,9 @@ public class AnimCrouching extends AnimCommon {
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		return player.isSneaking();
 	}
+	
+	@Override
+	public boolean customBodyHeadRotation(EntityLivingBase entity) {
+		return entity.moveForward != 0 || entity.moveStrafing != 0;
+	}
 }

@@ -527,7 +527,7 @@ public class AnimCommon extends BaseAnimation {
 	}
 	
 	@Override
-	public boolean isOnlyVisual() {
+	public boolean customBodyHeadRotation(EntityLivingBase entity) {
 		return false;
 	}
 }

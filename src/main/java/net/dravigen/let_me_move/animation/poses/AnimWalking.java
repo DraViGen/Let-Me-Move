@@ -1,6 +1,7 @@
 package net.dravigen.let_me_move.animation.poses;
 
 import net.minecraft.src.AxisAlignedBB;
+import net.minecraft.src.EntityLivingBase;
 import net.minecraft.src.EntityPlayer;
 import net.minecraft.src.ResourceLocation;
 
@@ -14,5 +15,10 @@ public class AnimWalking extends AnimCommon {
 	
 	public AnimWalking() {
 		super(id);
+	}
+	
+	@Override
+	public boolean customBodyHeadRotation(EntityLivingBase entity) {
+		return entity.moveForward != 0 || entity.moveStrafing != 0;
 	}
 }

@@ -1,9 +1,12 @@
 package net.dravigen.let_me_move.mixin.client.render;
 
+import btw.util.color.ColorHelper;
+import com.prupe.mcpatcher.cc.Colorizer;
 import net.dravigen.let_me_move.animation.BaseAnimation;
 import net.dravigen.let_me_move.interfaces.ICustomMovementEntity;
 import net.dravigen.let_me_move.utils.AnimationUtils;
 import net.minecraft.src.*;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,6 +17,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.awt.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Mixin(GuiIngame.class)
 public abstract class GuiIngameMixin extends Gui {
@@ -52,21 +60,57 @@ public abstract class GuiIngameMixin extends Gui {
 		
 		y -= 5;
 		
+		Map<ResourceLocation, BaseAnimation> cooldownAnims = new HashMap<>();
+		
 		for (BaseAnimation animCool : AnimationUtils.getAnimationsMap().values()) {
 			int cooldown = animCool.cooldown;
+			
 			if (animCool.hasCooldown() && cooldown > 0) {
-				String cooldownS = String.valueOf(cooldown);
-				
-				name = getAnimName(animCool);
-				
-				String string = cooldownS + ": " + name;
-				
-				this.drawString(fontRenderer, string,
-								scaledWidth - fontRenderer.getStringWidth(string) - 2,
-								y -= fontRenderer.FONT_HEIGHT - 1,
-								Color.red.getRGB());
-				
+				cooldownAnims.put(animCool.getID(), animCool);
 			}
+		}
+		
+		cooldownAnims = cooldownAnims.entrySet()
+				.stream()
+				.sorted(Comparator.comparingInt(animCooldown -> animCooldown.getValue().cooldown))
+				.collect(Collectors.toMap(Map.Entry::getKey,
+										  Map.Entry::getValue,
+										  (oldValue, newValue) -> oldValue,
+										  LinkedHashMap::new));
+		
+		
+		for (BaseAnimation animCool : cooldownAnims.values()) {
+			String string = getAnimName(animCool);
+			
+			int cooldownWidth = 60;
+			float delta = (float) cooldownWidth / animCool.maxCooldown;
+			y -= fontRenderer.FONT_HEIGHT - 1;
+			
+			GL11.glPushMatrix();
+			GL11.glEnable(3042);
+			GL11.glBlendFunc(770, 771);
+			
+			int var1 = (int) (animCool.cooldown * delta);
+			
+			for (int i = 0; i <= var1; i++) {
+				float diff = (float) i / cooldownWidth;
+				Color color = diff < 2 / 3f ? diff < 1 / 3f ? Color.green : Color.yellow : Color.red;
+				Gui.drawRect(scaledWidth - 2 - i,
+							 y - 1,
+							 scaledWidth - 2,
+							 y + fontRenderer.FONT_HEIGHT,
+							 80 << 24 | color.getRed() << 16 | color.getGreen() << 8 | color.getBlue());
+			}
+			
+			GL11.glDisable(3042);
+			GL11.glPopMatrix();
+			
+			float diff = (float) animCool.cooldown / animCool.maxCooldown;
+			Color color = diff <= 2 / 3f ? diff <= 1 / 3f ? Color.green : Color.yellow : Color.red;
+			
+			this.drawCenteredString(fontRenderer, string, scaledWidth - 2 - cooldownWidth / 2, y, color.getRGB());
+			
+			y -= 3;
 		}
 	}
 	

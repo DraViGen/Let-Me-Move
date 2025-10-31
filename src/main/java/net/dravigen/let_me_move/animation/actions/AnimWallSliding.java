@@ -106,4 +106,9 @@ public class AnimWallSliding extends AnimCommon {
 		
 		return true;
 	}
+	
+	@Override
+	public boolean customBodyHeadRotation(EntityLivingBase entity) {
+		return true;
+	}
 }

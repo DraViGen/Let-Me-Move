@@ -156,5 +156,5 @@ public abstract class BaseAnimation {
 
 	public abstract boolean getCustomMove(EntityPlayer player);
 	
-	public abstract boolean isOnlyVisual();
+	public abstract boolean customBodyHeadRotation(EntityLivingBase entity);
 }

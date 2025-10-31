@@ -183,4 +183,9 @@ public class AnimPullingUp extends AnimCommon {
 	public boolean hasCooldown() {
 		return true;
 	}
+	
+	@Override
+	public boolean customBodyHeadRotation(EntityLivingBase entity) {
+		return true;
+	}
 }

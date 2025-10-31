@@ -291,4 +291,9 @@ public class AnimSwimming extends AnimCommon {
 				!player.capabilities.isFlying &&
 				isInsideWater(player);
 	}
+	
+	@Override
+	public boolean customBodyHeadRotation(EntityLivingBase entity) {
+		return entity.moveForward != 0 || entity.moveStrafing != 0;
+	}
 }

@@ -255,4 +255,9 @@ public class AnimJumping extends AnimCommon {
 		smoothRotateAll(model.bipedLeftLeg, lLeg, 0.5f * delta);
 		
 	}
+	
+	@Override
+	public boolean customBodyHeadRotation(EntityLivingBase entity) {
+		return entity.moveForward != 0 || entity.moveStrafing != 0;
+	}
 }
