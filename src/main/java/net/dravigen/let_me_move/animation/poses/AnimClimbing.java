@@ -19,11 +19,6 @@ public class AnimClimbing extends AnimCommon{
 	}
 	
 	@Override
-	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return true;
-	}
-	
-	@Override
 	public void renderAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j,
 			float u, float delta) {
 		resetAnimationRotationPoints(model);

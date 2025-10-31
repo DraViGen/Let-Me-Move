@@ -6,6 +6,6 @@ public class AnimStanding extends AnimCommon {
 	public static final ResourceLocation id = new ResourceLocation("LMM", "standing");
 	
 	public AnimStanding() {
-		super(id, 1.8f, 1);
+		super(id);
 	}
 }

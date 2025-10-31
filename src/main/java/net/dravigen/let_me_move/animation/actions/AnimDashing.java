@@ -23,7 +23,6 @@ public class AnimDashing extends AnimCommon {
 
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		
 		if (player.isUsingSpecialKey() || player.moveStrafing != 0) {
 			if (pressTime < 5 && player.isUsingSpecialKey() && player.moveStrafing != 0) {
 				
@@ -42,6 +41,10 @@ public class AnimDashing extends AnimCommon {
 	@Override
 	public void renderAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j,
 			float u, float delta) {
+		if (entity.isEating()) {
+			stopAnimation();
+		}
+		
 		ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
 		
 		resetAnimationRotationPoints(model);

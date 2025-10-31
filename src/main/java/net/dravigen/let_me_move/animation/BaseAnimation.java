@@ -102,6 +102,10 @@ public abstract class BaseAnimation {
 		return this.maxCooldown != 0;
 	}
 	
+	public void stopAnimation() {
+		this.timeRendered = this.totalDuration;
+	}
+	
 	public void startCooldown() {
 		this.cooldown = this.maxCooldown;
 	}

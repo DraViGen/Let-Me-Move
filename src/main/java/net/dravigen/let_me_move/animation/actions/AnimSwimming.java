@@ -15,23 +15,28 @@ public class AnimSwimming extends AnimCommon {
 		super(id, 0.8f, 0.15f, true);
 	}
 	
-	@Override
-	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return !player.capabilities.isFlying && (player.onGround || isInsideWater(player));
+	public AnimSwimming(ResourceLocation id) {
+		super(id, 0.8f, 0.15f, true);
 	}
 	
 	@Override
+	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
+		boolean conditionA = isInsideWater(player) && crawl_key.pressed;
+		
+		boolean conditionB = (isInsideWater(player) && player.getLookVec().yCoord < 0.45 ||
+				isHeadInsideWater(player)) &&
+				(player.moveForward > 0 || player.moveStrafing != 0) &&
+				player.isUsingSpecialKey();
+		
+		return !player.doesStatusPreventSprinting() &&
+				!player.capabilities.isFlying &&
+				player.canSwim() &&
+				(conditionA || conditionB);
+	}
+
+	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		boolean conditionA = crawl_key.pressed &&
-				((player.onGround && !isInsideWater(player)) || (isInsideWater(player) && player.canSwim()));
-		
-		boolean conditionB = player.canSwim() &&
-				(isInsideWater(player) && player.getLookVec().yCoord < 0.45 || isHeadInsideWater(player)) &&
-				player.isUsingSpecialKey() &&
-				player.moveForward > 0 &&
-				!player.doesStatusPreventSprinting();
-		
-		return conditionA || conditionB;
+		return crawl_key.pressed || player.isUsingSpecialKey();
 	}
 	
 	@Override

@@ -24,11 +24,6 @@ public class AnimJumping extends AnimCommon {
 				!player.isOnLadder();
 	}
 	
-	@Override
-	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return true;
-	}
-	
 	private int field_1 = 1;
 	private int prevRenderTime = -1;
 	
@@ -241,6 +236,9 @@ public class AnimJumping extends AnimCommon {
 			
 			lArm[0] = model.heldItemLeft != 0 ? lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft : lArm[0];
 		}
+		
+		eatFood(model, h, entity, head, rArm);
+		
 		smoothRotateAll(model.bipedBody, body, 0.7f * delta);
 		
 		smoothRotateAll(model.bipedHead, head, 0.5f * delta);

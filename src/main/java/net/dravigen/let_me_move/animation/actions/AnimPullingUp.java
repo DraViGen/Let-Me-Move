@@ -19,8 +19,6 @@ public class AnimPullingUp extends AnimCommon {
 	
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		double minY = player.boundingBox.minY;
-		
 		return !player.capabilities.isFlying &&
 				!player.isEating() &&
 				(player.onGround || player.motionY < 0) &&
@@ -28,7 +26,7 @@ public class AnimPullingUp extends AnimCommon {
 				!player.doesStatusPreventSprinting() &&
 				checkIfEntityFacingWall(player) &&
 				(yBlockAboveWall = getWallTopYIfEmptySpace(player)) != -1 &&
-				!(yBlockAboveWall - minY < 1.5 && player.onGround);
+				!(yBlockAboveWall - player.boundingBox.minY < 1.5 && player.onGround);
 	}
 	
 	@Override
@@ -45,7 +43,7 @@ public class AnimPullingUp extends AnimCommon {
 				!entity.isSneaking() ||
 				this.timeRendered < 35 &&
 						(getWallSide(entity, 0, entity.height) == null || getWallTopYIfEmptySpace(entity) == -1)) {
-			this.timeRendered = this.totalDuration;
+			this.stopAnimation();
 			
 			return;
 		}

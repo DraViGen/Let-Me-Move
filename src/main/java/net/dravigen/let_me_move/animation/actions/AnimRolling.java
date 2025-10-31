@@ -34,6 +34,10 @@ public class AnimRolling extends AnimCommon {
 	@Override
 	public void renderAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i, float j,
 			float u, float delta) {
+		if (entity.isEating()) {
+			stopAnimation();
+		}
+		
 		resetAnimationRotationPoints(model);
 		
 		smoothRotateAll(model.bipedBody, 0, 0, 0, 0.6f * delta);

@@ -51,7 +51,7 @@ public class AnimCommon extends BaseAnimation {
 	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -221,7 +221,6 @@ public class AnimCommon extends BaseAnimation {
 		
 		moveAround(model, h, head, rArm, lArm, rLeg, lLeg, body);
 		
-
 		if (model.aimedBow) {
 			float var8 = 0.0f;
 			float var9 = 0.0f;
@@ -249,6 +248,8 @@ public class AnimCommon extends BaseAnimation {
 			
 			lArm[0] = model.heldItemLeft != 0 ? lArm[0] * 0.5f - 0.31415927f * (float) model.heldItemLeft : lArm[0];
 		}
+		
+		eatFood(model, h, player, head, rArm);
 		
 		smoothRotateAll(model.bipedBody, body, 0.7f * delta);
 		
@@ -406,6 +407,21 @@ public class AnimCommon extends BaseAnimation {
 				model.bipedCloak.rotationPointY = -0.85F;
 			}
 		}*/
+	}
+	
+	protected static void eatFood(ModelBiped model, float h, EntityLivingBase player, float[] head, float[] rArm) {
+		if (player.isEating()) {
+			head[0] = sin(h * 2) * pi(1, 32) + pi(1, 12);
+			head[1] = 0;
+			
+			head[2] += sin(h) * pi(1, 16);
+			
+			rArm[0] -= pi(8, 16);
+			rArm[2] += pi(3, 16);
+			
+			model.bipedRightArm.rotationPointZ += 1;
+			model.bipedRightArm.rotationPointY += 2;
+		}
 	}
 	
 	protected static void swingArm(ModelBiped model, float[] body, float[] rArm, float[] lArm, float[] head) {
