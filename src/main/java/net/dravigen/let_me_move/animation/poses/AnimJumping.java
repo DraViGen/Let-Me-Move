@@ -183,7 +183,7 @@ public class AnimJumping extends AnimCommon {
 			rArm[2] = rArm[2] + MathHelper.sin(model.onGround * pi) * -0.4F;
 		}
 		
-		if (isCrouching) {
+		if (isCrouching || isEntityHeadInsideBlock(player, 0.3)) {
 			this.height = 1.4f;
 			
 			body[0] = 0.5F;

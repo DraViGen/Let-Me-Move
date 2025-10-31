@@ -20,8 +20,8 @@ public class AnimPullingUp extends AnimCommon {
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		return !player.capabilities.isFlying &&
+				player.getHeldItem() == null &&
 				!player.isEating() &&
-				(player.onGround || player.motionY < 0) &&
 				!player.inWater &&
 				!player.doesStatusPreventSprinting() &&
 				checkIfEntityFacingWall(player) &&
@@ -31,7 +31,10 @@ public class AnimPullingUp extends AnimCommon {
 	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return player.isSneaking() && player.moveForward > 0;
+		return player.isSneaking() &&
+				player.moveForward > 0 &&
+				!isEntityHeadInsideBlock(player, 0.3) &&
+				(getWallTopYIfEmptySpace(player) - player.boundingBox.minY) < 2;
 	}
 	
 	@Override

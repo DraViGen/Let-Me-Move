@@ -21,7 +21,7 @@ import static net.dravigen.let_me_move.animation.AnimRegistry.*;
 public abstract class EntityPlayerMixin extends EntityLivingBase {
 	
 	@Unique
-	private final List<BaseAnimation> animToCheckIfFail = Arrays.asList(AnimationUtils.getAnimationFromID(SWIMMING.getID()),
+	private final List<BaseAnimation> animToCheckIfFail = Arrays.asList(AnimationUtils.getAnimationFromID(CRAWLING.getID()),
 																		AnimationUtils.getAnimationFromID(CROUCHING.getID()));
 	@Shadow
 	protected boolean sleeping;
@@ -48,7 +48,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 		ICustomMovementEntity customPlayer = (ICustomMovementEntity) this;
 		EntityPlayer player = (EntityPlayer) (Object) this;
 		
-		if (this.worldObj.isRemote && Minecraft.getMinecraft().currentScreen == null) {
+		if (this.worldObj.isRemote) {
 			for (BaseAnimation animation : AnimationUtils.getAnimationsMap().values()) {
 				animation.updateAnimationTime(customPlayer.llm_$getAnimationID());
 			}
@@ -122,7 +122,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 				}
 				else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() &&
 						!GeneralUtils.isEntityFeetInsideBlock(this)) {
-					customPlayer.llm_$setAnimation(SWIMMING.getID());
+					customPlayer.llm_$setAnimation(CRAWLING.getID());
 				}
 			}
 		}

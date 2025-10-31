@@ -73,6 +73,31 @@ public class AnimFlying extends AnimCommon{
 			
 		}
 		
+		this.height = 1.8f;
+		
+		if (entity.isSneaking() || isEntityHeadInsideBlock(entity, 0.3)) {
+			this.height = 1.4f;
+			body[0] = 0.5F;
+			
+			rArm[0] += 0.4F;
+			lArm[0] += 0.4F;
+			
+			model.bipedRightArm.rotationPointY += 3.2F;
+			
+			model.bipedLeftArm.rotationPointY += 3.2F;
+			
+			model.bipedRightLeg.rotationPointY += 0.2F;
+			model.bipedRightLeg.rotationPointZ += 4.0F;
+			
+			model.bipedLeftLeg.rotationPointY += 0.2F;
+			model.bipedLeftLeg.rotationPointZ += 4.0F;
+			
+			model.bipedHead.rotationPointY += 4.2F;
+			model.bipedHeadwear.rotationPointY += 4.2f;
+			
+			model.bipedBody.rotationPointY += 1.0F;
+			model.bipedBody.rotationPointZ = 4.8F;
+		}
 		
 		head[0] += sin(h / 8) * pi(1, 80);
 		

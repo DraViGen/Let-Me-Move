@@ -1,12 +1,12 @@
 package net.dravigen.let_me_move.mixin.client;
 
-import net.dravigen.let_me_move.animation.AnimRegistry;
 import net.dravigen.let_me_move.interfaces.ICustomMovementEntity;
 import net.minecraft.src.*;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static net.dravigen.let_me_move.animation.AnimRegistry.*;
 
 @Mixin(EntityPlayerSP.class)
 public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
@@ -17,8 +17,15 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 	
 	@Redirect(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isSneaking()Z"))
 	private boolean disableSprintOnCrawl(EntityPlayerSP instance) {
+		ICustomMovementEntity customEntity = (ICustomMovementEntity) instance;
 		if (instance.isSneaking() ||
-				((ICustomMovementEntity) instance).llm_$isAnimation(AnimRegistry.SWIMMING.getID())) {
+				!(customEntity.llm_$isAnimation(RUNNING.getID()) ||
+						customEntity.llm_$isAnimation(WALKING.getID()) ||
+						customEntity.llm_$isAnimation(STANDING.getID()) ||
+						customEntity.llm_$isAnimation(FLYING.getID()) ||
+						customEntity.llm_$isAnimation(JUMPING.getID()) ||
+						customEntity.llm_$isAnimation(SWIMMING.getID()) ||
+						customEntity.llm_$isAnimation(LOW_FALLING.getID()))) {
 			instance.setSprinting(false);
 			
 			return true;
@@ -27,9 +34,15 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 		return false;
 	}
 	
+	@Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/src/MovementInput;moveForward:F", opcode = Opcodes.GETFIELD))
+	private float allowRunOnStraf(MovementInput instance) {
+		
+		return instance.moveStrafe != 0 ? 0.8f : instance.moveForward;
+	}
+	
 	@Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/src/MovementInput;sneak:Z", ordinal = 0, opcode = Opcodes.GETFIELD))
 	private boolean disableVanillaSneakLowerCamera(MovementInput instance) {
-		return ((ICustomMovementEntity) this).llm_$isAnimation(AnimRegistry.CROUCHING.getID());
+		return ((ICustomMovementEntity) this).llm_$isAnimation(CROUCHING.getID());
 	}
 	
 	@Redirect(method = "pushOutOfBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/EntityPlayerSP;isBlockTranslucent(III)Z", ordinal = 0))

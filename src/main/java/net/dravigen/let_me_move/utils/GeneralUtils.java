@@ -53,11 +53,19 @@ public class GeneralUtils {
 	}
 	
 	public static boolean isEntityHeadNormalHeightInsideBlock(Entity entity) {
-		int x = MathHelper.floor_double(entity.posX);
-		int y = MathHelper.floor_double(entity.boundingBox.minY + 1.8);
-		int z = MathHelper.floor_double(entity.posZ);
+		double x = entity.posX;
+		double y = entity.boundingBox.minY + 1;
+		double z = entity.posZ;
 		
-		return entity.worldObj.isBlockFullCube(x, y, z);
+		return !entity.worldObj.getCollidingBoundingBoxes(entity, new AxisAlignedBB(x - 0.1, y, z - 0.1, x + 0.1, y + 0.5, z + 0.1)).isEmpty();
+	}
+	
+	public static boolean isEntityHeadInsideBlock(Entity entity, double yOff) {
+		double x = entity.posX;
+		double y = entity.boundingBox.minY + 1;
+		double z = entity.posZ;
+		
+		return !entity.worldObj.getCollidingBoundingBoxes(entity, new AxisAlignedBB(x - 0.1, y, z - 0.1, x + 0.1, y + 0.5 + yOff, z + 0.1)).isEmpty();
 	}
 	
 	public static float lerpAngle(float angleOne, float angleTwo, float magnitude) {

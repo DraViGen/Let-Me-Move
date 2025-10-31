@@ -167,7 +167,7 @@ public abstract class ModelBipedMixin extends ModelBase {
 		
 		ci.cancel();
 		
-		if (livingEntity instanceof EntityPlayer player && Minecraft.getMinecraft().currentScreen == null) {
+		if (livingEntity instanceof EntityPlayer player) {
 			customEntity.llm_$getAnimation()
 					.renderAnimation((ModelBiped) (Object) this, player, f, g, h, i, j, u, customEntity.llm_$getDelta());
 		}

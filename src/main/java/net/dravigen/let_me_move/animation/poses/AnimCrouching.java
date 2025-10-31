@@ -2,6 +2,8 @@ package net.dravigen.let_me_move.animation.poses;
 
 import net.minecraft.src.*;
 
+import static net.dravigen.let_me_move.utils.GeneralUtils.isEntityHeadInsideBlock;
+
 
 public class AnimCrouching extends AnimCommon {
 	public static final ResourceLocation id = new ResourceLocation("LMM", "crouching");
@@ -17,7 +19,7 @@ public class AnimCrouching extends AnimCommon {
 	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return player.isSneaking();
+		return player.isSneaking() || isEntityHeadInsideBlock(player, 0.3);
 	}
 	
 	@Override
