@@ -22,7 +22,6 @@ public class AnimCrawling extends AnimSwimming {
 	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return crawl_key.pressed ||
-				isEntityHeadNormalHeightInsideBlock(player);
+		return crawl_key.pressed || isEntityHeadNormalHeightInsideBlock(player);
 	}
 }

@@ -19,7 +19,8 @@ import static net.dravigen.let_me_move.animation.AnimRegistry.*;
 
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {
-	@Shadow public ModelRenderer bipedHead;
+	@Shadow
+	public ModelRenderer bipedHead;
 	@Unique
 	float prevXRotation = 0;
 	@Unique
@@ -39,7 +40,7 @@ public abstract class ModelBipedMixin extends ModelBase {
 	
 	@Inject(method = "render", at = @At("HEAD"))
 	private void rotateBody(Entity entity, float f, float g, float h, float i, float j, float u, CallbackInfo ci) {
-		if (!(entity instanceof EntityPlayer player) || (ModelBiped)(Object)this instanceof PlayerArmorModel) return;
+		if (!(entity instanceof EntityPlayer player) || (ModelBiped) (Object) this instanceof PlayerArmorModel) return;
 		
 		ICustomMovementEntity customEntity = (ICustomMovementEntity) entity;
 		BaseAnimation animation = customEntity.llm_$getAnimation();
@@ -168,13 +169,23 @@ public abstract class ModelBipedMixin extends ModelBase {
 		if (livingEntity instanceof EntityPlayer player) {
 			GuiScreen screen = Minecraft.getMinecraft().currentScreen;
 			
-			boolean inInv = Minecraft.getMinecraft().gameSettings.thirdPersonView != 0 && (screen instanceof GuiInventory || screen instanceof GuiContainerCreative) && livingEntity == Minecraft.getMinecraft().renderViewEntity;
+			boolean inInv = Minecraft.getMinecraft().gameSettings.thirdPersonView != 0 &&
+					(screen instanceof GuiInventory || screen instanceof GuiContainerCreative) &&
+					livingEntity == Minecraft.getMinecraft().renderViewEntity;
 			
 			i = inInv ? 0 : i;
 			j = inInv ? 0 : j;
 			
 			customEntity.llm_$getAnimation()
-					.renderAnimation((ModelBiped) (Object) this, player, f, g, h, i, j, u, customEntity.llm_$getDelta());
+					.renderAnimation((ModelBiped) (Object) this,
+									 player,
+									 f,
+									 g,
+									 h,
+									 i,
+									 j,
+									 u,
+									 customEntity.llm_$getDelta());
 		}
 	}
 }

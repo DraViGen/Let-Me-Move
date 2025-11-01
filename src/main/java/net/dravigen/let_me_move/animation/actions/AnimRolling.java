@@ -49,7 +49,7 @@ public class AnimRolling extends AnimCommon {
 		float[] lLeg = new float[]{0, 0, 0};
 		
 		int t = this.timeRendered;
-
+		
 		if (t < 10) {
 			this.height = 1.8f - t / 10f;
 			rArm[0] = -pi;
@@ -151,13 +151,12 @@ public class AnimRolling extends AnimCommon {
 		}
 		player.motionY = !(!player.worldObj.isRemote ||
 				player.worldObj.blockExists((int) player.posX, 0, (int) player.posZ) &&
-						player.worldObj.getChunkFromBlockCoords((int) ((int) player.posX),
-																(int) ((int) player.posZ)).isChunkLoaded)
+						player.worldObj.getChunkFromBlockCoords((int) player.posX, (int) player.posZ).isChunkLoaded)
 						 ? (player.posY > 0.0 ? -0.1 : 0.0)
 						 : (player.motionY -= 0.08);
-		player.motionY *= (double) 0.98f;
-		player.motionX *= (double) var3;
-		player.motionZ *= (double) var3;
+		player.motionY *= 0.98f;
+		player.motionX *= var3;
+		player.motionZ *= var3;
 		
 		return true;
 	}

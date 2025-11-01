@@ -20,7 +20,7 @@ public class AnimDashing extends AnimCommon {
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		return !player.isEating() && player.moveForward == 0 && player.onGround && !player.doesStatusPreventSprinting();
 	}
-
+	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		if (player.isUsingSpecialKey() || player.moveStrafing != 0) {

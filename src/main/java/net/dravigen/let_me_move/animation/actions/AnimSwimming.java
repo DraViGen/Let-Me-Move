@@ -33,7 +33,7 @@ public class AnimSwimming extends AnimCommon {
 				player.canSwim() &&
 				(conditionA || conditionB);
 	}
-
+	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		return crawl_key.pressed || player.isUsingSpecialKey();
@@ -287,14 +287,12 @@ public class AnimSwimming extends AnimCommon {
 		return false;
 	}
 	
-	private boolean canFastSwimInWater(EntityPlayer player) {
-		return !player.isEating() &&
-				!player.capabilities.isFlying &&
-				isInsideWater(player);
-	}
-	
 	@Override
 	public boolean customBodyHeadRotation(EntityLivingBase entity) {
 		return entity.moveForward != 0 || entity.moveStrafing != 0;
+	}
+	
+	private boolean canFastSwimInWater(EntityPlayer player) {
+		return !player.isEating() && !player.capabilities.isFlying && isInsideWater(player);
 	}
 }

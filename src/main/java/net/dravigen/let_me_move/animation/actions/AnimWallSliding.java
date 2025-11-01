@@ -99,10 +99,7 @@ public class AnimWallSliding extends AnimCommon {
 		
 		if (total > 0) {
 			player.addStat(StatList.distanceFallenStat, total);
-			player.addExhaustion(0.75f *
-									   total *
-									   0.001f *
-									   getHungerDifficultyMultiplier(player));
+			player.addExhaustion(0.75f * total * 0.001f * getHungerDifficultyMultiplier(player));
 		}
 		
 		return true;

@@ -18,6 +18,8 @@ import static net.dravigen.let_me_move.animation.AnimRegistry.*;
 public abstract class EntityPlayerMixin extends EntityLivingBase {
 	
 	@Shadow
+	public PlayerCapabilities capabilities;
+	@Shadow
 	protected boolean sleeping;
 	
 	public EntityPlayerMixin(World par1World) {
@@ -28,14 +30,13 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	public abstract float getEyeHeight();
 	
 	@Shadow
+	public abstract boolean canJump();
+	
+	@Shadow
 	public abstract boolean canSwim();
 	
 	@Shadow
 	public abstract void addMovementStat(double par1, double par3, double par5);
-	
-	@Shadow public abstract boolean canJump();
-	
-	@Shadow public PlayerCapabilities capabilities;
 	
 	@Inject(method = "onUpdate", at = @At("HEAD"))
 	private void updateAnimation(CallbackInfo ci) {
@@ -58,7 +59,10 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			
 			ResourceLocation newID = new ResourceLocation("");
 			
-			if (!customPlayer.llm_$getAnimation().hasCooldown() || customPlayer.llm_$getAnimation().hasCooldown() && customPlayer.llm_$getAnimation().timeRendered == customPlayer.llm_$getAnimation().totalDuration) {
+			if (!customPlayer.llm_$getAnimation().hasCooldown() ||
+					customPlayer.llm_$getAnimation().hasCooldown() &&
+							customPlayer.llm_$getAnimation().timeRendered ==
+									customPlayer.llm_$getAnimation().totalDuration) {
 				for (BaseAnimation animation : AnimationUtils.getAnimationsMap().values()) {
 					if (!animation.shouldActivateAnimation(player, this.boundingBox)) continue;
 					if (animation.isGeneralConditonsMet(player, this.boundingBox)) {
@@ -121,7 +125,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 		
 		if (animation == null) return;
 		
-		boolean shouldDisableBaseMove = animation.getCustomMove((EntityPlayer) (Object)this);
+		boolean shouldDisableBaseMove = animation.getCustomMove((EntityPlayer) (Object) this);
 		
 		if (shouldDisableBaseMove) {
 			ci.cancel();
@@ -136,7 +140,7 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 		
 		if (animation == null) return;
 		
-		boolean disableBaseHunger = animation.getHungerCost((EntityPlayer) (Object)this, distX, distY, distZ);
+		boolean disableBaseHunger = animation.getHungerCost((EntityPlayer) (Object) this, distX, distY, distZ);
 		
 		if (disableBaseHunger) {
 			ci.cancel();

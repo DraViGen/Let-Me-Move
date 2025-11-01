@@ -176,8 +176,7 @@ public class AnimationUtils {
 		smoothRotate(part, type.Z, rots[2], factor);
 	}
 	
-	public static void smoothRotateAll(ModelRenderer part, float[] rots, float factorX,
-			float factorY, float factorZ) {
+	public static void smoothRotateAll(ModelRenderer part, float[] rots, float factorX, float factorY, float factorZ) {
 		smoothRotate(part, type.X, rots[0], factorX);
 		smoothRotate(part, type.Y, rots[1], factorY);
 		smoothRotate(part, type.Z, rots[2], factorZ);
@@ -205,6 +204,8 @@ public class AnimationUtils {
 	
 	
 	public enum type {
-		X, Y, Z
+		X,
+		Y,
+		Z
 	}
 }

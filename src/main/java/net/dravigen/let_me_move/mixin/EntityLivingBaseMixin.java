@@ -205,7 +205,9 @@ public abstract class EntityLivingBaseMixin extends Entity implements ICustomMov
 	private float disableHeadTurn(EntityLivingBase instance, float par1, float par2) {
 		ICustomMovementEntity customEntity = (ICustomMovementEntity) instance;
 		ResourceLocation animation = customEntity.llm_$getAnimationID();
-		if (animation != null && instance instanceof EntityPlayer && customEntity.llm_$getAnimation().customBodyHeadRotation(instance)) {
+		if (animation != null &&
+				instance instanceof EntityPlayer &&
+				customEntity.llm_$getAnimation().customBodyHeadRotation(instance)) {
 			return par2;
 		}
 		

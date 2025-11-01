@@ -8,16 +8,16 @@ import net.minecraft.src.ResourceLocation;
 public class AnimWalking extends AnimCommon {
 	public static final ResourceLocation id = new ResourceLocation("LMM", "walking");
 	
+	public AnimWalking() {
+		super(id);
+	}
+	
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		return (player.moveForward != 0 || player.moveStrafing != 0) &&
 				!player.isSprinting() &&
 				!player.isSneaking() &&
 				!player.capabilities.isFlying;
-	}
-	
-	public AnimWalking() {
-		super(id);
 	}
 	
 	@Override

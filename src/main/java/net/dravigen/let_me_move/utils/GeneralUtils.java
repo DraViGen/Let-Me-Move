@@ -58,7 +58,13 @@ public class GeneralUtils {
 		double z = entity.posZ;
 		double halfWidth = entity.width / 2;
 		
-		return !entity.worldObj.getCollidingBoundingBoxes(entity, new AxisAlignedBB(x - halfWidth, y, z - halfWidth, x + halfWidth, y + 0.5, z + halfWidth)).isEmpty();
+		return !entity.worldObj.getCollidingBoundingBoxes(entity,
+														  new AxisAlignedBB(x - halfWidth,
+																			y,
+																			z - halfWidth,
+																			x + halfWidth,
+																			y + 0.5,
+																			z + halfWidth)).isEmpty();
 	}
 	
 	public static boolean isEntityHeadInsideBlock(Entity entity, double yOff) {
@@ -67,7 +73,13 @@ public class GeneralUtils {
 		double z = entity.posZ;
 		double halfWidth = entity.width / 2;
 		
-		return !entity.worldObj.getCollidingBoundingBoxes(entity, new AxisAlignedBB(x - halfWidth, y, z - halfWidth, x + halfWidth, y + yOff, z + halfWidth)).isEmpty();
+		return !entity.worldObj.getCollidingBoundingBoxes(entity,
+														  new AxisAlignedBB(x - halfWidth,
+																			y,
+																			z - halfWidth,
+																			x + halfWidth,
+																			y + yOff,
+																			z + halfWidth)).isEmpty();
 	}
 	
 	public static float lerpAngle(float angleOne, float angleTwo, float magnitude) {
@@ -240,14 +252,17 @@ public class GeneralUtils {
 			double height) {
 		return (List<AxisAlignedBB>) entity.worldObj.getCollidingBoundingBoxes(entity,
 																			   new AxisAlignedBB(x - 0.25,
-																										y,
-																										z - 0.25,
-																										x + 0.25,
-																										y + height,
-																										z + 0.25));
+																								 y,
+																								 z - 0.25,
+																								 x + 0.25,
+																								 y + height,
+																								 z + 0.25));
 	}
 	
 	public enum coords {
-		NORTH, EAST, SOUTH, WEST
+		NORTH,
+		EAST,
+		SOUTH,
+		WEST
 	}
 }

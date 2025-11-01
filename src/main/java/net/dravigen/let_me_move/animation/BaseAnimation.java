@@ -146,13 +146,13 @@ public abstract class BaseAnimation {
 		}
 		else return false;
 	}
-
+	
 	public abstract boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB);
 	
 	public abstract boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB);
 	
 	protected float getHungerDifficultyMultiplier(EntityPlayer player) {
-		return ((Float)player.worldObj.getDifficultyParameter(DifficultyParam.HungerIntensiveActionCostMultiplier.class)).floatValue();
+		return player.worldObj.getDifficultyParameter(DifficultyParam.HungerIntensiveActionCostMultiplier.class).floatValue();
 	}
 	
 	public abstract void renderAnimation(ModelBiped model, EntityLivingBase entity, float f, float g, float h, float i,
@@ -161,7 +161,7 @@ public abstract class BaseAnimation {
 	public abstract void updateLeaning(EntityLivingBase entity);
 	
 	public abstract boolean getHungerCost(EntityPlayer player, double distX, double distY, double distZ);
-
+	
 	public abstract boolean getCustomMove(EntityPlayer player);
 	
 	public abstract boolean customBodyHeadRotation(EntityLivingBase entity);

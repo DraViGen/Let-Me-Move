@@ -48,6 +48,114 @@ public class AnimCommon extends BaseAnimation {
 		super(id, 1.8f, 1, false, 0, 0, true, 0);
 	}
 	
+	protected static void eatFood(ModelBiped model, float h, EntityLivingBase player, float[] head, float[] rArm) {
+		if (player.isEating()) {
+			head[0] = sin(h * 2) * pi(1, 32) + pi(1, 12);
+			head[1] = 0;
+			
+			head[2] += sin(h) * pi(1, 16);
+			
+			rArm[0] -= pi(8, 16);
+			rArm[2] += pi(3, 16);
+			
+			model.bipedRightArm.rotationPointZ += 1;
+			model.bipedRightArm.rotationPointY += 2;
+		}
+	}
+	
+	protected static void swingArm(ModelBiped model, float[] body, float[] rArm, float[] lArm, float[] head) {
+		float onGround = model.onGround;
+		if (!(onGround <= 0.0F)) {
+			onGround *= 1.25f;
+			
+			body[1] = MathHelper.sin(MathHelper.sqrt_float(onGround) * (pi * 2)) * 0.2F;
+			
+			model.bipedRightArm.rotationPointZ = sin(body[1]) * 5.0F;
+			model.bipedRightArm.rotationPointX = -cos(body[1]) * 5.0F;
+			
+			model.bipedLeftArm.rotationPointZ = -sin(body[1]) * 5.0F;
+			model.bipedLeftArm.rotationPointX = cos(body[1]) * 5.0F;
+			
+			rArm[1] = rArm[1] + body[1];
+			
+			lArm[1] = lArm[1] + body[1];
+			lArm[0] = lArm[0] + body[1];
+			
+			onGround = 1.0F - model.onGround;
+			onGround *= onGround;
+			onGround *= onGround;
+			onGround = 1.0F - onGround;
+			
+			float v = MathHelper.sin(onGround * pi);
+			float v1 = MathHelper.sin(model.onGround * pi) * -(head[0] - 0.7F) * 0.75F;
+			
+			rArm[0] = (float) (rArm[0] - (v * 1.2 + v1));
+			rArm[1] = rArm[1] + body[1] * 2.0F;
+			rArm[2] = rArm[2] + MathHelper.sin(model.onGround * pi) * -0.4F;
+		}
+	}
+	
+	protected static void breath(ModelBiped model, float h, float[] head, float[] rArm, float[] lArm, float[] rLeg,
+			float[] lLeg, float[] body) {
+		head[0] += sin(h / 8) * pi(1, 80);
+		head[2] += sin(h / 6) * pi(1, 64);
+		
+		rArm[0] += (sin(h / 16f)) * pi(1, 128);
+		rArm[2] += (cos(h / 8f + pi(1, 5)) + 1) * pi(1, 64);
+		
+		lArm[0] += -(sin(h / (16f))) * pi(1, 128);
+		lArm[2] += -(cos(h / (8f) + pi(1, 5)) + 1) * pi(1, 64);
+		
+		float v0 = cos(h / 12) * 0.05f;
+		float v2 = cos(h / 16) * 0.025f;
+		
+		rLeg[0] += v0;
+		rLeg[2] += v2;
+		
+		lLeg[0] += v0;
+		lLeg[2] += v2;
+		
+		body[0] -= v0 * 0.5f;
+		body[2] -= v2 * 0.5f;
+		
+		model.bipedHead.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
+		model.bipedBody.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
+		model.bipedRightArm.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
+		model.bipedLeftArm.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
+	}
+	
+	protected static void moveAround(ModelBiped model, float h, float[] head, float[] rArm, float[] lArm, float[] rLeg,
+			float[] lLeg, float[] body) {
+		breath(model, h, head, rArm, lArm, rLeg, lLeg, body);
+		
+		float v0 = cos(h / 12) * 0.05f;
+		float v2 = cos(h / 16) * 0.025f;
+		
+		model.bipedRightLeg.rotationPointZ -= sin(v0) * 12;
+		model.bipedLeftLeg.rotationPointZ -= sin(v0) * 12;
+		
+		model.bipedBody.rotationPointZ -= sin(v0) * 12;
+		model.bipedRightArm.rotationPointZ -= sin(v0) * 12;
+		model.bipedLeftArm.rotationPointZ -= sin(v0) * 12;
+		model.bipedHead.rotationPointZ -= sin(v0) * 12;
+		
+		model.bipedRightLeg.rotationPointX += sin(v2) * 12;
+		model.bipedLeftLeg.rotationPointX += sin(v2) * 12;
+		model.bipedBody.rotationPointX += sin(v2) * 12;
+		model.bipedRightArm.rotationPointX += sin(v2) * 12;
+		model.bipedLeftArm.rotationPointX += sin(v2) * 12;
+		model.bipedHead.rotationPointX += sin(v2) * 12;
+	}
+	
+	@Override
+	public String getName(EntityPlayer player) {
+		if (this.jumpTime > 0) {
+			return StatCollector.translateToLocal("LMM.animation.jumping");
+		}
+		
+		return super.getName(player);
+	}
+	
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		return false;
@@ -92,7 +200,6 @@ public class AnimCommon extends BaseAnimation {
 						: forw == 0
 						  ? (straf > 0 ? -90 : straf < 0 ? 90 : 0)
 						  : forw < 0 ? (straf > 0 ? 45 : straf < 0 ? -45 : 0) : 0;
-			
 			
 			
 			entity.renderYawOffset = incrementAngleUntilGoal(entity.renderYawOffset,
@@ -225,8 +332,8 @@ public class AnimCommon extends BaseAnimation {
 					
 					model.bipedRightLeg.rotationPointY = (float) (12 - Math.max(0, field_1 * 2) * 2 * motYposRev * v1);
 					model.bipedLeftLeg.rotationPointY = (float) (12 - Math.max(0, -field_1 * 2) * 2 * motYposRev * v1);
-					model.bipedRightLeg.rotationPointZ = (float) (- Math.max(0, field_1 * 2) * g * 2 * motYposRev * v);
-					model.bipedLeftLeg.rotationPointZ = (float) (- Math.max(0, -field_1 * 2) * g * 2 * motYposRev * v);
+					model.bipedRightLeg.rotationPointZ = (float) (-Math.max(0, field_1 * 2) * g * 2 * motYposRev * v);
+					model.bipedLeftLeg.rotationPointZ = (float) (-Math.max(0, -field_1 * 2) * g * 2 * motYposRev * v);
 				}
 			}
 			else {
@@ -248,8 +355,8 @@ public class AnimCommon extends BaseAnimation {
 				
 				model.bipedRightLeg.rotationPointY = (float) (12 - Math.max(0, field_1 * 4) * motYposRev * v1);
 				model.bipedLeftLeg.rotationPointY = (float) (12 - Math.max(0, -field_1 * 4) * motYposRev * v1);
-				model.bipedRightLeg.rotationPointZ = (float) (- Math.max(0, field_1 * 3) * motYposRev * v);
-				model.bipedLeftLeg.rotationPointZ = (float) (- Math.max(0, -field_1 * 3) * motYposRev * v);
+				model.bipedRightLeg.rotationPointZ = (float) (-Math.max(0, field_1 * 3) * motYposRev * v);
+				model.bipedLeftLeg.rotationPointZ = (float) (-Math.max(0, -field_1 * 3) * motYposRev * v);
 			}
 		}
 		else {
@@ -588,114 +695,6 @@ public class AnimCommon extends BaseAnimation {
 				model.bipedCloak.rotationPointY = -0.85F;
 			}
 		}*/
-	}
-	
-	@Override
-	public String getName(EntityPlayer player) {
-		if (this.jumpTime > 0) {
-			return StatCollector.translateToLocal("LMM.animation.jumping");
-		}
-		
-		return super.getName(player);
-	}
-	
-	protected static void eatFood(ModelBiped model, float h, EntityLivingBase player, float[] head, float[] rArm) {
-		if (player.isEating()) {
-			head[0] = sin(h * 2) * pi(1, 32) + pi(1, 12);
-			head[1] = 0;
-			
-			head[2] += sin(h) * pi(1, 16);
-			
-			rArm[0] -= pi(8, 16);
-			rArm[2] += pi(3, 16);
-			
-			model.bipedRightArm.rotationPointZ += 1;
-			model.bipedRightArm.rotationPointY += 2;
-		}
-	}
-	
-	protected static void swingArm(ModelBiped model, float[] body, float[] rArm, float[] lArm, float[] head) {
-		float onGround = model.onGround;
-		if (!(onGround <= 0.0F)) {
-			onGround *= 1.25f;
-			
-			body[1] = MathHelper.sin(MathHelper.sqrt_float(onGround) * (pi * 2)) * 0.2F;
-			
-			model.bipedRightArm.rotationPointZ = sin(body[1]) * 5.0F;
-			model.bipedRightArm.rotationPointX = -cos(body[1]) * 5.0F;
-			
-			model.bipedLeftArm.rotationPointZ = -sin(body[1]) * 5.0F;
-			model.bipedLeftArm.rotationPointX = cos(body[1]) * 5.0F;
-			
-			rArm[1] = rArm[1] + body[1];
-			
-			lArm[1] = lArm[1] + body[1];
-			lArm[0] = lArm[0] + body[1];
-			
-			onGround = 1.0F - model.onGround;
-			onGround *= onGround;
-			onGround *= onGround;
-			onGround = 1.0F - onGround;
-			
-			float v = MathHelper.sin(onGround * pi);
-			float v1 = MathHelper.sin(model.onGround * pi) * -(head[0] - 0.7F) * 0.75F;
-			
-			rArm[0] = (float) (rArm[0] - (v * 1.2 + v1));
-			rArm[1] = rArm[1] + body[1] * 2.0F;
-			rArm[2] = rArm[2] + MathHelper.sin(model.onGround * pi) * -0.4F;
-		}
-	}
-	
-	protected static void breath(ModelBiped model, float h, float[] head, float[] rArm, float[] lArm, float[] rLeg,
-			float[] lLeg, float[] body) {
-		head[0] += sin(h / 8) * pi(1, 80);
-		head[2] += sin(h / 6) * pi(1, 64);
-		
-		rArm[0] += (sin(h / 16f)) * pi(1, 128);
-		rArm[2] += (cos(h / 8f + pi(1, 5)) + 1) * pi(1, 64);
-		
-		lArm[0] += -(sin(h / (16f))) * pi(1, 128);
-		lArm[2] += -(cos(h / (8f) + pi(1, 5)) + 1) * pi(1, 64);
-		
-		float v0 = cos(h / 12) * 0.05f;
-		float v2 = cos(h / 16) * 0.025f;
-		
-		rLeg[0] += v0;
-		rLeg[2] += v2;
-		
-		lLeg[0] += v0;
-		lLeg[2] += v2;
-		
-		body[0] -= v0 * 0.5f;
-		body[2] -= v2 * 0.5f;
-		
-		model.bipedHead.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
-		model.bipedBody.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
-		model.bipedRightArm.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
-		model.bipedLeftArm.rotationPointY += (sin(h / 8) + 0.65f) * 0.25f;
-	}
-	
-	protected static void moveAround(ModelBiped model, float h, float[] head, float[] rArm, float[] lArm, float[] rLeg,
-			float[] lLeg, float[] body) {
-		breath(model, h, head, rArm, lArm, rLeg, lLeg, body);
-		
-		float v0 = cos(h / 12) * 0.05f;
-		float v2 = cos(h / 16) * 0.025f;
-		
-		model.bipedRightLeg.rotationPointZ -= sin(v0) * 12;
-		model.bipedLeftLeg.rotationPointZ -= sin(v0) * 12;
-		
-		model.bipedBody.rotationPointZ -= sin(v0) * 12;
-		model.bipedRightArm.rotationPointZ -= sin(v0) * 12;
-		model.bipedLeftArm.rotationPointZ -= sin(v0) * 12;
-		model.bipedHead.rotationPointZ -= sin(v0) * 12;
-		
-		model.bipedRightLeg.rotationPointX += sin(v2) * 12;
-		model.bipedLeftLeg.rotationPointX += sin(v2) * 12;
-		model.bipedBody.rotationPointX += sin(v2) * 12;
-		model.bipedRightArm.rotationPointX += sin(v2) * 12;
-		model.bipedLeftArm.rotationPointX += sin(v2) * 12;
-		model.bipedHead.rotationPointX += sin(v2) * 12;
 	}
 	
 	@Override

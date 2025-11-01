@@ -15,18 +15,18 @@ import static net.dravigen.let_me_move.animation.AnimRegistry.ROLLING;
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
 	
+	@Unique
+	private static float prevPitch;
 	@Shadow
 	public WorldClient theWorld;
 	@Shadow
 	public EntityClientPlayerMP thePlayer;
+	@Shadow
+	public GameSettings gameSettings;
 	@Unique
 	long prevTime;
 	@Shadow
 	private boolean isGamePaused;
-	@Unique
-	private static float prevPitch;
-	
-	@Shadow public GameSettings gameSettings;
 	
 	@Inject(method = "runGameLoop", at = @At("HEAD"))
 	private void updateRender(CallbackInfo ci) {

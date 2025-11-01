@@ -23,12 +23,14 @@ import java.util.stream.Collectors;
 @Mixin(GuiIngame.class)
 public abstract class GuiIngameMixin extends Gui {
 	
-	@Shadow @Final private Minecraft mc;
+	@Shadow
+	@Final
+	private Minecraft mc;
 	
 	@Redirect(method = "renderGameOverlay", at = @At(value = "INVOKE", target = "Lnet/minecraft/src/GuiIngame;drawTexturedModalRect(IIIIII)V", ordinal = 2))
 	private void disable1CrossWhenF5(GuiIngame instance, int i, int i1, int i2, int i3, int i4, int i5) {
 		if (this.mc.gameSettings.thirdPersonView == 0) {
-			instance.drawTexturedModalRect(i ,i1, i2, i3, i4, i5);
+			instance.drawTexturedModalRect(i, i1, i2, i3, i4, i5);
 		}
 	}
 	

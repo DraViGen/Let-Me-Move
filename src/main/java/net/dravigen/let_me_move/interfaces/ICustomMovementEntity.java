@@ -30,6 +30,7 @@ public interface ICustomMovementEntity {
 	float llm_$getDelta();
 	
 	enum side {
-		LEFT, RIGHT
+		LEFT,
+		RIGHT
 	}
 }

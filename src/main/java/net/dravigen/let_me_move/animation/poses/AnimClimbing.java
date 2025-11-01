@@ -6,7 +6,7 @@ import static net.dravigen.let_me_move.utils.AnimationUtils.*;
 import static net.dravigen.let_me_move.utils.GeneralUtils.*;
 import static net.dravigen.let_me_move.utils.GeneralUtils.sin;
 
-public class AnimClimbing extends AnimCommon{
+public class AnimClimbing extends AnimCommon {
 	public static final ResourceLocation id = new ResourceLocation("LMM", "climbing");
 	
 	public AnimClimbing() {
@@ -71,8 +71,9 @@ public class AnimClimbing extends AnimCommon{
 		
 		
 		model.bipedBody.rotationPointZ = sin(body[0]) * 12;
-
-		model.bipedRightLeg.rotationPointZ = sin(body[0]) * 12 + Math.max((sin((float) (entity.posY * 4 + pi)) - 1), -1.5f);
+		
+		model.bipedRightLeg.rotationPointZ = sin(body[0]) * 12 +
+				Math.max((sin((float) (entity.posY * 4 + pi)) - 1), -1.5f);
 		model.bipedLeftLeg.rotationPointZ = sin(body[0]) * 12 + Math.max((sin((float) (entity.posY * 4)) - 1), -1.5f);
 		
 		model.bipedRightLeg.rotationPointY += -2 + (cos((float) (entity.posY * 4 + pi)) - 1) * 2;
@@ -83,7 +84,7 @@ public class AnimClimbing extends AnimCommon{
 		swingArm(model, body, rArm, lArm, head);
 		
 		smoothRotateAll(model.bipedBody, body, 0.75f);
-
+		
 		smoothRotateAll(model.bipedHead, head, 0.75f);
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;

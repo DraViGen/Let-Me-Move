@@ -50,7 +50,7 @@ public class AnimPullingUp extends AnimCommon {
 			
 			return;
 		}
-	
+		
 		resetAnimationRotationPoints(model);
 		
 		i %= 360;
@@ -60,7 +60,7 @@ public class AnimPullingUp extends AnimCommon {
 		float[] head = new float[]{
 				j * (pi / 180.0f), MathHelper.clamp_float(i * (pi / 180.0f), -pi / 2f, pi / 2f), i * (pi / 180.0f) / 6
 		};
-	
+		
 		float[] body = new float[]{0, 0, 0};
 		float[] rArm = new float[]{0, 0, 0};
 		float[] lArm = new float[]{0, 0, 0};
@@ -117,7 +117,7 @@ public class AnimPullingUp extends AnimCommon {
 		smoothRotateAll(model.bipedBody, body, 1);
 		
 		smoothRotateAll(model.bipedHead, head, 0.7f);
-	
+		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
 		
@@ -154,7 +154,7 @@ public class AnimPullingUp extends AnimCommon {
 		z = prevSide == coords.EAST ? -player.moveStrafing : prevSide == coords.WEST ? player.moveStrafing : z;
 		
 		if (player.moveForward != 0) {
-			if (this.timeRendered == this.totalDuration -1 && !movedOnce) {
+			if (this.timeRendered == this.totalDuration - 1 && !movedOnce) {
 				x = prevSide == coords.EAST ? 10 : prevSide == coords.WEST ? -10 : x;
 				z = prevSide == coords.SOUTH ? 10 : prevSide == coords.NORTH ? -10 : z;
 				
@@ -178,12 +178,12 @@ public class AnimPullingUp extends AnimCommon {
 	}
 	
 	@Override
-	public boolean hasCooldown() {
+	public boolean customBodyHeadRotation(EntityLivingBase entity) {
 		return true;
 	}
 	
 	@Override
-	public boolean customBodyHeadRotation(EntityLivingBase entity) {
+	public boolean hasCooldown() {
 		return true;
 	}
 }
