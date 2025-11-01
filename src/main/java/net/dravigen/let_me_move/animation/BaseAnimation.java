@@ -98,6 +98,14 @@ public abstract class BaseAnimation {
 		return this.id;
 	}
 	
+	public String getName(EntityPlayer player) {
+		if (player.capabilities.isFlying) {
+			return StatCollector.translateToLocal("LMM.animation.flying");
+		}
+		
+		return StatCollector.translateToLocal(this.id.getResourceDomain() + ".animation." + this.id.getResourcePath());
+	}
+	
 	public boolean hasCooldown() {
 		return this.maxCooldown != 0;
 	}

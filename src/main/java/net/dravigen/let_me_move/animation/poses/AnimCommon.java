@@ -8,6 +8,10 @@ import static net.dravigen.let_me_move.utils.AnimationUtils.*;
 import static net.dravigen.let_me_move.utils.GeneralUtils.*;
 
 public class AnimCommon extends BaseAnimation {
+	private int field_1 = 1;
+	private int prevJumpTime = -1;
+	private int jumpTime = 0;
+	
 	public AnimCommon(ResourceLocation id, float height, float speedModifier, boolean needYOffsetUpdate,
 			int maxCooldown, int duration, boolean shouldAutoUpdate, float yOffset) {
 		super(id, height, speedModifier, needYOffsetUpdate, maxCooldown, duration, shouldAutoUpdate, yOffset);
@@ -63,6 +67,8 @@ public class AnimCommon extends BaseAnimation {
 		
 		resetAnimationRotationPoints(model);
 		
+		GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+		
 		i %= 360;
 		
 		i = i < -180 ? i + 360 : i > 180 ? i - 360 : i;
@@ -76,122 +82,279 @@ public class AnimCommon extends BaseAnimation {
 		float k = 1;
 		
 		boolean isCrouching = customMoveEntity.llm_$isAnimation(AnimCrouching.id);
+		boolean isFlying = player.capabilities.isFlying;
+		float forw = entity.moveForward;
+		float straf = entity.moveStrafing;
 		
-		if (player.moveForward != 0 || player.moveStrafing != 0) {
-			player.renderYawOffset = incrementAngleUntilGoal(player.renderYawOffset,
-															 player.rotationYaw -
-																	 90 *
-																			 (player.moveStrafing -
-																					 player.moveStrafing / 2 *
-																							 player.moveForward),
+		if (isFlying) {
+			float yaw = forw > 0
+						? (straf == 0 ? 0 : straf > 0 ? -45 : straf < 0 ? 45 : 0)
+						: forw == 0
+						  ? (straf > 0 ? -90 : straf < 0 ? 90 : 0)
+						  : forw < 0 ? (straf > 0 ? 45 : straf < 0 ? -45 : 0) : 0;
+			
+			
+			
+			entity.renderYawOffset = incrementAngleUntilGoal(entity.renderYawOffset,
+															 entity.rotationYaw + yaw,
 															 delta * 0.1f);
+		}
+		else {
+			if (forw != 0 || straf != 0) {
+				
+				player.renderYawOffset = incrementAngleUntilGoal(player.renderYawOffset,
+																 player.rotationYaw - 90 * (straf - straf / 2 * forw),
+																 delta * 0.1f);
+			}
 		}
 		
 		boolean bSprint = player.isSprinting();
 		float mul = 0.5f;
-		boolean backward = player.moveForward < 0 && player.moveStrafing == 0;
+		boolean backward = forw < 0 && straf == 0;
 		
-		f *= backward ? -0.75f : 1;
-		g *= backward ? 0.75f : 1;
-		
-		f *= isCrouching ? backward ? 3f : 3.5f : 1;
-		g *= isCrouching ? 2f : 1;
-		
-		g *= model.aimedBow || model.heldItemRight == 3 ? 2f : 1;
-		
-		f = player.inWater ? h / 3 : f;
-		g = player.inWater ? 0.5f : g;
-		
-		if ((player.moveForward != 0 || player.moveStrafing != 0)) {
-			rArm[0] = cos(f * mul) * 2.0F * g * (bSprint ? 0.75f : 0.5F) / k;
-			lArm[0] = cos(f * mul + pi) * 2.0F * g * (bSprint ? 0.75f : 0.5F) / k;
+		if (isFlying) {
+			backward = forw < 0;
 			
-			body[0] = (cos(f * mul * 2) + 1) * g * (bSprint ? 0.1f : 0) / k + (bSprint ? pi(1, 32) : 0);
-			body[1] = cos(f * mul) * g * (bSprint ? 0.0f : backward ? 0.5f : 0.3F) * (isCrouching ? 0.25f : 1) / k;
+			mul = entity.motionY < 0 ? (float) -(entity.motionY * 48) : entity.motionY > 0 ? 0 : 1;
 			
-			if (!isCrouching) {
-				rLeg[1] = pi(1, 64);
-				lLeg[1] = -pi(1, 64);
+			rArm[2] = pi(1, 48) * mul;
+			lArm[2] = -pi(1, 48) * mul;
+			rLeg[2] = pi(1, 128);
+			lLeg[2] = -pi(1, 128);
+			
+			if (forw != 0 || straf != 0) {
+				g *= backward ? -1 : 1;
+				
+				head[0] += -g * pi(1, 8);
+				rArm[2] += pi(1, 16);
+				lArm[2] -= pi(1, 16);
+				rArm[0] = g * pi(1, 4);
+				lArm[0] = g * pi(1, 4);
+				rLeg[0] = g * pi(1, 4);
+				lLeg[0] = g * pi(1, 4);
+				rLeg[2] += pi(1, 64);
+				lLeg[2] -= pi(1, 64);
+				
 			}
 			
-			rLeg[0] = Math.max(-2, (cos(f * mul + pi)) * g * (bSprint ? 0.9f : 0.6f) / k);
-			rLeg[2] = pi(1, 100);
+			head[0] += sin(h / 8) * pi(1, 80);
 			
-			lLeg[0] = Math.max(-2, (cos(f * mul)) * g * (bSprint ? 0.9f : 0.6f) / k);
-			lLeg[2] = -pi(1, 100);
+			rArm[0] += (sin(h / 18f)) * pi(1, 16);
+			lArm[0] += -(sin(h / (14f))) * pi(1, 16);
+			rLeg[0] += (cos(h / 6f)) * pi(1, 16);
+			lLeg[0] += (cos(h / 6f + pi)) * pi(1, 16);
 			
-			if (player.inWater && !isHeadInsideWater(player)) {
-				body[0] = (cos(f * mul * 2) + 1) * g * 0.25F / k;
-				body[1] = cos(f * mul) * g * 0.6F / k;
-				
-				rArm[2] += pi(1, 3);
-				lArm[2] -= pi(1, 3);
-				
-				rArm[0] = cos(f * mul) * 2.0F * g * 1f / k;
-				lArm[0] = cos(f * mul + pi) * 2.0F * g * 1f / k;
-				
-				model.bipedRightArm.rotationPointY -= 1;
-				model.bipedLeftArm.rotationPointY -= 1;
+			rArm[2] += (cos(h / 10f - pi(1, 4)) + 1) * pi(1, (int) (12 + 40 * Math.abs(entity.motionY)));
+			lArm[2] += -(cos(h / (10f) - pi(1, 4)) + 1) * pi(1, (int) (12 + 40 * Math.abs(entity.motionY)));
+			rLeg[2] += (cos(h / 10f - pi(1, 6)) + 1) * pi(1, 128);
+			lLeg[2] += -(cos(h / (10f) - pi(1, 6)) + 1) * pi(1, 128);
+			
+			model.bipedHead.rotationPointY += sin(h / 10) * 1.25f;
+			model.bipedBody.rotationPointY += sin(h / 10) * 1.25f;
+			model.bipedRightArm.rotationPointY += sin(h / 10) * 1.25f;
+			model.bipedLeftArm.rotationPointY += sin(h / 10) * 1.25f;
+			model.bipedRightLeg.rotationPointY += sin(h / 10) * 1.25f;
+			model.bipedLeftLeg.rotationPointY += sin(h / 10) * 1.25f;
+			
+			if (entity.moveForward > 0 || entity.moveStrafing != 0 && !(entity.moveForward < 0)) {
+				model.bipedRightLeg.rotationPointZ -= 3;
+				model.bipedRightLeg.rotationPointY -= 2;
 			}
+		}
+		else if (!player.onGround) {
+			if (this.jumpTime == 0) {
+				if (this.prevJumpTime != 0) {
+					field_1 *= -1;
+					this.prevJumpTime = 0;
+				}
+			}
+			else this.prevJumpTime = -1;
 			
-			setAllRotationPoint(model.bipedHead, 0, 12 - cos(body[0]) * 12, -sin(body[0]) * 12);
+			double motYposRev = 1 - Math.max(0, player.motionY);
 			
-			setAllRotationPoint(model.bipedRightArm,
-								-cos(body[1]) * 5.0F,
-								12 - cos(body[0]) * 10,
-								sin(body[1]) * 5.0F - sin(body[0]) * 12);
-			
-			setAllRotationPoint(model.bipedLeftArm,
-								cos(body[1]) * 5.0F,
-								12 - cos(body[0]) * 10,
-								-sin(body[1]) * 5.0F - sin(body[0]) * 12);
-			
-			setAllRotationPoint(model.bipedRightLeg,
-								-cos(body[1]) * 2f,
-								Math.max((sin(f * mul) - 1) * g * (bSprint ? 1.75f : 1.3f) + 12, (bSprint ? 6 : 8)),
-								-sin(body[1]) * 2f);
-			
-			setAllRotationPoint(model.bipedLeftLeg,
-								cos(body[1]) * 2f,
-								Math.max((sin(f * mul + pi) - 1) * g * (bSprint ? 1.75f : 1.3f) + 12,
-										 (bSprint ? 6 : 8)),
-								sin(body[1]) * 2f);
-			
-			rArm[1] += body[1] + (bSprint ? cos(f * mul) * pi(1, 12) : 0);
-			lArm[1] += body[1] + (bSprint ? cos(f * mul) * pi(1, 12) : 0);
-			head[0] += body[0];
-			//head[1] += -body[1] / 3;
-			
-			float v = 2f;
-			float v1 = bSprint ? 3 : backward ? 0.2f : 2f;
-			model.bipedBody.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
-			model.bipedRightArm.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
-			model.bipedLeftArm.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
-			model.bipedHead.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
-			model.bipedRightLeg.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
-			model.bipedLeftLeg.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
+			if ((player.moveForward != 0 || player.moveStrafing != 0)) {
+				body[0] = (bSprint ? pi(1, 32) : 0);
+				body[1] = field_1 * pi(1, 16) * g;
+				
+				if (!isCrouching) {
+					rLeg[1] = pi(1, 64);
+					lLeg[1] = -pi(1, 64);
+				}
+				
+				rLeg[2] = pi(1, 100);
+				lLeg[2] = -pi(1, 100);
+				
+				if (bSprint) {
+					setAllRotationPoint(model.bipedHead, 0, 12 - cos(body[0]) * 12, -sin(body[0]) * 12);
+					
+					setAllRotationPoint(model.bipedRightArm,
+										-cos(body[1]) * 5.0F,
+										12 - cos(body[0]) * 10,
+										sin(body[1]) * 5.0F - sin(body[0]) * 12);
+					
+					setAllRotationPoint(model.bipedLeftArm,
+										cos(body[1]) * 5.0F,
+										12 - cos(body[0]) * 10,
+										-sin(body[1]) * 5.0F - sin(body[0]) * 12);
+					
+					setAllRotationPoint(model.bipedRightLeg, -cos(body[1]) * 2f, 12, -sin(body[1]) * 2f);
+					
+					setAllRotationPoint(model.bipedLeftLeg, cos(body[1]) * 2f, 12, sin(body[1]) * 2f);
+					
+					rArm[1] += body[1];
+					lArm[1] += body[1];
+					head[0] += body[0];
+					
+					rArm[0] = (float) (field_1 * pi(1, 4) * g * (1 - player.motionY));
+					lArm[0] = (float) (-field_1 * pi(1, 4) * g * (1 - player.motionY));
+					rLeg[0] = (float) (-field_1 * pi(1, 4) * g * (1 - player.motionY));
+					lLeg[0] = (float) (field_1 * pi(1, 4) * g * (1 - player.motionY));
+					
+					rLeg[2] = (float) Math.abs(field_1 * pi(1, 24) * g * (1 - player.motionY));
+					lLeg[2] = (float) -Math.abs(field_1 * pi(1, 24) * g * (1 - player.motionY));
+					
+				}
+				else {
+					float v = isCrouching ? 0.25f : 1;
+					float v1 = isCrouching ? 0.4f : 1;
+					rArm[0] = (float) (field_1 * pi(1, 3) * (1 - player.motionY) * v1);
+					lArm[0] = (float) (-field_1 * pi(1, 3) * (1 - player.motionY) * v1);
+					
+					rLeg[0] = pi(1, 16) * Math.max(0, field_1 * 2) * v;
+					lLeg[0] = pi(1, 16) * Math.max(0, -field_1 * 2) * v;
+					
+					model.bipedRightLeg.rotationPointY = (float) (12 - Math.max(0, field_1 * 2) * 2 * motYposRev * v1);
+					model.bipedLeftLeg.rotationPointY = (float) (12 - Math.max(0, -field_1 * 2) * 2 * motYposRev * v1);
+					model.bipedRightLeg.rotationPointZ = (float) (- Math.max(0, field_1 * 2) * g * 2 * motYposRev * v);
+					model.bipedLeftLeg.rotationPointZ = (float) (- Math.max(0, -field_1 * 2) * g * 2 * motYposRev * v);
+				}
+			}
+			else {
+				rArm[1] = rArm[1] + body[1];
+				lArm[1] = lArm[1] + body[1];
+				head[1] += -body[1] / 4;
+				
+				rLeg[2] += pi(1, 64);
+				lLeg[2] -= pi(1, 64);
+				
+				float v = isCrouching ? 0.25f : 1;
+				float v1 = isCrouching ? 0.4f : 1;
+				
+				rArm[0] = (float) (field_1 * pi(1, 3) * (1 - player.motionY) * v1);
+				lArm[0] = (float) (-field_1 * pi(1, 3) * (1 - player.motionY) * v1);
+				
+				rLeg[0] = pi(1, 16) * Math.max(0, field_1 * 2) * v;
+				lLeg[0] = pi(1, 16) * Math.max(0, -field_1 * 2) * v;
+				
+				model.bipedRightLeg.rotationPointY = (float) (12 - Math.max(0, field_1 * 4) * motYposRev * v1);
+				model.bipedLeftLeg.rotationPointY = (float) (12 - Math.max(0, -field_1 * 4) * motYposRev * v1);
+				model.bipedRightLeg.rotationPointZ = (float) (- Math.max(0, field_1 * 3) * motYposRev * v);
+				model.bipedLeftLeg.rotationPointZ = (float) (- Math.max(0, -field_1 * 3) * motYposRev * v);
+			}
 		}
 		else {
-			rArm[1] = rArm[1] + body[1];
-			lArm[1] = lArm[1] + body[1];
-			body[1] += head[1] * 0.5f;
-			rArm[1] += body[1] * 0.75f;
-			lArm[1] += body[1] * 0.75f;
+			f *= backward ? -0.75f : 1;
+			g *= backward ? 0.75f : 1;
 			
-			model.bipedRightArm.rotationPointX = -cos(body[1] * 0.75f) * 5.0F;
-			model.bipedRightArm.rotationPointZ = sin(body[1] * 0.75f) * 5.0F;
-			model.bipedLeftArm.rotationPointX = cos(body[1] * 0.75f) * 5.0F;
-			model.bipedLeftArm.rotationPointZ = -sin(body[1] * 0.75f) * 5.0F;
+			f *= isCrouching ? backward ? 3f : 3.5f : 1;
+			g *= isCrouching ? 2f : 1;
 			
-			rLeg[0] -= pi(1, 80);
-			rLeg[2] += pi(1, 50);
-			lLeg[0] += pi(1, 128);
-			lLeg[2] -= pi(1, 50);
-			rLeg[1] += pi(1, 32);
-			lLeg[1] -= pi(1, 12);
+			g *= model.aimedBow || model.heldItemRight == 3 ? 2f : 1;
 			
-			model.bipedRightLeg.rotationPointZ -= 0.6f;
-			model.bipedLeftLeg.rotationPointZ += 0.5f;
+			f = player.inWater ? h / 3 : f;
+			g = player.inWater ? 0.5f : g;
+			
+			if (forw != 0 || straf != 0) {
+				rArm[0] = cos(f * mul) * 2.0F * g * (bSprint ? 0.75f : 0.5F) / k;
+				lArm[0] = cos(f * mul + pi) * 2.0F * g * (bSprint ? 0.75f : 0.5F) / k;
+				
+				body[0] = (cos(f * mul * 2) + 1) * g * (bSprint ? 0.1f : 0) / k + (bSprint ? pi(1, 32) : 0);
+				body[1] = cos(f * mul) * g * (bSprint ? 0.0f : backward ? 0.5f : 0.3F) * (isCrouching ? 0.25f : 1) / k;
+				
+				if (!isCrouching) {
+					rLeg[1] = pi(1, 64);
+					lLeg[1] = -pi(1, 64);
+				}
+				
+				rLeg[0] = Math.max(-2, (cos(f * mul + pi)) * g * (bSprint ? 0.9f : 0.6f) / k);
+				rLeg[2] = pi(1, 100);
+				
+				lLeg[0] = Math.max(-2, (cos(f * mul)) * g * (bSprint ? 0.9f : 0.6f) / k);
+				lLeg[2] = -pi(1, 100);
+				
+				if (player.inWater && !isHeadInsideWater(player)) {
+					body[0] = (cos(f * mul * 2) + 1) * g * 0.25F / k;
+					body[1] = cos(f * mul) * g * 0.6F / k;
+					
+					rArm[2] += pi(1, 3);
+					lArm[2] -= pi(1, 3);
+					
+					rArm[0] = cos(f * mul) * 2.0F * g * 1f / k;
+					lArm[0] = cos(f * mul + pi) * 2.0F * g * 1f / k;
+					
+					model.bipedRightArm.rotationPointY -= 1;
+					model.bipedLeftArm.rotationPointY -= 1;
+				}
+				
+				setAllRotationPoint(model.bipedHead, 0, 12 - cos(body[0]) * 12, -sin(body[0]) * 12);
+				
+				setAllRotationPoint(model.bipedRightArm,
+									-cos(body[1]) * 5.0F,
+									12 - cos(body[0]) * 10,
+									sin(body[1]) * 5.0F - sin(body[0]) * 12);
+				
+				setAllRotationPoint(model.bipedLeftArm,
+									cos(body[1]) * 5.0F,
+									12 - cos(body[0]) * 10,
+									-sin(body[1]) * 5.0F - sin(body[0]) * 12);
+				
+				setAllRotationPoint(model.bipedRightLeg,
+									-cos(body[1]) * 2f,
+									Math.max((sin(f * mul) - 1) * g * (bSprint ? 1.75f : 1.3f) + 12, (bSprint ? 6 : 8)),
+									-sin(body[1]) * 2f);
+				
+				setAllRotationPoint(model.bipedLeftLeg,
+									cos(body[1]) * 2f,
+									Math.max((sin(f * mul + pi) - 1) * g * (bSprint ? 1.75f : 1.3f) + 12,
+											 (bSprint ? 6 : 8)),
+									sin(body[1]) * 2f);
+				
+				rArm[1] += body[1] + (bSprint ? cos(f * mul) * pi(1, 12) : 0);
+				lArm[1] += body[1] + (bSprint ? cos(f * mul) * pi(1, 12) : 0);
+				head[0] += body[0];
+				//head[1] += -body[1] / 3;
+				
+				float v = 2f;
+				float v1 = bSprint ? 3 : backward ? 0.2f : 2f;
+				model.bipedBody.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
+				model.bipedRightArm.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
+				model.bipedLeftArm.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
+				model.bipedHead.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
+				model.bipedRightLeg.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
+				model.bipedLeftLeg.rotationPointY -= Math.min(cos(f * mul * v) * g * v1, 2);
+			}
+			else {
+				rArm[1] = rArm[1] + body[1];
+				lArm[1] = lArm[1] + body[1];
+				body[1] += head[1] * (isCrouching ? 0 : 0.5f);
+				rArm[1] += body[1] * 0.75f;
+				lArm[1] += body[1] * 0.75f;
+				
+				model.bipedRightArm.rotationPointX = -cos(body[1] * 0.75f) * 5.0F;
+				model.bipedRightArm.rotationPointZ = sin(body[1] * 0.75f) * 5.0F;
+				model.bipedLeftArm.rotationPointX = cos(body[1] * 0.75f) * 5.0F;
+				model.bipedLeftArm.rotationPointZ = -sin(body[1] * 0.75f) * 5.0F;
+				
+				rLeg[0] -= pi(1, 80);
+				rLeg[2] += pi(1, 50);
+				lLeg[0] += pi(1, 128);
+				lLeg[2] -= pi(1, 50);
+				rLeg[1] += pi(1, 32);
+				lLeg[1] -= pi(1, 12);
+				
+				model.bipedRightLeg.rotationPointZ -= 0.6f;
+				model.bipedLeftLeg.rotationPointZ += 0.5f;
+			}
 		}
 		
 		swingArm(model, body, rArm, lArm, head);
@@ -251,9 +414,27 @@ public class AnimCommon extends BaseAnimation {
 		
 		eatFood(model, h, player, head, rArm);
 		
+		if (screen != null) {
+			rArm[0] -= pi(1, 3) + sin(h / 4) * pi(1, 64);
+			lArm[0] -= pi(1, 3) + sin(h / 4 + pi) * pi(1, 64);
+			rArm[1] -= pi(1, 7);
+			lArm[1] += pi(1, 7);
+			
+			head[0] = MathHelper.clamp_float(pi(1, 6) + sin(h / 24) * pi(1, 12), pi(1, 16), pi(1, 5));
+			head[2] += MathHelper.clamp_float(sin(h / 12) * pi(1, 8), -pi(1, 16), pi(1, 16));
+		}
+		
+		if (!player.onGround && !isFlying) {
+			this.jumpTime++;
+		}
+		else {
+			this.jumpTime = 0;
+		}
+		
 		smoothRotateAll(model.bipedBody, body, 0.7f * delta);
 		
 		smoothRotateAll(model.bipedHead, head, 0.5f * delta);
+		
 		
 		model.bipedHeadwear.rotateAngleY = model.bipedHead.rotateAngleY;
 		model.bipedHeadwear.rotateAngleX = model.bipedHead.rotateAngleX;
@@ -409,6 +590,15 @@ public class AnimCommon extends BaseAnimation {
 		}*/
 	}
 	
+	@Override
+	public String getName(EntityPlayer player) {
+		if (this.jumpTime > 0) {
+			return StatCollector.translateToLocal("LMM.animation.jumping");
+		}
+		
+		return super.getName(player);
+	}
+	
 	protected static void eatFood(ModelBiped model, float h, EntityLivingBase player, float[] head, float[] rArm) {
 		if (player.isEating()) {
 			head[0] = sin(h * 2) * pi(1, 32) + pi(1, 12);
@@ -528,6 +718,6 @@ public class AnimCommon extends BaseAnimation {
 	
 	@Override
 	public boolean customBodyHeadRotation(EntityLivingBase entity) {
-		return false;
+		return ((EntityPlayer) entity).capabilities.isFlying;
 	}
 }

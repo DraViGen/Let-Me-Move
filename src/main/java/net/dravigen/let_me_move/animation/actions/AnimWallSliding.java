@@ -19,6 +19,7 @@ public class AnimWallSliding extends AnimCommon {
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		return !player.isEating() &&
+				!player.capabilities.isFlying &&
 				player.fallDistance > 1.5 &&
 				!player.onGround &&
 				!player.inWater &&

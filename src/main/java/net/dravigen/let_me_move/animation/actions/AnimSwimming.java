@@ -139,7 +139,8 @@ public class AnimSwimming extends AnimCommon {
 		}
 		else {
 			f *= entity.moveForward < 0 && entity.moveStrafing == 0 ? -1 : 1;
-			g *= 8;
+			
+			g = Math.min(g * 8, 2.5f);
 			
 			offsetAllRotationPoints(model, 0, 0, 1);
 			

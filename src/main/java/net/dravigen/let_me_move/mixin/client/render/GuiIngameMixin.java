@@ -1,7 +1,5 @@
 package net.dravigen.let_me_move.mixin.client.render;
 
-import btw.util.color.ColorHelper;
-import com.prupe.mcpatcher.cc.Colorizer;
 import net.dravigen.let_me_move.animation.BaseAnimation;
 import net.dravigen.let_me_move.interfaces.ICustomMovementEntity;
 import net.dravigen.let_me_move.utils.AnimationUtils;
@@ -10,7 +8,6 @@ import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -48,7 +45,7 @@ public abstract class GuiIngameMixin extends Gui {
 		int scaledWidth = scaledresolution.getScaledWidth();
 		int scaledHeight = scaledresolution.getScaledHeight();
 		
-		String name = getAnimName(animation);
+		String name = animation.getName(player);
 		
 		int y = scaledHeight - fontRenderer.FONT_HEIGHT - 1;
 		
@@ -80,7 +77,7 @@ public abstract class GuiIngameMixin extends Gui {
 		
 		
 		for (BaseAnimation animCool : cooldownAnims.values()) {
-			String string = getAnimName(animCool);
+			String string = animCool.getName(player);
 			
 			int cooldownWidth = 60;
 			float delta = (float) cooldownWidth / animCool.maxCooldown;
@@ -113,11 +110,4 @@ public abstract class GuiIngameMixin extends Gui {
 			y -= 3;
 		}
 	}
-	
-	@Unique
-	private static String getAnimName(BaseAnimation animCool) {
-		return StatCollector.translateToLocal(animCool.getID().getResourceDomain() + ".animation." + animCool.getID().getResourcePath());
-	}
-	
-	
 }

@@ -8,21 +8,15 @@ import net.dravigen.let_me_move.utils.GeneralUtils;
 import net.minecraft.src.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.*;
 
 import static net.dravigen.let_me_move.animation.AnimRegistry.*;
 
 @Mixin(EntityPlayer.class)
 public abstract class EntityPlayerMixin extends EntityLivingBase {
 	
-	@Unique
-	private final List<BaseAnimation> animToCheckIfFail = Arrays.asList(AnimationUtils.getAnimationFromID(CRAWLING.getID()),
-																		AnimationUtils.getAnimationFromID(CROUCHING.getID()));
 	@Shadow
 	protected boolean sleeping;
 	
@@ -40,6 +34,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 	public abstract void addMovementStat(double par1, double par3, double par5);
 	
 	@Shadow public abstract boolean canJump();
+	
+	@Shadow public PlayerCapabilities capabilities;
 	
 	@Inject(method = "onUpdate", at = @At("HEAD"))
 	private void updateAnimation(CallbackInfo ci) {
@@ -65,7 +61,6 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 			if (!customPlayer.llm_$getAnimation().hasCooldown() || customPlayer.llm_$getAnimation().hasCooldown() && customPlayer.llm_$getAnimation().timeRendered == customPlayer.llm_$getAnimation().totalDuration) {
 				for (BaseAnimation animation : AnimationUtils.getAnimationsMap().values()) {
 					if (!animation.shouldActivateAnimation(player, this.boundingBox)) continue;
-					
 					if (animation.isGeneralConditonsMet(player, this.boundingBox)) {
 						newID = animation.getID();
 						
@@ -93,36 +88,19 @@ public abstract class EntityPlayerMixin extends EntityLivingBase {
 						customPlayer.llm_$setAnimation(newID);
 					}
 					else {
-						dHeight = 0;
-						
-						for (BaseAnimation testAnimation : animToCheckIfFail) {
-							bounds = this.boundingBox.copy();
-							
-							float dNewHeight = testAnimation.height - customPlayer.llm_$getAnimation().height;
-							
-							if (testAnimation.isGeneralConditonsMet(player, bounds) && dNewHeight > dHeight) {
-								
-								noCollisionWithBlock = this.worldObj.getCollidingBoundingBoxes(this,
-																							   bounds.addCoord(0,
-																											   dNewHeight,
-																											   0))
-										.isEmpty();
-								
-								if (noCollisionWithBlock) {
-									dHeight = dNewHeight;
-									newID = testAnimation.getID();
-								}
-							}
-						}
-						
-						if (!newID.equals(STANDING.getID()) && !newID.equals(customPlayer.llm_$getAnimationID())) {
-							customPlayer.llm_$setAnimation(newID);
+						if (!GeneralUtils.isEntityHeadInsideBlock(this, 0.41)) {
+							customPlayer.llm_$setAnimation(CROUCHING.getID());
 						}
 					}
 				}
 				else if (!this.worldObj.getCollidingBlockBounds(this.boundingBox).isEmpty() &&
 						!GeneralUtils.isEntityFeetInsideBlock(this)) {
-					customPlayer.llm_$setAnimation(CRAWLING.getID());
+					if (this.capabilities.isFlying) {
+						customPlayer.llm_$setAnimation(DIVING.getID());
+					}
+					else {
+						customPlayer.llm_$setAnimation(CRAWLING.getID());
+					}
 				}
 			}
 		}

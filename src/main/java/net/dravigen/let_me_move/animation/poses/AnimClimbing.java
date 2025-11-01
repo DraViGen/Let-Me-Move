@@ -15,7 +15,7 @@ public class AnimClimbing extends AnimCommon{
 	
 	@Override
 	public boolean isGeneralConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
-		return !player.onGround && player.isOnLadder();
+		return !player.onGround && player.isOnLadder() && !player.capabilities.isFlying;
 	}
 	
 	@Override

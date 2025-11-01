@@ -14,7 +14,7 @@ public class AnimPullingUp extends AnimCommon {
 	private coords prevSide;
 	
 	public AnimPullingUp() {
-		super(id, 1.8f, 1f, false, 0, 40, false);
+		super(id, 1.4f, 1f, false, 0, 40, false);
 	}
 	
 	@Override
@@ -26,14 +26,14 @@ public class AnimPullingUp extends AnimCommon {
 				!player.doesStatusPreventSprinting() &&
 				checkIfEntityFacingWall(player) &&
 				(yBlockAboveWall = getWallTopYIfEmptySpace(player)) != -1 &&
-				!(yBlockAboveWall - player.boundingBox.minY < 1.5 && player.onGround);
+				!(yBlockAboveWall - player.boundingBox.minY < 1.5 && player.onGround) &&
+				!isEntityHeadInsideBlock(player, yBlockAboveWall - player.boundingBox.minY + this.height - 1);
 	}
 	
 	@Override
 	public boolean isActivationConditonsMet(EntityPlayer player, AxisAlignedBB axisAlignedBB) {
 		return player.isSneaking() &&
 				player.moveForward > 0 &&
-				!isEntityHeadInsideBlock(player, 0.3) &&
 				(getWallTopYIfEmptySpace(player) - player.boundingBox.minY) < 2;
 	}
 	
@@ -67,7 +67,7 @@ public class AnimPullingUp extends AnimCommon {
 		float[] rLeg = new float[]{0, 0, 0};
 		float[] lLeg = new float[]{0, 0, 0};
 		
-		this.timeRendered = MathHelper.floor_double((2 - ((yBlockAboveWall + 0.2) - entity.boundingBox.minY)) *
+		this.timeRendered = MathHelper.floor_double((2 - ((yBlockAboveWall + 0.1) - entity.boundingBox.minY)) *
 															this.totalDuration / 2);
 		
 		int t = this.timeRendered;
@@ -85,8 +85,6 @@ public class AnimPullingUp extends AnimCommon {
 		}
 		
 		if (t > 20) {
-			this.height = 1.4f;
-			
 			body[0] = 0.5F;
 			
 			rArm[0] += 0.4F;
@@ -107,9 +105,6 @@ public class AnimPullingUp extends AnimCommon {
 			
 			model.bipedBody.rotationPointY += 1.0F;
 			model.bipedBody.rotationPointZ = 4.8F;
-		}
-		else {
-			this.height = 1.8f;
 		}
 		
 		rLeg[0] = cos(h / 3) * pi(1, 16);

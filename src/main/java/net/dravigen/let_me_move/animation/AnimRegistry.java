@@ -6,8 +6,6 @@ import net.dravigen.let_me_move.animation.poses.*;
 import static net.dravigen.let_me_move.utils.AnimationUtils.*;
 
 public class AnimRegistry {
-	public final static BaseAnimation JUMPING = new AnimJumping();
-	public final static BaseAnimation FLYING = new AnimFlying();
 	public final static BaseAnimation CLIMBING = new AnimClimbing();
 	public final static BaseAnimation SWIMMING = new AnimSwimming();
 	public final static BaseAnimation DIVING = new AnimDiving();
@@ -44,11 +42,7 @@ public class AnimRegistry {
 		registerAnimation(DIVING);
 		
 		//Poses
-		registerAnimation(FLYING);
-		
 		registerAnimation(CLIMBING);
-		
-		registerAnimation(JUMPING);
 		
 		registerAnimation(CROUCHING);
 		

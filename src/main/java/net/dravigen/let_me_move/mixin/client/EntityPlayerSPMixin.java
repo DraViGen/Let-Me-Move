@@ -22,8 +22,6 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 				!(customEntity.llm_$isAnimation(RUNNING.getID()) ||
 						customEntity.llm_$isAnimation(WALKING.getID()) ||
 						customEntity.llm_$isAnimation(STANDING.getID()) ||
-						customEntity.llm_$isAnimation(FLYING.getID()) ||
-						customEntity.llm_$isAnimation(JUMPING.getID()) ||
 						customEntity.llm_$isAnimation(SWIMMING.getID()) ||
 						customEntity.llm_$isAnimation(LOW_FALLING.getID()))) {
 			instance.setSprinting(false);
@@ -32,12 +30,6 @@ public abstract class EntityPlayerSPMixin extends AbstractClientPlayer {
 		}
 		
 		return false;
-	}
-	
-	@Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/src/MovementInput;moveForward:F", opcode = Opcodes.GETFIELD))
-	private float allowRunOnStraf(MovementInput instance) {
-		
-		return instance.moveStrafe != 0 ? 0.8f : instance.moveForward;
 	}
 	
 	@Redirect(method = "onLivingUpdate", at = @At(value = "FIELD", target = "Lnet/minecraft/src/MovementInput;sneak:Z", ordinal = 0, opcode = Opcodes.GETFIELD))

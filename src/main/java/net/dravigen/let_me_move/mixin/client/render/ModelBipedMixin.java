@@ -13,14 +13,12 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static net.dravigen.let_me_move.animation.AnimRegistry.*;
 
 @Mixin(ModelBiped.class)
 public abstract class ModelBipedMixin extends ModelBase {
-	
 	@Shadow public ModelRenderer bipedHead;
 	@Unique
 	float prevXRotation = 0;
@@ -168,6 +166,13 @@ public abstract class ModelBipedMixin extends ModelBase {
 		ci.cancel();
 		
 		if (livingEntity instanceof EntityPlayer player) {
+			GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+			
+			boolean inInv = Minecraft.getMinecraft().gameSettings.thirdPersonView != 0 && (screen instanceof GuiInventory || screen instanceof GuiContainerCreative) && livingEntity == Minecraft.getMinecraft().renderViewEntity;
+			
+			i = inInv ? 0 : i;
+			j = inInv ? 0 : j;
+			
 			customEntity.llm_$getAnimation()
 					.renderAnimation((ModelBiped) (Object) this, player, f, g, h, i, j, u, customEntity.llm_$getDelta());
 		}
